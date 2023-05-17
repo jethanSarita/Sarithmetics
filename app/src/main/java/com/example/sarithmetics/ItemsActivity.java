@@ -138,8 +138,6 @@ public class ItemsActivity extends AppCompatActivity implements NavigationView.O
             public void onClick(View view) {
                 /*Write sql insertion code here*/
 
-
-
             }
         });
     }
