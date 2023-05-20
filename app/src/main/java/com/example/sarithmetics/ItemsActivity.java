@@ -95,7 +95,7 @@ public class ItemsActivity extends AppCompatActivity implements NavigationView.O
             startActivity(intent);
         }else if(item.getItemId() == R.id.nav_items){
 
-        }else if(item.getItemId() == R.id.nav_analytics){
+        }else if(item.getItemId() == R.id.nav_logout){
 
         }else if(item.getItemId() == R.id.nav_share){
 

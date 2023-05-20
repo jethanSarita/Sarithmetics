@@ -7,7 +7,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if(item.getItemId() == R.id.nav_items){
             homeLayout.setVisibility(View.GONE);
             itemsLayout.setVisibility(View.VISIBLE);
-        }else if(item.getItemId() == R.id.nav_analytics){
+        }else if(item.getItemId() == R.id.nav_logout){
 
         }else if(item.getItemId() == R.id.nav_share){
 
@@ -157,12 +156,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
                 int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
                 myDB.addItem(pName, pPrice, pQty);
+                popupWindow.dismiss();
             }
         });
     }
 
     void storeDataInArrays(){
-        Cursor cursor = database.readAllData();
+        Cursor cursor = database.readAllProductData();
         if(cursor.getCount() == 0){
             Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
         }else{
