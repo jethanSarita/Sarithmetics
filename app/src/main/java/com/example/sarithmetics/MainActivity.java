@@ -1,5 +1,7 @@
 package com.example.sarithmetics;
 
+import static android.text.TextUtils.isEmpty;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -185,11 +187,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 /*Write sql insertion code here*/
-
                 MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
-                String pName =  productName.getText().toString().trim();
-                float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
-                int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
+                String pName = "NULL";
+                float pPrice = 0;
+                int pQty = 0;
+                String tempPName, tempPPrice, tempPQty;
+                tempPName =  productName.getText().toString().trim();
+                tempPPrice = productPrice.getText().toString().trim();
+                tempPQty = productQuantity.getText().toString().trim();
+                if(!isEmpty(tempPName)){
+                    pName = tempPName;
+                }
+                if(!isEmpty(tempPPrice)){
+                    pPrice = Float.parseFloat(tempPPrice);
+                }
+                if(!isEmpty(tempPQty)){
+                    pQty = Integer.parseInt(tempPQty);
+                }
                 myDB.addItem(pName, pPrice, pQty);
                 refreshItems();
                 popupWindow.dismiss();
@@ -236,12 +250,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Write sql insertion code here*/
-
+                /*Write sql update code here*/
                 MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
-                String pName =  productName.getText().toString().trim();
-                float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
-                int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
+                String pName = "NULL";
+                float pPrice = 0;
+                int pQty = 0;
+                String tempPName, tempPPrice, tempPQty;
+                tempPName =  productName.getText().toString().trim();
+                tempPPrice = productPrice.getText().toString().trim();
+                tempPQty = productQuantity.getText().toString().trim();
+                if(!isEmpty(tempPName)){
+                    pName = tempPName;
+                }
+                if(!isEmpty(tempPPrice)){
+                    pPrice = Float.parseFloat(tempPPrice);
+                }
+                if(!isEmpty(tempPQty)){
+                    pQty = Integer.parseInt(tempPQty);
+                }
                 myDB.editItem(currProductID, pName, pPrice, pQty);
                 refreshItems();
                 popupWindow.dismiss();
