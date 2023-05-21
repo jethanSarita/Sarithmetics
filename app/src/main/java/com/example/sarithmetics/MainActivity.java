@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RelativeLayout homeLayout, itemsLayout;
     MyDatabaseHelper database;
     ArrayList<String> listProductID, listProductName, listProductPrice, listProductQty;
+    SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         /*hook*/
+        sessionManager = new SessionManager(getApplicationContext());
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -104,14 +107,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if(item.getItemId() == R.id.nav_items){
             homeLayout.setVisibility(View.GONE);
             itemsLayout.setVisibility(View.VISIBLE);
+            /*need to add extra option her for partner's part*/
         }else if(item.getItemId() == R.id.nav_logout){
-
+            sessionManager.setLogin(false);
+            sessionManager.setUsername(null);
+            startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
+            finish();
         }else if(item.getItemId() == R.id.nav_share){
 
         }else if(item.getItemId() == R.id.nav_rate){
 
         }else if(item.getItemId() == R.id.nav_exit){
-
+            finishAffinity();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

@@ -21,12 +21,12 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     private static final String COL_PRODUCT_QTY = "productQty";
 
     /*tblProfile*/
-    private static final String TABLE_PROFILE = "profileID";
+    private static final String TABLE_PROFILE = "tblProfile";
     private static final String COL_PROFILE_ID = "profileID";
     private static final String COL_PROFILE_FIRST_NAME = "profileFirstName";
     private static final String COL_PROFILE_LAST_NAME = "profileLastName";
-    private static final String COL_PROFILE_IS_OWNER = "profileIsOwner";
-    private static final String COL_PROFILE_HIGHS_SCORE = "profileHighScore";
+    private static final String COL_PROFILE_PASSWORD = "profilePassword";
+    private static final String COL_PROFILE_HIGH_SCORE = "profileHighScore";
     private static final String COL_PROFILE_CURRENCY = "profileCurrency";
 
     public MyDatabaseHelper(@Nullable Context context) {
@@ -38,7 +38,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_PRODUCT + " (" + COL_PRODUCT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COL_PRODUCT_NAME + " TEXT, " + COL_PRODUCT_PRICE + " REAL, " + COL_PRODUCT_QTY + " INTEGER);";
         db.execSQL(query);
-        query = "CREATE TABLE " + TABLE_PROFILE + " (" + COL_PROFILE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COL_PROFILE_FIRST_NAME + " TEXT, " + COL_PROFILE_LAST_NAME + " TEXT, " + COL_PROFILE_IS_OWNER + " INTEGER, " + COL_PROFILE_HIGHS_SCORE + " INTEGER, " + COL_PROFILE_CURRENCY + " INTEGER);";
+        query = "CREATE TABLE " + TABLE_PROFILE + " (" + COL_PROFILE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COL_PROFILE_FIRST_NAME + " TEXT, " + COL_PROFILE_LAST_NAME + " TEXT, " + COL_PROFILE_PASSWORD + " TEXT, " + COL_PROFILE_HIGH_SCORE + " INTEGER, " + COL_PROFILE_CURRENCY + " INTEGER);";
         db.execSQL(query);
     }
 
@@ -65,11 +65,37 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     }
     boolean loginAccount(String firstName, String password){
         SQLiteDatabase db = this.getWritableDatabase();
-        /*String query = "SELECT * FROM " + TABLE_PROFILE + " WHERE profileFirstname" + ;*/
+        Cursor cursor = null;
+        String query = "SELECT * FROM " + TABLE_PROFILE + " WHERE profileFirstName = '" + firstName + "' AND profilePassword = '" + password + "';";
+        if(db == null){
+            Toast.makeText(context, "no db", Toast.LENGTH_SHORT).show();
+        }else{
+            cursor = db.rawQuery(query, null);
+        }
+        if(cursor.getCount() != 0){
+            return true;
+        }
         return false;
     }
-    void registerAccount(){
+    boolean registerAccount(String firstName, String lastName, String password){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
 
+        cv.put(COL_PROFILE_FIRST_NAME, firstName);
+        cv.put(COL_PROFILE_LAST_NAME, lastName);
+        cv.put(COL_PROFILE_PASSWORD, password);
+        cv.put(COL_PROFILE_HIGH_SCORE, 0);
+        cv.put(COL_PROFILE_CURRENCY, 0);
+
+        long result = db.insert(TABLE_PROFILE, null, cv);
+
+        if(result == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+            return false;
+        }else{
+            Toast.makeText(context, "Added", Toast.LENGTH_SHORT).show();
+            return true;
+        }
     }
     Cursor readAllProductData(){
         String query = "SELECT * FROM " + TABLE_PRODUCT;

@@ -13,7 +13,8 @@
         android:id="@+id/loginLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:visibility="gone">
 
         <ImageView
             android:layout_width="100dp"
@@ -63,7 +64,7 @@
             android:ems="10"
             android:fontFamily="@font/alata"
             android:hint="  Password"
-            android:inputType="text" />
+            android:inputType="textPassword" />
 
 
         <androidx.appcompat.widget.AppCompatButton
@@ -93,7 +94,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/imageView5"
@@ -161,7 +163,7 @@
             android:ems="10"
             android:fontFamily="@font/alata"
             android:hint="  Password"
-            android:inputType="text" />
+            android:inputType="textPassword" />
 
         <TextView
             android:layout_width="match_parent"
@@ -178,7 +180,7 @@
             android:ems="10"
             android:fontFamily="@font/alata"
             android:hint="  Confirm Password"
-            android:inputType="text" />
+            android:inputType="textPassword" />
 
 
         <androidx.appcompat.widget.AppCompatButton
