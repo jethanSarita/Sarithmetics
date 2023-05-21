@@ -43,12 +43,12 @@
                 android:paddingTop="25dp">
 
                 <TextView
-                    android:id="@+id/textView9"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Welcome back,"
                     android:textAlignment="center"
-                    android:textSize="34sp" />
+                    android:textSize="34sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/profileFnLName"
@@ -57,7 +57,8 @@
                     android:fontFamily="@font/alata"
                     android:text="TextView"
                     android:textAlignment="center"
-                    android:textSize="34sp" />
+                    android:textSize="34sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -146,7 +147,7 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:paddingLeft="30dp"
                     android:paddingRight="30dp">
 

@@ -104,6 +104,19 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         if(db != null){
             cursor = db.rawQuery(query, null);
+        }else{
+
+        }
+        return cursor;
+    }
+    Cursor getUser(String user){
+        String query = "SELECT * FROM " + TABLE_PROFILE + " WHERE profileFirstName = '" + user + "';";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        if(db == null){
+            Toast.makeText(context, "db is null", Toast.LENGTH_SHORT).show();
+        }else{
+            cursor = db.rawQuery(query, null);
         }
         return cursor;
     }

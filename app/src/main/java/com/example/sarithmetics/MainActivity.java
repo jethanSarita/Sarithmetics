@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -34,8 +37,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ImageView settings, homeIcon, cart, add;
     RelativeLayout homeLayout, itemsLayout;
     MyDatabaseHelper database;
-    ArrayList<String> listProductID, listProductName, listProductPrice, listProductQty;
+    ArrayList<String> listProductID;
+    ArrayList<String> listProductName;
+    ArrayList<String> listProductPrice;
+    ArrayList<String> listProductQty;
     SessionManager sessionManager;
+    TextView profileFnLName;
+    CustomAdapter customAdapter;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +62,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemsLayout = findViewById(R.id.layoutItems);
         cart = findViewById(R.id.ivCart);
         add = findViewById(R.id.ivAddItem);
+        profileFnLName = findViewById(R.id.profileFnLName);
         database = new MyDatabaseHelper(MainActivity.this);
-        listProductID = new ArrayList<>();
         listProductName = new ArrayList<>();
         listProductPrice = new ArrayList<>();
         listProductQty = new ArrayList<>();
+        recyclerView = findViewById(R.id.recyclerView);
+
         /*tool bar*/
         setSupportActionBar(toolbar);
 
@@ -70,6 +81,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setCheckedItem(R.id.nav_home);
         /*database arraylist storing*/
         storeDataInArrays();
+        customAdapter = new CustomAdapter(MainActivity.this, listProductID, listProductName, listProductPrice, listProductQty);
+        recyclerView.setAdapter(customAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        /*Welcome back, "[FirstName] [LastName]"*/
+        Cursor cursor = database.getUser(sessionManager.getUsername());
+        String currentUser = null;
+        if(cursor.getCount() == 0){
+            Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
+        }else{
+            cursor.moveToNext();
+            currentUser = cursor.getString(1) +  " " + cursor.getString(2);
+        }
+        profileFnLName.setText(currentUser);
+
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -163,12 +189,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
                 int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
                 myDB.addItem(pName, pPrice, pQty);
+                spawnItems();
+                popupWindow.dismiss();
+            }
+        });
+    }
+    /*Popup when editing an item*/
+    private void CreateEditPopUpWindow() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.editpopup, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0);
+            }
+        });
+        Button add, close;
+        EditText productName, productPrice, productQuantity;
+        productName = popupView.findViewById(R.id.productName);
+        productPrice = popupView.findViewById(R.id.productPrice);
+        productQuantity = popupView.findViewById(R.id.productQuantity);
+        add = popupView.findViewById(R.id.btnPopupAdd);
+        close = popupView.findViewById(R.id.btnPopupClose);
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupWindow.dismiss();
+            }
+        });
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Write sql insertion code here*/
+
+                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+                String pName =  productName.getText().toString().trim();
+                float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
+                int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
+                myDB.addItem(pName, pPrice, pQty);
+                spawnItems();
                 popupWindow.dismiss();
             }
         });
     }
 
     void storeDataInArrays(){
+        listProductName.clear();
+        listProductPrice.clear();
+        listProductQty.clear();
         Cursor cursor = database.readAllProductData();
         if(cursor.getCount() == 0){
             Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
@@ -180,5 +253,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 listProductQty.add(cursor.getString(3));
             }
         }
+    }
+
+    void spawnItems(){
+        storeDataInArrays();
+        customAdapter.notifyDataSetChanged();
     }
 }
