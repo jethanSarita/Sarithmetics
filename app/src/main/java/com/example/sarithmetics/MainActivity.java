@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -190,13 +191,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
                 int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
                 myDB.addItem(pName, pPrice, pQty);
-                spawnItems();
+                refreshItems();
                 popupWindow.dismiss();
             }
         });
     }
     /*Popup when editing an item*/
-    private void CreateEditPopUpWindow() {
+    private void CreateEditPopUpWindow(int currProductID, String currProductName, float currProductPrice, int currProductQty) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.editpopup, null);
 
@@ -210,20 +211,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0);
             }
         });
-        Button add, close;
+        NumberPicker editPopupNumberPicker;
+        Button edit, close;
         EditText productName, productPrice, productQuantity;
-        productName = popupView.findViewById(R.id.productName);
-        productPrice = popupView.findViewById(R.id.productPrice);
-        productQuantity = popupView.findViewById(R.id.productQuantity);
-        add = popupView.findViewById(R.id.btnPopupAdd);
-        close = popupView.findViewById(R.id.btnPopupClose);
+        productName = popupView.findViewById(R.id.productNameEdit);
+        productPrice = popupView.findViewById(R.id.productPriceEdit);
+        productQuantity = popupView.findViewById(R.id.productQuantityEdit);
+        edit = popupView.findViewById(R.id.btnEditPopupEdit);
+        close = popupView.findViewById(R.id.btnEditPopupClose);
+        editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
+
+        editPopupNumberPicker.setMinValue(0);
+        editPopupNumberPicker.setMaxValue(currProductQty);
+
+        productName.setText(currProductName);
+        productPrice.setText(String.valueOf(currProductPrice));
+        productQuantity.setText(String.valueOf(currProductQty));
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 popupWindow.dismiss();
             }
         });
-        add.setOnClickListener(new View.OnClickListener() {
+        edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 /*Write sql insertion code here*/
@@ -232,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String pName =  productName.getText().toString().trim();
                 float pPrice = Float.parseFloat(productPrice.getText().toString().trim());
                 int pQty = Integer.valueOf(productQuantity.getText().toString().trim());
-                myDB.addItem(pName, pPrice, pQty);
-                spawnItems();
+                myDB.editItem(currProductID, pName, pPrice, pQty);
+                refreshItems();
                 popupWindow.dismiss();
             }
         });
@@ -257,13 +267,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    void spawnItems(){
+    void refreshItems(){
         storeDataInArrays();
         customAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
-        Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();
+        /*Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();*/
+        CreateEditPopUpWindow(Integer.parseInt(productId), productName, Float.parseFloat(productPrice), Integer.parseInt(productQty));
     }
 }

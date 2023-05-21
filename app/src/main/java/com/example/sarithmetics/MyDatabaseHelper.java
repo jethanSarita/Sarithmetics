@@ -120,4 +120,21 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         }
         return cursor;
     }
+
+    public void editItem(int currPID, String newPName, float newPPrice, int newPQty) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_PRODUCT_NAME, newPName);
+        cv.put(COL_PRODUCT_PRICE, newPPrice);
+        cv.put(COL_PRODUCT_QTY, newPQty);
+        String condition = "" + COL_PRODUCT_ID + " = " + currPID;
+
+        /*String query = "UPDATE " + TABLE_PRODUCT + " SET " + COL_PRODUCT_NAME + " = " + newPName + ", " + COL_PRODUCT_PRICE + " = " + newPPrice + ", " + COL_PRODUCT_QTY + " = " + newPQty + " WHERE " + COL_PRODUCT_ID + " = " + currPID + ";";*/
+        int result = db.update(TABLE_PRODUCT, cv, condition, null);
+        if(result == 0){
+            Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(context, "Edited", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
