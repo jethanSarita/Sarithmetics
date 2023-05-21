@@ -17,15 +17,16 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
     private ArrayList productId, productName, productPrice, productQty;
     private OnItemClickListener listener;
     public interface OnItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(int position, String productId, String productName, String productPrice, String productQty);
     }
 
-    CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty){
+    CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
         this.context = context;
         this.productId = productId;
         this.productName = productName;
         this.productPrice = productPrice;
         this.productQty = productQty;
+        this.listener = listener;
     }
     @NonNull
     @Override
@@ -43,7 +44,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
         holder.rowListLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (listener != null) {
+                    listener.onItemClick(position, String.valueOf(productId.get(position)), String.valueOf(productName.get(position)), String.valueOf(productPrice.get(position)), String.valueOf(productQty.get(position)));
+                }
             }
         });
     }

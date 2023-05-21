@@ -29,7 +29,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
 
     Toolbar toolbar;
     DrawerLayout drawerLayout;
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         add = findViewById(R.id.ivAddItem);
         profileFnLName = findViewById(R.id.profileFnLName);
         database = new MyDatabaseHelper(MainActivity.this);
+        listProductID = new ArrayList<>();
         listProductName = new ArrayList<>();
         listProductPrice = new ArrayList<>();
         listProductQty = new ArrayList<>();
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setCheckedItem(R.id.nav_home);
         /*database arraylist storing*/
         storeDataInArrays();
-        customAdapter = new CustomAdapter(MainActivity.this, listProductID, listProductName, listProductPrice, listProductQty);
+        customAdapter = new CustomAdapter(MainActivity.this, listProductID, listProductName, listProductPrice, listProductQty, this);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
@@ -239,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void storeDataInArrays(){
+        listProductID.clear();
         listProductName.clear();
         listProductPrice.clear();
         listProductQty.clear();
@@ -258,5 +260,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     void spawnItems(){
         storeDataInArrays();
         customAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
+        Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();
     }
 }
