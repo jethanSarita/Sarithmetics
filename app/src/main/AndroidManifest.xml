@@ -7,25 +7,19 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label=""
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sarithmetics"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AddItemActivity"
+            android:label=""
             android:exported="false" />
         <activity
             android:name=".CartActivity"
+            android:label=""
             android:exported="false" />
-        <activity
-            android:name=".ItemsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_items"
-            android:theme="@style/Theme.Sarithmetics" />
         <activity
             android:name=".LoginRegisterActivity"
             android:exported="true">

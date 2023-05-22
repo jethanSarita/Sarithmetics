@@ -138,6 +138,52 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void addStock(int prodID, int prodQty){
+        String query = "SELECT * FROM " + TABLE_PRODUCT + " WHERE " + COL_PRODUCT_ID + " = " + prodID;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        if(db == null){
+            Toast.makeText(context, "db is null", Toast.LENGTH_SHORT).show();
+        }else{
+            cursor = db.rawQuery(query, null);
+        }
+        cursor.moveToNext();
+        int currentStock = cursor.getInt(3);
+        currentStock += prodQty;
+        ContentValues cv = new ContentValues();
+        cv.put(COL_PRODUCT_QTY, currentStock);
+        String condition = "" + COL_PRODUCT_ID + " = " + prodID;
+        int result = db.update(TABLE_PRODUCT, cv, condition, null);
+        if(result == 0){
+            Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(context, "Restocked", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void removeStock(int prodID, int prodQty){
+        String query = "SELECT * FROM " + TABLE_PRODUCT + " WHERE " + COL_PRODUCT_ID + " = " + prodID;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        if(db == null){
+            Toast.makeText(context, "db is null", Toast.LENGTH_SHORT).show();
+        }else{
+            cursor = db.rawQuery(query, null);
+        }
+        cursor.moveToNext();
+        int currentStock = cursor.getInt(3);
+        currentStock -= prodQty;
+        ContentValues cv = new ContentValues();
+        cv.put(COL_PRODUCT_QTY, currentStock);
+        String condition = "" + COL_PRODUCT_ID + " = " + prodID;
+        int result = db.update(TABLE_PRODUCT, cv, condition, null);
+        if(result == 0){
+            Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(context, "Removed Quantity from stock and added to cart", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void deleteItem(int currProductID) {
         SQLiteDatabase db = this.getWritableDatabase();
         /*String query = "DELETE FROM " + TABLE_PRODUCT + " WHERE " + COL_PRODUCT_ID + " = " + currProductID;*/

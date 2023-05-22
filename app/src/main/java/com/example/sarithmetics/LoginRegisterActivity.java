@@ -3,6 +3,7 @@ package com.example.sarithmetics;
 import static android.text.TextUtils.isEmpty;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         sessionManager = new SessionManager(getApplicationContext());
 
@@ -86,6 +89,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                 if(myDB.loginAccount(user, etLoginPassword.getText().toString())){
                     sessionManager.setLogin(true);
                     sessionManager.setUsername(user);
+                    sessionManager.setMainStatus(false);
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                     finish();
                 }else{
@@ -95,6 +99,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         });
         if(sessionManager.getLogin()){
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            sessionManager.setMainStatus(false);
             finish();
         }
     }

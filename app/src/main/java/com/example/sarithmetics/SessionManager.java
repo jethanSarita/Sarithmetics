@@ -26,4 +26,12 @@ public class SessionManager {
     public String getUsername(){
         return sharedPreferences.getString("key_username", "");
     }
+    public void setMainStatus(boolean status){
+        editor.putBoolean("key_mainstatus", status);
+        editor.commit();
+    }
+    public boolean getMainStatus(){
+        return sharedPreferences.getBoolean("key_mainstatus", false);
+    }
+
 }

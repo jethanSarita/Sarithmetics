@@ -31,7 +31,6 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
@@ -75,8 +74,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listProductName = new ArrayList<>();
         listProductPrice = new ArrayList<>();
         listProductQty = new ArrayList<>();
-        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerViewItem);
         cartedProduct = new ArrayList<>();
+        cartedProduct.clear();
 
         /*tool bar*/
         setSupportActionBar(toolbar);
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.nav_home);
+
         /*database arraylist storing*/
         storeDataInArrays();
         customAdapter = new CustomAdapter(MainActivity.this, listProductID, listProductName, listProductPrice, listProductQty, this);
@@ -105,6 +105,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         profileFnLName.setText(currentUser);
 
+
+
+        if(sessionManager.getMainStatus()){
+            itemsLayout.setVisibility(View.VISIBLE);
+            homeLayout.setVisibility(View.GONE);
+            navigationView.setCheckedItem(R.id.nav_items);
+        }else{
+            itemsLayout.setVisibility(View.GONE);
+            homeLayout.setVisibility(View.VISIBLE);
+            navigationView.setCheckedItem(R.id.nav_home);
+        }
+
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,9 +133,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 /*Cart Activity PENDING*/
-                Intent intent = new Intent(MainActivity.this, CartActivity.class);
-                intent.putExtra("key", cartedProduct);
-                startActivity(intent);
+                if(cartedProduct.isEmpty()){
+                    Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
+                }else{
+                    Intent intent = new Intent(MainActivity.this, CartActivity.class);
+                    intent.putExtra("key", cartedProduct);
+                    startActivity(intent);
+                }
             }
         });
         add.setOnClickListener(new View.OnClickListener() {
@@ -141,9 +157,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(item.getItemId() == R.id.nav_home){
             itemsLayout.setVisibility(View.GONE);
             homeLayout.setVisibility(View.VISIBLE);
+            sessionManager.setMainStatus(false);
         }else if(item.getItemId() == R.id.nav_items){
             homeLayout.setVisibility(View.GONE);
             itemsLayout.setVisibility(View.VISIBLE);
+            sessionManager.setMainStatus(true);
             /*need to add extra option her for partner's part*/
         }else if(item.getItemId() == R.id.nav_logout){
             sessionManager.setLogin(false);
@@ -287,6 +305,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 myDB.deleteItem(currProductID);
+                refreshItems();
                 popupWindow.dismiss();
             }
         });
@@ -295,11 +314,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 int pQty = editPopupNumberPicker.getValue();
                 if(pQty == 0){
-                    Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT);
+                    Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
                 }else{
                     Product product = new Product(currProductID, currProductName, currProductPrice, pQty);
                     cartedProduct.add(product);
-                    Toast.makeText(MainActivity.this, "Added to cart", Toast.LENGTH_SHORT);
+                    myDB.removeStock(currProductID, pQty);
+                    refreshItems();
                     popupWindow.dismiss();
                 }
             }
