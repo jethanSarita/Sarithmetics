@@ -137,4 +137,15 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             Toast.makeText(context, "Edited", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void deleteItem(int currProductID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        /*String query = "DELETE FROM " + TABLE_PRODUCT + " WHERE " + COL_PRODUCT_ID + " = " + currProductID;*/
+        int result = db.delete(TABLE_PRODUCT, COL_PRODUCT_ID + " = " + currProductID, null);
+        if(result == 0){
+            Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT);
+        }else{
+            Toast.makeText(context, "Deletion Error", Toast.LENGTH_SHORT);
+        }
+    }
 }
