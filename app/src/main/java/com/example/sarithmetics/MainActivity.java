@@ -225,8 +225,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0);
             }
         });
+        MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
         NumberPicker editPopupNumberPicker;
-        Button edit, close;
+        Button edit, close, delete;
         EditText productName, productPrice, productQuantity;
         productName = popupView.findViewById(R.id.productNameEdit);
         productPrice = popupView.findViewById(R.id.productPriceEdit);
@@ -234,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         edit = popupView.findViewById(R.id.btnEditPopupEdit);
         close = popupView.findViewById(R.id.btnEditPopupClose);
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
+        delete = popupView.findViewById(R.id.btnEditPopupDelete);
 
         editPopupNumberPicker.setMinValue(0);
         editPopupNumberPicker.setMaxValue(currProductQty);
@@ -251,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 /*Write sql update code here*/
-                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+
                 String pName = "NULL";
                 float pPrice = 0;
                 int pQty = 0;
@@ -271,6 +273,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 myDB.editItem(currProductID, pName, pPrice, pQty);
                 refreshItems();
                 popupWindow.dismiss();
+            }
+        });
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                myDB.deleteItem(currProductID);
             }
         });
     }
