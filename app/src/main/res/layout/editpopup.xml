@@ -154,7 +154,7 @@
                         android:orientation="vertical">
 
                         <Button
-                            android:id="@+id/btnAddtoCart"
+                            android:id="@+id/btnAddToCart"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"

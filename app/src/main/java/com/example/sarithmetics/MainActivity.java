@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView profileFnLName;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
+    ArrayList<Product> cartedProduct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listProductPrice = new ArrayList<>();
         listProductQty = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerView);
+        cartedProduct = new ArrayList<>();
 
         /*tool bar*/
         setSupportActionBar(toolbar);
@@ -227,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
         NumberPicker editPopupNumberPicker;
-        Button edit, close, delete;
+        Button edit, close, delete, cart;
         EditText productName, productPrice, productQuantity;
         productName = popupView.findViewById(R.id.productNameEdit);
         productPrice = popupView.findViewById(R.id.productPriceEdit);
@@ -236,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         close = popupView.findViewById(R.id.btnEditPopupClose);
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         delete = popupView.findViewById(R.id.btnEditPopupDelete);
+        cart = popupView.findViewById(R.id.btnAddToCart);
 
         editPopupNumberPicker.setMinValue(0);
         editPopupNumberPicker.setMaxValue(currProductQty);
@@ -280,6 +284,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 myDB.deleteItem(currProductID);
                 popupWindow.dismiss();
+            }
+        });
+        cart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int pQty = editPopupNumberPicker.getValue();
+                if(pQty == 0){
+                    Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT);
+                }else{
+                    Product product = new Product(currProductID, currProductName, currProductPrice, pQty);
+                    cartedProduct.add(product);
+                    Toast.makeText(MainActivity.this, "Added to cart", Toast.LENGTH_SHORT);
+                    popupWindow.dismiss();
+                }
             }
         });
     }
