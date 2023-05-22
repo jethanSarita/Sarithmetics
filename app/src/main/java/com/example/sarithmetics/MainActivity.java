@@ -119,7 +119,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 /*Cart Activity PENDING*/
-                Toast.makeText(getApplicationContext(), "Cart", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, CartActivity.class);
+                intent.putExtra("key", cartedProduct);
+                startActivity(intent);
             }
         });
         add.setOnClickListener(new View.OnClickListener() {
