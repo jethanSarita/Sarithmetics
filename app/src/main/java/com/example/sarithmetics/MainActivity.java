@@ -279,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 myDB.deleteItem(currProductID);
+                popupWindow.dismiss();
             }
         });
     }
