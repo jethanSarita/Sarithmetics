@@ -1,5 +1,7 @@
 package com.example.sarithmetics;
 
+import static android.text.TextUtils.isEmpty;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +19,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class CartActivity extends AppCompatActivity {
+public class CartActivity extends AppCompatActivity implements CustomAdapter.OnItemClickListener {
     ArrayList<String> cartedProductID, cartedProductName, cartedProductPrice, cartedProductQty;
     ArrayList<Product> cartedProduct;
     CustomAdapter customAdapter;
@@ -56,7 +58,7 @@ public class CartActivity extends AppCompatActivity {
         /*Listing*/
         cartedProduct = (ArrayList<Product>) getIntent().getSerializableExtra("key");
         storeDataInArrays();
-        customAdapter = new CustomAdapter(CartActivity.this, cartedProductID, cartedProductName, cartedProductPrice, cartedProductQty);
+        customAdapter = new CustomAdapter(CartActivity.this, cartedProductID, cartedProductName, cartedProductPrice, cartedProductQty, this);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
 
@@ -65,7 +67,11 @@ public class CartActivity extends AppCompatActivity {
         calculate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                float customerPaymentFloat = Float.parseFloat(customerPayment.getText().toString().trim());
+                float customerPaymentFloat = 0;
+                String tempPayment = customerPayment.getText().toString().trim();
+                if(!isEmpty(tempPayment)){
+                    customerPaymentFloat = Float.parseFloat(tempPayment);
+                }
                 float result = customerPaymentFloat - total;
                 if(result < 0){
                     Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
@@ -126,5 +132,10 @@ public class CartActivity extends AppCompatActivity {
             cartedProductQty.add(String.valueOf(p.getProductQty()));
             total += p.getProductPrice() * (float) p.getProductQty();
         }
+    }
+
+    @Override
+    public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
+
     }
 }

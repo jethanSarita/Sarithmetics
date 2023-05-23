@@ -79,8 +79,6 @@
                         android:id="@+id/btnEditPopupEdit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:backgroundTint="#E87C3C"
                         android:text="Edit" />
@@ -89,8 +87,6 @@
                         android:id="@+id/btnEditPopupDelete"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:backgroundTint="#E87C3C"
                         android:text="Delete" />
@@ -99,8 +95,6 @@
                         android:id="@+id/btnEditPopupClose"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:backgroundTint="#E87C3C"
                         android:text="Close" />
