@@ -11,11 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHolder> {
     private Context context;
     private ArrayList productId, productName, productPrice, productQty;
     private OnItemClickListener listener;
+    private List<Product> productList;
     public interface OnItemClickListener {
         void onItemClick(int position, String productId, String productName, String productPrice, String productQty);
     }
@@ -75,5 +77,18 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
             rowListLayout = itemView.findViewById(R.id.rowListLayoutID);
         }
 
+    }
+    public void setFilteredList(ArrayList<Product> filteredList){
+        this.productId.clear();
+        this.productName.clear();
+        this.productPrice.clear();
+        this.productQty.clear();
+        for(Product p : filteredList){
+            this.productId.add(String.valueOf(p.getProductID()));
+            this.productName.add(p.getProductName());
+            this.productPrice.add(String.valueOf(p.getProductPrice()));
+            this.productQty.add(String.valueOf(p.getProductQty()));
+        }
+        notifyDataSetChanged();
     }
 }

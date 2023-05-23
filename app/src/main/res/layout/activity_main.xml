@@ -152,6 +152,7 @@
                     android:paddingRight="30dp">
 
                     <androidx.appcompat.widget.SearchView
+                        android:id="@+id/itemSearchBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/search_view_bg"

@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
 
@@ -49,7 +51,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView profileFnLName;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
-    ArrayList<Product> cartedProduct;
+    ArrayList<Product> cartedProduct, currProduct;
+    androidx.appcompat.widget.SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         /*hook*/
+        currProduct = new ArrayList<>();
+        searchView = findViewById(R.id.itemSearchBar);
         sessionManager = new SessionManager(getApplicationContext());
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -80,6 +85,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*tool bar*/
         setSupportActionBar(toolbar);
+
+        searchView.clearFocus();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterList(newText);
+                return true;
+            }
+        });
+
 
         /*navigation drawer menu*/
         navigationView.bringToFront();
@@ -341,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 listProductPrice.add(cursor.getString(2));
                 listProductQty.add(cursor.getString(3));
             }
+            storeProductDataInCurrProduct();
         }
     }
 
@@ -353,5 +375,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
         /*Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();*/
         CreateEditPopUpWindow(Integer.parseInt(productId), productName, Float.parseFloat(productPrice), Integer.parseInt(productQty));
+    }
+
+    void storeProductDataInCurrProduct(){
+        currProduct.clear();
+        Product temp;
+        for(int i = 0; i < listProductID.size(); i++){
+            temp = new Product(Integer.parseInt(listProductPrice.get(i)), listProductName.get(i), Float.parseFloat(listProductPrice.get(i)), Integer.parseInt(listProductQty.get(i)));
+            currProduct.add(temp);
+        }
+    }
+
+    void filterList(String newText){
+        ArrayList<Product> filteredList = new ArrayList<>();
+        for(Product p : currProduct){
+            if(p.getProductName().toLowerCase().contains(newText.toLowerCase())) {
+                filteredList.add(p);
+            }
+        }
+        if(filteredList.isEmpty()){
+            Toast.makeText(MainActivity.this, "No data found", Toast.LENGTH_SHORT).show();
+        }else{
+            customAdapter.setFilteredList(filteredList);
+        }
     }
 }

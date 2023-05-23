@@ -76,7 +76,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
                 if(result < 0){
                     Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
                 }else{
-                    changeTextView.setText(String.valueOf(result));
+                    changeTextView.setText("₱" + String.valueOf(result));
                     checkOut.setVisibility(View.VISIBLE);
                 }
             }
