@@ -19,6 +19,7 @@
             android:layout_weight="0"
             android:text="Add Product"
             android:textAlignment="center"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -27,6 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="Product Name"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <EditText
@@ -44,6 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="Product Price"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <EditText
@@ -61,6 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="Product Quantity"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <EditText
@@ -85,7 +89,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:backgroundTint="#E87C3C"
+                android:backgroundTint="@color/colorTextPrimary"
                 android:text="Add" />
 
             <Button
@@ -95,7 +99,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="#E87C3C"
+                android:backgroundTint="@color/colorTextPrimary"
                 android:text="Close" />
         </LinearLayout>
 

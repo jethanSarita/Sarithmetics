@@ -19,6 +19,7 @@
                     android:layout_weight="0"
                     android:text="Edit Product"
                     android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -26,6 +27,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:text="Product Name"
+                    android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -42,6 +44,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:text="Product Price"
+                    android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -58,6 +61,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:text="Product Quantity"
+                    android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -80,7 +84,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:backgroundTint="#E87C3C"
+                        android:backgroundTint="@color/colorTextPrimary"
                         android:text="Edit" />
 
                     <Button
@@ -88,7 +92,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:backgroundTint="#E87C3C"
+                        android:backgroundTint="@color/colorTextPrimary"
                         android:text="Delete" />
 
                     <Button
@@ -96,7 +100,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:backgroundTint="#E87C3C"
+                        android:backgroundTint="@color/colorTextPrimary"
                         android:text="Close" />
 
                 </LinearLayout>
@@ -109,6 +113,7 @@
                     android:layout_weight="0"
                     android:text="Add Product to Cart"
                     android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -129,7 +134,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
                             android:text="Quantity"
-                            android:textAlignment="center" />
+                            android:textAlignment="center"
+                            android:textColor="@color/colorTextPrimary" />
 
                         <NumberPicker
 
@@ -153,7 +159,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp"
-                            android:backgroundTint="#E87C3C"
+                            android:backgroundTint="@color/colorTextPrimary"
                             android:text="Add to Cart" />
                     </LinearLayout>
 

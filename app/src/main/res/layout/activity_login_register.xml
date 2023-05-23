@@ -7,6 +7,7 @@
     android:paddingLeft="50dp"
     android:paddingTop="125dp"
     android:paddingRight="50dp"
+    android:background="@color/colorBackground"
     tools:context=".LoginRegisterActivity">
 
     <LinearLayout
@@ -14,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:visibility="gone">
+        android:visibility="visible"
+        tools:visibility="visible">
 
         <ImageView
             android:layout_width="100dp"
@@ -84,7 +86,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/alata"
             android:text="No account? Register here!"
-            android:textColor="#A54B23"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -95,7 +97,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <ImageView
             android:id="@+id/imageView5"
@@ -201,7 +203,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/alata"
             android:text="Already have an account? Log in here!"
-            android:textColor="#A54B23"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
     </LinearLayout>

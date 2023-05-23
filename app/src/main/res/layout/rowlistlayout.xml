@@ -17,6 +17,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/colorActionBar"
             android:padding="10dp">
 
             <LinearLayout
@@ -36,14 +37,18 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Product name"
-                        android:textSize="20sp" />
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvProductQty"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Product quantity" />
+                        android:text="Product quantity"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <TextView
@@ -54,7 +59,9 @@
                     android:gravity="center"
                     android:text="Product Price"
                     android:textAlignment="textEnd"
-                    android:textSize="24sp" />
+                    android:textColor="@color/colorTextPrimary"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

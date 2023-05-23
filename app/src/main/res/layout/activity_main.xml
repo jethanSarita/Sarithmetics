@@ -5,17 +5,18 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    android:background="@color/colorBackground"
     android:fitsSystemWindows="true"
-    >
+    tools:context=".MainActivity"
+    tools:openDrawer="end">
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
+        android:layout_gravity="start"
         app:headerLayout="@layout/header"
-        app:menu="@menu/main_menu"
-        android:layout_gravity="start">
+        app:menu="@menu/main_menu">
 
     </com.google.android.material.navigation.NavigationView>
 
@@ -34,7 +35,7 @@
             android:id="@+id/layoutHome"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -47,6 +48,7 @@
                     android:layout_height="wrap_content"
                     android:text="Welcome back,"
                     android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
                     android:textSize="34sp"
                     android:textStyle="bold" />
 
@@ -57,6 +59,7 @@
                     android:fontFamily="@font/alata"
                     android:text="TextView"
                     android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
                     android:textSize="34sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -67,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -113,7 +116,7 @@
                         android:layout_centerHorizontal="true"
                         android:gravity="center_horizontal"
                         android:text="Items"
-                        android:textColor="#7B3F18"
+                        android:textColor="@color/colorTextPrimary"
                         android:textSize="34sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -138,7 +141,7 @@
                         android:id="@+id/view2"
                         android:layout_width="match_parent"
                         android:layout_height="5dp"
-                        android:background="#b07c64" />
+                        android:background="@color/colorTextSecondary" />
                 </RelativeLayout>
 
                 <Space
