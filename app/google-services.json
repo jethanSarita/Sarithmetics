@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "729796277826",
+    "project_id": "sarithmetics",
+    "storage_bucket": "sarithmetics.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:729796277826:android:8ffd4d798c74bca031dfdb",
+        "android_client_info": {
+          "package_name": "com.example.sarithmetics"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKJrQp-J-FeFtljX9UU1Tp1GYaA0Zdu6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
