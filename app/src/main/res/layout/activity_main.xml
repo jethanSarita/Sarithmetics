@@ -35,6 +35,7 @@
             android:id="@+id/layoutHome"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="visible"
             tools:visibility="visible">
 
             <LinearLayout
@@ -62,6 +63,106 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textSize="34sp"
                     android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="30dp"
+                    android:paddingRight="30dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp"
+                        android:background="@color/colorTextSecondary" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/llBusinessOwnerLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/alata"
+                        android:text="Business code"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity=""
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/boxBusinessCode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@color/colorTextPrimary"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tvBusinessCode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/alata"
+                                android:text="TextView"
+                                android:textAlignment="center"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textSize="34sp"
+                                android:textStyle="bold"
+                                android:visibility="invisible"/>
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/ivEyeCloseIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:src="@drawable/eye_close" />
+
+                        <ImageView
+                            android:id="@+id/ivEyeOpenIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:src="@drawable/eye_open"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="30dp"
+                        android:paddingRight="30dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/alata"
+                        android:text="Employees"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+
             </LinearLayout>
         </RelativeLayout>
 
@@ -110,7 +211,6 @@
                         app:srcCompat="@drawable/cart_icon" />
 
                     <TextView
-                        android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"

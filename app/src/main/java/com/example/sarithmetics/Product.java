@@ -1,6 +1,9 @@
 package com.example.sarithmetics;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.Serializable;
+
 
 public class Product implements Serializable {
     private int productID;

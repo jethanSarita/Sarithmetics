@@ -5,9 +5,9 @@ import static android.text.TextUtils.isEmpty;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,22 +26,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
-
+    private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
-    ImageView settings, homeIcon, cart, add;
+    ImageView settings, homeIcon, cart_button, add_button, eye_open_button, eye_close_button;
     RelativeLayout homeLayout, itemsLayout;
     MyDatabaseHelper database;
     ArrayList<String> listProductID;
@@ -47,18 +57,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listProductPrice;
     ArrayList<String> listProductQty;
     SessionManager sessionManager;
-    TextView profileFnLName;
+    TextView profileFnLName, testText, business_code;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
     ArrayList<Product> cartedProduct, currProduct;
+    LinearLayout boxBusinessCode;
     androidx.appcompat.widget.SearchView searchView;
+
+    User cUser;
+    FirebaseUser user;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference myRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
         /*hook*/
         currProduct = new ArrayList<>();
@@ -67,13 +81,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
-        settings = findViewById(R.id.settingsBtn);
+        settings = findViewById(R.id.vEyeCloseIcon);
         homeIcon = findViewById(R.id.homeIcon);
         homeLayout = findViewById(R.id.layoutHome);
         itemsLayout = findViewById(R.id.layoutItems);
-        cart = findViewById(R.id.ivCart);
-        add = findViewById(R.id.ivAddItem);
+        cart_button = findViewById(R.id.ivCart);
+        add_button = findViewById(R.id.ivAddItem);
         profileFnLName = findViewById(R.id.profileFnLName);
+        testText = findViewById(R.id.tvBusinessCode);
         database = new MyDatabaseHelper(MainActivity.this);
         listProductID = new ArrayList<>();
         listProductName = new ArrayList<>();
@@ -82,6 +97,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView = findViewById(R.id.recyclerViewItem);
         cartedProduct = new ArrayList<>();
         cartedProduct.clear();
+        eye_open_button = findViewById(R.id.ivEyeOpenIcon);
+        eye_close_button = findViewById(R.id.ivEyeCloseIcon);
+        boxBusinessCode = findViewById(R.id.boxBusinessCode);
+        business_code = findViewById(R.id.tvBusinessCode);
+
+        firebaseDatabase = FirebaseDatabase.getInstance(DB);
+        user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (!sessionManager.getLogin()) {
+            sessionManager.setLogin(false);
+            sessionManager.setUsername(null);
+            startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
+            finish();
+        }
+
+        if (user == null) {
+            sessionManager.setLogin(false);
+            sessionManager.setUsername(null);
+            startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
+            finish();
+        }
+
+        myRef = firebaseDatabase.getReference("Users");
+        myRef.child(user.getUid()).child("").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e("firebaseDatabase", "Error getting data", task.getException());
+                } else {
+                    Log.d("firebaseDatabase", String.valueOf(task.getResult().getValue()));
+                    cUser = task.getResult().getValue(User.class);
+                }
+            }
+        });
+
+        testText.setText(user.getEmail());
 
         /*tool bar*/
         setSupportActionBar(toolbar);
@@ -90,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
                 return false;
             }
 
@@ -116,15 +166,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         /*Welcome back, "[FirstName] [LastName]"*/
-        Cursor cursor = database.getUser(sessionManager.getUsername());
+        /*Cursor cursor = database.getUser(sessionManager.getUsername());
         String currentUser = null;
         if(cursor.getCount() == 0){
-            Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "No item data", Toast.LENGTH_SHORT).show();
         }else{
             cursor.moveToNext();
             currentUser = cursor.getString(1) +  " " + cursor.getString(2);
         }
-        profileFnLName.setText(currentUser);
+        profileFnLName.setText(currentUser);*/
+
+        profileFnLName.setText(sessionManager.getUsername());
 
 
 
@@ -138,32 +190,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Hello", Toast.LENGTH_SHORT).show();
-            }
+        eye_close_button.setOnClickListener(view -> {
+            eye_close_button.setVisibility(View.GONE);
+            eye_open_button.setVisibility(View.VISIBLE);
+            boxBusinessCode.setBackgroundColor(Color.TRANSPARENT);
+            business_code.setVisibility(View.VISIBLE);
         });
-        homeIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        eye_open_button.setOnClickListener(view -> {
+            eye_open_button.setVisibility(View.GONE);
+            eye_close_button.setVisibility(View.VISIBLE);
+            boxBusinessCode.setBackgroundColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
+            business_code.setVisibility(View.INVISIBLE);
+        });
 
+        settings.setOnClickListener(view -> {
+            Toast.makeText(getApplicationContext(), sessionManager.getUsername(), Toast.LENGTH_SHORT).show();
+        });
+        homeIcon.setOnClickListener(view -> {
+
+        });
+        cart_button.setOnClickListener(view -> {
+            /*Cart Activity PENDING*/
+            if(cartedProduct.isEmpty()){
+                Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
+            }else{
+                Intent intent = new Intent(MainActivity.this, CartActivity.class);
+                intent.putExtra("key", cartedProduct);
+                startActivity(intent);
             }
         });
-        cart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Cart Activity PENDING*/
-                if(cartedProduct.isEmpty()){
-                    Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
-                }else{
-                    Intent intent = new Intent(MainActivity.this, CartActivity.class);
-                    intent.putExtra("key", cartedProduct);
-                    startActivity(intent);
-                }
-            }
-        });
-        add.setOnClickListener(new View.OnClickListener() {
+        add_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 /*Add Item Activity PENDING*/
@@ -189,11 +245,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             sessionManager.setUsername(null);
             startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
             finish();
-        }else if(item.getItemId() == R.id.nav_share){
+        }else if (item.getItemId() == R.id.nav_share) {
 
-        }else if(item.getItemId() == R.id.nav_rate){
+        }else if (item.getItemId() == R.id.nav_rate) {
 
-        }else if(item.getItemId() == R.id.nav_exit){
+        }else if(item.getItemId() == R.id.nav_exit) {
             finishAffinity();
         }
 
@@ -223,37 +279,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         productQuantity = popupView.findViewById(R.id.productQuantity);
         add = popupView.findViewById(R.id.btnPopupAdd);
         close = popupView.findViewById(R.id.btnPopupClose);
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupWindow.dismiss();
+
+        close.setOnClickListener(view -> popupWindow.dismiss());
+
+        add.setOnClickListener(view -> {
+            /*Write sql insertion code here*/
+            MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+
+            //Initialize data (In case of empty fields)
+            String pName = "NULL";
+            float pPrice = 0;
+            int pQty = 0;
+
+            //Store field data in temp variables
+            String tempPName, tempPPrice, tempPQty;
+            tempPName =  productName.getText().toString().trim();
+            tempPPrice = productPrice.getText().toString().trim();
+            tempPQty = productQuantity.getText().toString().trim();
+
+            //To check if fields were empty. No point storing in official data if they are empty
+            if (!isEmpty(tempPName)) {
+                pName = tempPName;
             }
-        });
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Write sql insertion code here*/
-                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
-                String pName = "NULL";
-                float pPrice = 0;
-                int pQty = 0;
-                String tempPName, tempPPrice, tempPQty;
-                tempPName =  productName.getText().toString().trim();
-                tempPPrice = productPrice.getText().toString().trim();
-                tempPQty = productQuantity.getText().toString().trim();
-                if(!isEmpty(tempPName)){
-                    pName = tempPName;
-                }
-                if(!isEmpty(tempPPrice)){
-                    pPrice = Float.parseFloat(tempPPrice);
-                }
-                if(!isEmpty(tempPQty)){
-                    pQty = Integer.parseInt(tempPQty);
-                }
-                myDB.addItem(pName, pPrice, pQty);
-                refreshItems();
-                popupWindow.dismiss();
+
+            if (!isEmpty(tempPPrice)) {
+                pPrice = Float.parseFloat(tempPPrice);
             }
+
+            if (!isEmpty(tempPQty)) {
+                pQty = Integer.parseInt(tempPQty);
+            }
+
+
+            myDB.addItem(pName, pPrice, pQty);
+            refreshItems();
+            popupWindow.dismiss();
         });
     }
     /*Popup when editing an item*/
@@ -354,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listProductQty.clear();
         Cursor cursor = database.readAllProductData();
         if(cursor.getCount() == 0){
-            Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
         }else{
             while(cursor.moveToNext()){
                 listProductID.add(cursor.getString(0));

@@ -13,13 +13,20 @@
         android:theme="@style/Theme.Sarithmetics"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
-            android:label=""
+            android:name=".LoginRegister2Activity"
             android:exported="false" />
         <activity
+            android:name=".ui.login.LoginRegisterActivity2"
+            android:exported="false"
+            android:label="@string/title_activity_login_register2" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="" />
+        <activity
             android:name=".CartActivity"
-            android:label=""
-            android:exported="false" />
+            android:exported="false"
+            android:label="" />
         <activity
             android:name=".LoginRegisterActivity"
             android:exported="true">

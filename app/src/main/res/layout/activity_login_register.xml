@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="50dp"
-    android:paddingTop="125dp"
+    android:paddingTop="50dp"
     android:paddingRight="50dp"
     android:background="@color/colorBackground"
     tools:context=".LoginRegisterActivity">
@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="visible"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <ImageView
             android:layout_width="100dp"
@@ -39,16 +39,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:fontFamily="@font/alata"
-            android:text="First name" />
+            android:text="Email" />
 
         <EditText
-            android:id="@+id/etLoginFirstName"
+            android:id="@+id/etLoginEmail"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
             android:fontFamily="@font/alata"
-            android:hint="  Firstname"
+            android:hint="  Email"
             android:inputType="text" />
 
         <TextView
@@ -97,7 +97,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/imageView5"
@@ -155,6 +155,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:fontFamily="@font/alata"
+            android:text="Email" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/search_view_bg"
+            android:ems="10"
+            android:fontFamily="@font/alata"
+            android:hint="  Email"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/alata"
             android:text="Password" />
 
         <EditText
@@ -184,6 +201,28 @@
             android:hint="  Confirm Password"
             android:inputType="textPassword" />
 
+        <RadioGroup
+            android:id="@+id/radioGroupUserType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:checkedButton="@id/rbEmployee"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbEmployee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Employee"
+                android:paddingRight="10dp"/>
+
+            <RadioButton
+                android:id="@+id/rbBusinessOwner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Business owner" />
+
+        </RadioGroup>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/registerBtn"
