@@ -154,7 +154,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                                             User cUser = new User();
                                             if (user_type == 0) {
                                                 //Employee
-                                                cUser = new User(user.getUid(), first_name, last_name, null, 0);
+                                                cUser = new User(user.getUid(), first_name, last_name, "null", 0);
                                             } else if (user_type == 1) {
                                                 //Business owner
                                                 cUser = new User(user.getUid(), first_name, last_name, generateRandom5CharString(), 1);

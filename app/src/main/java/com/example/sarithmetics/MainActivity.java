@@ -33,12 +33,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -57,53 +54,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listProductPrice;
     ArrayList<String> listProductQty;
     SessionManager sessionManager;
-    TextView profileFnLName, testText, business_code;
+    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tvBusinessCode, business_code;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
     ArrayList<Product> cartedProduct, currProduct;
-    LinearLayout boxBusinessCode;
+    LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
     androidx.appcompat.widget.SearchView searchView;
 
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference myRef;
+    DatabaseReference usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*hook*/
-        currProduct = new ArrayList<>();
-        searchView = findViewById(R.id.itemSearchBar);
+        /*firebase*/
+        firebaseDatabase = FirebaseDatabase.getInstance(DB);
+
+        /*session*/
         sessionManager = new SessionManager(getApplicationContext());
+        user = FirebaseAuth.getInstance().getCurrentUser();
+
+        /*database*/
+        database = new MyDatabaseHelper(MainActivity.this);
+
+        /*general hooks*/
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         settings = findViewById(R.id.vEyeCloseIcon);
         homeIcon = findViewById(R.id.homeIcon);
-        homeLayout = findViewById(R.id.layoutHome);
+
+        /*home page layout*/
+        profileFnLNameEmployee = findViewById(R.id.profileFnLNameEmployee);
+        profileFnLNameBusinessOwner = findViewById(R.id.profileFnLNameBusinessOwner);
+        tvBusinessCode = findViewById(R.id.tvBusinessCode);
+        recyclerView = findViewById(R.id.recyclerViewItem);
+
+        /*employee session hooks*/
+        llEmployeeLayoutYesSync = findViewById(R.id.llEmployeeLayoutYesSync);
+        llEmployeeLayoutNoSync = findViewById(R.id.llEmployeeLayoutNoSync);
+
+        /*items page hooks*/
+        searchView = findViewById(R.id.itemSearchBar);
         itemsLayout = findViewById(R.id.layoutItems);
         cart_button = findViewById(R.id.ivCart);
         add_button = findViewById(R.id.ivAddItem);
-        profileFnLName = findViewById(R.id.profileFnLName);
-        testText = findViewById(R.id.tvBusinessCode);
-        database = new MyDatabaseHelper(MainActivity.this);
-        listProductID = new ArrayList<>();
-        listProductName = new ArrayList<>();
-        listProductPrice = new ArrayList<>();
-        listProductQty = new ArrayList<>();
-        recyclerView = findViewById(R.id.recyclerViewItem);
-        cartedProduct = new ArrayList<>();
-        cartedProduct.clear();
+
         eye_open_button = findViewById(R.id.ivEyeOpenIcon);
         eye_close_button = findViewById(R.id.ivEyeCloseIcon);
         boxBusinessCode = findViewById(R.id.boxBusinessCode);
         business_code = findViewById(R.id.tvBusinessCode);
 
-        firebaseDatabase = FirebaseDatabase.getInstance(DB);
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        /*array lists*/
+        currProduct = new ArrayList<>();
+        cartedProduct = new ArrayList<>();
+        listProductID = new ArrayList<>();
+        listProductName = new ArrayList<>();
+        listProductPrice = new ArrayList<>();
+        listProductQty = new ArrayList<>();
+
+        cartedProduct.clear();
 
         if (!sessionManager.getLogin()) {
             sessionManager.setLogin(false);
@@ -119,20 +133,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             finish();
         }
 
-        myRef = firebaseDatabase.getReference("Users");
-        myRef.child(user.getUid()).child("").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebaseDatabase", "Error getting data", task.getException());
-                } else {
-                    Log.d("firebaseDatabase", String.valueOf(task.getResult().getValue()));
-                    cUser = task.getResult().getValue(User.class);
+        usersRef = firebaseDatabase.getReference("Users");
+        usersRef.child(user.getUid()).child("").get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebaseDatabase", "Error getting data", task.getException());
+            } else {
+                Log.d("firebaseDatabase", "Got User object: " + String.valueOf(task.getResult().getValue()));
+                cUser = task.getResult().getValue(User.class);
+                switch (cUser.getUser_type()) {
+                    case 0:
+                        //Employee
+                        homeLayout = findViewById(R.id.layoutHomeEmployee);
+                        add_button.setVisibility(View.GONE);
+                        if (cUser.getBusiness_code().equals("null")) {
+                            llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
+                        } else {
+                            llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                    case 1:
+                        //Business Owner
+                        homeLayout = findViewById(R.id.layoutHomeBusinessOwner);
+                        tvBusinessCode.setText(cUser.getBusiness_code());
+                        break;
+                    case 2:
+                        //Employee - Inventory Manager
+                        homeLayout = findViewById(R.id.layoutHomeEmployee);
+                        add_button.setVisibility(View.GONE);
+                        llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
+                        break;
                 }
+
             }
         });
-
-        testText.setText(user.getEmail());
 
         /*tool bar*/
         setSupportActionBar(toolbar);
