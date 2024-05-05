@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         eye_open_button = findViewById(R.id.ivEyeOpenIcon);
         eye_close_button = findViewById(R.id.ivEyeCloseIcon);
         boxBusinessCode = findViewById(R.id.boxBusinessCode);
-        business_code = findViewById(R.id.tvBusinessCode);
 
         /*array lists*/
         currProduct = new ArrayList<>();
@@ -117,15 +116,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listProductPrice = new ArrayList<>();
         listProductQty = new ArrayList<>();
 
+        //Clear cart
         cartedProduct.clear();
 
+        //Check if session exists
         if (!sessionManager.getLogin()) {
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
             startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
             finish();
         }
-
         if (user == null) {
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             finish();
         }
 
+        //Get current user information
         usersRef = firebaseDatabase.getReference("Users");
         usersRef.child(user.getUid()).child("").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -140,30 +141,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Log.d("firebaseDatabase", "Got User object: " + String.valueOf(task.getResult().getValue()));
                 cUser = task.getResult().getValue(User.class);
+                //Check usertype
+                //[Employee, Business Owner, Employee - Inventory Manager]
                 switch (cUser.getUser_type()) {
                     case 0:
                         //Employee
+
+                        //Set home layout to employee version
                         homeLayout = findViewById(R.id.layoutHomeEmployee);
+                        //Get rid of add item button
                         add_button.setVisibility(View.GONE);
+                        //Set username text view
+                        profileFnLNameEmployee.setText(sessionManager.getUsername());
+
+                        //User is sync to business?
                         if (cUser.getBusiness_code().equals("null")) {
+                            //No
                             llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
                         } else {
+                            //Yes
                             llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
                         }
                         break;
                     case 1:
                         //Business Owner
+
+                        //Set home layout to business owner version
                         homeLayout = findViewById(R.id.layoutHomeBusinessOwner);
+                        //Set business code text
                         tvBusinessCode.setText(cUser.getBusiness_code());
+                        //Set username text view
+                        profileFnLNameBusinessOwner.setText(sessionManager.getUsername());
                         break;
                     case 2:
                         //Employee - Inventory Manager
+
+                        //Set home layout to employee version
                         homeLayout = findViewById(R.id.layoutHomeEmployee);
-                        add_button.setVisibility(View.GONE);
+                        //Set username text view
+                        profileFnLNameEmployee.setText(sessionManager.getUsername());
+                        //No need to check business sync, since employee cant exist
+                        //without an already in sync of a business
                         llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
                         break;
                 }
-
             }
         });
 
@@ -208,10 +229,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             currentUser = cursor.getString(1) +  " " + cursor.getString(2);
         }
         profileFnLName.setText(currentUser);*/
-
-        profileFnLName.setText(sessionManager.getUsername());
-
-
 
         if(sessionManager.getMainStatus()){
             itemsLayout.setVisibility(View.VISIBLE);
