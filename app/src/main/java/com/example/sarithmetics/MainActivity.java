@@ -40,7 +40,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference userRef, itemReference, userBusCodeRef;
+    DatabaseReference userRef, itemsRef, userBusCodeRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,10 +204,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 navigationView.setCheckedItem(R.id.nav_home);
             }
 
-            itemReference = firebaseDatabase.getReference("businesses").child(cUser.getBusiness_code()).child("items");
-            itemReference.addValueEventListener(new ValueEventListener() {
+            itemsRef = firebaseDatabase.getReference("businesses").child(cUser.getBusiness_code()).child("items");
+            itemsRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    clearArrays();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         // TODO: handle the post
                         Item item = postSnapshot.getValue(Item.class);
@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         searchView.clearFocus();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        /*searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 filterList(newText);
                 return true;
             }
-        });
+        });*/
 
 
         /*navigation drawer menu*/
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         /*database arraylist storing*/
-        storeDataInArrays();
+        //storeDataInArrays();
         customAdapter = new CustomAdapter(MainActivity.this, listItemID, listItemName, listItemPrice, listItemQty, this);
         rvItems.setAdapter(customAdapter);
         rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -402,13 +402,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //old local database
             //myDB.addItem(pName, pPrice, pQty);
 
-            itemReference.child(pName).setValue(new Item(pName, pPrice, pQty));
+            itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
             refreshItems();
             popupWindow.dismiss();
         });
     }
     /*Popup when editing an item*/
-    private void CreateEditPopUpWindow(int currProductID, String currProductName, float currProductPrice, int currProductQty) {
+    private void CreateEditPopUpWindow(String currProductName, float currProductPrice, int currProductQty) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.editpopup, null);
 
@@ -441,61 +441,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         productName.setText(currProductName);
         productPrice.setText(String.valueOf(currProductPrice));
         productQuantity.setText(String.valueOf(currProductQty));
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupWindow.dismiss();
-            }
-        });
-        edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Write sql update code here*/
 
-                String pName = "NULL";
-                float pPrice = 0;
-                int pQty = 0;
-                String tempPName, tempPPrice, tempPQty;
-                tempPName =  productName.getText().toString().trim();
-                tempPPrice = productPrice.getText().toString().trim();
-                tempPQty = productQuantity.getText().toString().trim();
-                if(!isEmpty(tempPName)){
-                    pName = tempPName;
-                }
-                if(!isEmpty(tempPPrice)){
-                    pPrice = Float.parseFloat(tempPPrice);
-                }
-                if(!isEmpty(tempPQty)){
-                    pQty = Integer.parseInt(tempPQty);
-                }
-                myDB.editItem(currProductID, pName, pPrice, pQty);
+        close.setOnClickListener(view -> popupWindow.dismiss());
+
+        edit.setOnClickListener(view -> {
+
+            //set default values
+            String pName = "NULL";
+            float pPrice = 0;
+            int pQty = 0;
+            String tempPName, tempPPrice, tempPQty;
+            //take inputted values
+            tempPName =  productName.getText().toString().trim();
+            tempPPrice = productPrice.getText().toString().trim();
+            tempPQty = productQuantity.getText().toString().trim();
+            //commit values
+            if(!isEmpty(tempPName)){
+                pName = tempPName;
+            }
+            if(!isEmpty(tempPPrice)){
+                pPrice = Float.parseFloat(tempPPrice);
+            }
+            if(!isEmpty(tempPQty)){
+                pQty = Integer.parseInt(tempPQty);
+            }
+
+            //myDB.editItem(currProductID, pName, pPrice, pQty);
+
+            if(!(currProductName.equals(pName))){
+                itemsRef.child(currProductName).removeValue();
+            }
+
+            itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
+            refreshItems();
+            popupWindow.dismiss();
+        });
+        delete.setOnClickListener(view -> {
+
+            //myDB.deleteItem(currProductID);
+
+            itemsRef.child(currProductName).removeValue();
+            refreshItems();
+            popupWindow.dismiss();
+        });
+        /*cart.setOnClickListener(view -> {
+            int pQty = editPopupNumberPicker.getValue();
+            if(pQty == 0){
+                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
+            }else{
+                Product product = new Product(currProductID, currProductName, currProductPrice, pQty);
+                cartedProduct.add(product);
+                myDB.removeStock(currProductID, pQty);
                 refreshItems();
                 popupWindow.dismiss();
             }
-        });
-        delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                myDB.deleteItem(currProductID);
-                refreshItems();
-                popupWindow.dismiss();
-            }
-        });
-        cart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pQty = editPopupNumberPicker.getValue();
-                if(pQty == 0){
-                    Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
-                }else{
-                    Product product = new Product(currProductID, currProductName, currProductPrice, pQty);
-                    cartedProduct.add(product);
-                    myDB.removeStock(currProductID, pQty);
-                    refreshItems();
-                    popupWindow.dismiss();
-                }
-            }
-        });
+        });*/
+    }
+
+    void clearArrays(){
+        listItemName.clear();
+        listItemPrice.clear();
+        listItemQty.clear();
     }
 
     void storeDataInArrays(){
@@ -518,14 +524,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void refreshItems(){
-        storeDataInArrays();
+        //storeDataInArrays();
+        clearArrays();
         customAdapter.notifyDataSetChanged();
+        searchView.clearFocus();
     }
 
     @Override
-    public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
+    public void onItemClick(int position, String productName, String productPrice, String productQty) {
         /*Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();*/
-        CreateEditPopUpWindow(Integer.parseInt(productId), productName, Float.parseFloat(productPrice), Integer.parseInt(productQty));
+        CreateEditPopUpWindow(productName, Float.parseFloat(productPrice), Integer.parseInt(productQty));
     }
 
     void storeProductDataInCurrProduct(){

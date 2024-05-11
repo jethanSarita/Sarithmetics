@@ -135,7 +135,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
     }
 
     @Override
-    public void onItemClick(int position, String productId, String productName, String productPrice, String productQty) {
+    public void onItemClick(int position, String productName, String productPrice, String productQty) {
 
     }
 }
