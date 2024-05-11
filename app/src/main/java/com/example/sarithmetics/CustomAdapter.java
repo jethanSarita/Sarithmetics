@@ -49,14 +49,11 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
     @Override
     public void onBindViewHolder(@NonNull CustomAdapter.MyViewHolder holder, int position) {
         holder.productNameText.setText(String.valueOf(productName.get(position)));
-        holder.productPriceText.setText("₱" + String.valueOf(productPrice.get(position)));
-        holder.productQtyText.setText("Stock: " + String.valueOf(productQty.get(position)));
-        holder.rowListLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                    listener.onItemClick(position, String.valueOf(productId.get(position)), String.valueOf(productName.get(position)), String.valueOf(productPrice.get(position)), String.valueOf(productQty.get(position)));
-                }
+        holder.productPriceText.setText("₱" + productPrice.get(position));
+        holder.productQtyText.setText("Stock: " + productQty.get(position));
+        holder.rowListLayout.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onItemClick(position, String.valueOf(productId.get(position)), String.valueOf(productName.get(position)), String.valueOf(productPrice.get(position)), String.valueOf(productQty.get(position)));
             }
         });
     }

@@ -36,8 +36,12 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -49,22 +53,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ImageView settings, homeIcon, cart_button, add_button, eye_open_button, eye_close_button;
     RelativeLayout homeLayout, itemsLayout;
     MyDatabaseHelper database;
-    ArrayList<String> listProductID;
-    ArrayList<String> listProductName;
-    ArrayList<String> listProductPrice;
-    ArrayList<String> listProductQty;
+    ArrayList<String> listItemID;
+    ArrayList<String> listItemName;
+    ArrayList<String> listItemPrice;
+    ArrayList<String> listItemQty;
     SessionManager sessionManager;
-    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tvBusinessCode, business_code;
+    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code;
     CustomAdapter customAdapter;
-    RecyclerView recyclerView;
+    RecyclerView rvItems;
     ArrayList<Product> cartedProduct, currProduct;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
     androidx.appcompat.widget.SearchView searchView;
+    EditText etBusinessCode;
+    Button btnEnterBusinessCode;
 
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference usersRef;
+    DatabaseReference userRef, itemReference, userBusCodeRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,12 +97,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*home page layout*/
         profileFnLNameEmployee = findViewById(R.id.profileFnLNameEmployee);
         profileFnLNameBusinessOwner = findViewById(R.id.profileFnLNameBusinessOwner);
-        tvBusinessCode = findViewById(R.id.tvBusinessCode);
-        recyclerView = findViewById(R.id.recyclerViewItem);
+        tv_business_code = findViewById(R.id.tvBusinessCode);
+        rvItems = findViewById(R.id.recyclerViewItem);
 
         /*employee session hooks*/
         llEmployeeLayoutYesSync = findViewById(R.id.llEmployeeLayoutYesSync);
         llEmployeeLayoutNoSync = findViewById(R.id.llEmployeeLayoutNoSync);
+        etBusinessCode = findViewById(R.id.etBusinessCode);
+        btnEnterBusinessCode = findViewById(R.id.btnEnterBusinessCode);
 
         /*items page hooks*/
         searchView = findViewById(R.id.itemSearchBar);
@@ -111,10 +119,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*array lists*/
         currProduct = new ArrayList<>();
         cartedProduct = new ArrayList<>();
-        listProductID = new ArrayList<>();
-        listProductName = new ArrayList<>();
-        listProductPrice = new ArrayList<>();
-        listProductQty = new ArrayList<>();
+        listItemID = new ArrayList<>();
+        listItemName = new ArrayList<>();
+        listItemPrice = new ArrayList<>();
+        listItemQty = new ArrayList<>();
 
         //Clear cart
         cartedProduct.clear();
@@ -134,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Get current user information
-        usersRef = firebaseDatabase.getReference("Users");
-        usersRef.child(user.getUid()).child("").get().addOnCompleteListener(task -> {
+        userRef = firebaseDatabase.getReference("Users");
+        userRef.child(user.getUid()).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebaseDatabase", "Error getting data", task.getException());
             } else {
@@ -169,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         //Set home layout to business owner version
                         homeLayout = findViewById(R.id.layoutHomeBusinessOwner);
                         //Set business code text
-                        tvBusinessCode.setText(cUser.getBusiness_code());
+                        tv_business_code.setText(cUser.getBusiness_code());
                         //Set username text view
                         profileFnLNameBusinessOwner.setText(sessionManager.getUsername());
                         break;
@@ -186,6 +194,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                 }
             }
+
+            if(sessionManager.getMainStatus()){
+                itemsLayout.setVisibility(View.VISIBLE);
+                homeLayout.setVisibility(View.GONE);
+                navigationView.setCheckedItem(R.id.nav_items);
+            }else{
+                itemsLayout.setVisibility(View.GONE);
+                homeLayout.setVisibility(View.VISIBLE);
+                navigationView.setCheckedItem(R.id.nav_home);
+            }
+
+            itemReference = firebaseDatabase.getReference("businesses").child(cUser.getBusiness_code()).child("items");
+            itemReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        // TODO: handle the post
+                        Item item = postSnapshot.getValue(Item.class);
+                        listItemName.add(item.getName());
+                        listItemPrice.add(String.valueOf(item.getPrice()));
+                        listItemQty.add(String.valueOf(item.getQuantity()));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Getting Post failed, log a message
+                    Log.w("item value event listener", "loadPost:onCancelled", databaseError.toException());
+                    // ...
+                }
+            });
+
+            userBusCodeRef = firebaseDatabase.getReference("Users").child(cUser.getUid()).child("business_code");
+            btnEnterBusinessCode.setOnClickListener(view -> {
+                String code = etBusinessCode.getText().toString();
+                userBusCodeRef.setValue(code);
+                recreate();
+            });
         });
 
         /*tool bar*/
@@ -215,9 +261,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*database arraylist storing*/
         storeDataInArrays();
-        customAdapter = new CustomAdapter(MainActivity.this, listProductID, listProductName, listProductPrice, listProductQty, this);
-        recyclerView.setAdapter(customAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        customAdapter = new CustomAdapter(MainActivity.this, listItemID, listItemName, listItemPrice, listItemQty, this);
+        rvItems.setAdapter(customAdapter);
+        rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         /*Welcome back, "[FirstName] [LastName]"*/
         /*Cursor cursor = database.getUser(sessionManager.getUsername());
@@ -230,31 +276,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         profileFnLName.setText(currentUser);*/
 
-        if(sessionManager.getMainStatus()){
-            itemsLayout.setVisibility(View.VISIBLE);
-            homeLayout.setVisibility(View.GONE);
-            navigationView.setCheckedItem(R.id.nav_items);
-        }else{
-            itemsLayout.setVisibility(View.GONE);
-            homeLayout.setVisibility(View.VISIBLE);
-            navigationView.setCheckedItem(R.id.nav_home);
-        }
+
 
         eye_close_button.setOnClickListener(view -> {
             eye_close_button.setVisibility(View.GONE);
             eye_open_button.setVisibility(View.VISIBLE);
             boxBusinessCode.setBackgroundColor(Color.TRANSPARENT);
-            business_code.setVisibility(View.VISIBLE);
+            tv_business_code.setVisibility(View.VISIBLE);
         });
         eye_open_button.setOnClickListener(view -> {
             eye_open_button.setVisibility(View.GONE);
             eye_close_button.setVisibility(View.VISIBLE);
             boxBusinessCode.setBackgroundColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
-            business_code.setVisibility(View.INVISIBLE);
+            tv_business_code.setVisibility(View.INVISIBLE);
         });
 
         settings.setOnClickListener(view -> {
-            Toast.makeText(getApplicationContext(), sessionManager.getUsername(), Toast.LENGTH_SHORT).show();
+            refreshItems();
+            Toast.makeText(getApplicationContext(), "Settings clicked", Toast.LENGTH_SHORT).show();
         });
         homeIcon.setOnClickListener(view -> {
 
@@ -269,13 +308,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
-        add_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Add Item Activity PENDING*/
-                CreatePopUpWindow();
-            }
+        add_button.setOnClickListener(view -> {
+            /*Add Item Activity PENDING*/
+            CreatePopUpWindow();
         });
+
+
     }
 
     @Override
@@ -361,7 +399,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
 
-            myDB.addItem(pName, pPrice, pQty);
+            //old local database
+            //myDB.addItem(pName, pPrice, pQty);
+
+            itemReference.child(pName).setValue(new Item(pName, pPrice, pQty));
             refreshItems();
             popupWindow.dismiss();
         });
@@ -458,19 +499,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void storeDataInArrays(){
-        listProductID.clear();
-        listProductName.clear();
-        listProductPrice.clear();
-        listProductQty.clear();
+        listItemID.clear();
+        listItemName.clear();
+        listItemPrice.clear();
+        listItemQty.clear();
         Cursor cursor = database.readAllProductData();
         if(cursor.getCount() == 0){
             //Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
         }else{
             while(cursor.moveToNext()){
-                listProductID.add(cursor.getString(0));
-                listProductName.add(cursor.getString(1));
-                listProductPrice.add(cursor.getString(2));
-                listProductQty.add(cursor.getString(3));
+                listItemID.add(cursor.getString(0));
+                listItemName.add(cursor.getString(1));
+                listItemPrice.add(cursor.getString(2));
+                listItemQty.add(cursor.getString(3));
             }
             storeProductDataInCurrProduct();
         }
@@ -490,8 +531,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     void storeProductDataInCurrProduct(){
         currProduct.clear();
         Product temp;
-        for(int i = 0; i < listProductID.size(); i++){
-            temp = new Product(Integer.parseInt(listProductPrice.get(i)), listProductName.get(i), Float.parseFloat(listProductPrice.get(i)), Integer.parseInt(listProductQty.get(i)));
+        for(int i = 0; i < listItemID.size(); i++){
+            temp = new Product(Integer.parseInt(listItemPrice.get(i)), listItemName.get(i), Float.parseFloat(listItemPrice.get(i)), Integer.parseInt(listItemQty.get(i)));
             currProduct.add(temp);
         }
     }

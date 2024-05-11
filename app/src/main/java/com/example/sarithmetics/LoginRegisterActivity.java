@@ -122,8 +122,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
         });
 
         if(sessionManager.getLogin()){
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             sessionManager.setMainStatus(false);
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
     }
