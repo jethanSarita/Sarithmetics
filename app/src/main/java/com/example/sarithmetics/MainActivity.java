@@ -5,7 +5,6 @@ import static android.text.TextUtils.isEmpty;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView rvItems;
     ArrayList<Product> cartedProduct, currProduct;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
-    androidx.appcompat.widget.SearchView searchView;
+    androidx.appcompat.widget.SearchView itemSearchBar;
     EditText etBusinessCode;
     Button btnEnterBusinessCode;
 
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnEnterBusinessCode = findViewById(R.id.btnEnterBusinessCode);
 
         /*items page hooks*/
-        searchView = findViewById(R.id.itemSearchBar);
+        itemSearchBar = findViewById(R.id.itemSearchBar);
         itemsLayout = findViewById(R.id.layoutItems);
         cart_button = findViewById(R.id.ivCart);
         add_button = findViewById(R.id.ivAddItem);
@@ -237,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*tool bar*/
         setSupportActionBar(toolbar);
 
-        searchView.clearFocus();
+        itemSearchBar.clearFocus();
         /*searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -527,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //storeDataInArrays();
         clearArrays();
         customAdapter.notifyDataSetChanged();
-        searchView.clearFocus();
+        itemSearchBar.clearFocus();
     }
 
     @Override
