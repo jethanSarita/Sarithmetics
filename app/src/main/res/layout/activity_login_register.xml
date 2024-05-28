@@ -113,8 +113,9 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/alata"
-            android:text="Welcome to the team!"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:text="Welcome to the team!"/>
+
 
         <TextView
             android:layout_width="match_parent"
