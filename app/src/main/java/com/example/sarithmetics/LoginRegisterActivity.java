@@ -86,12 +86,13 @@ public class LoginRegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
 
-        //Old network checker
-        /*if (checkConnection()) {
+        if (checkConnection()) {
             Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "Not connected to internet", Toast.LENGTH_SHORT).show();
-        }*/
+            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+            finish();
+        }
 
         //Register for network updates
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);

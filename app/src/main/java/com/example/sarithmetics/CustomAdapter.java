@@ -15,29 +15,37 @@ import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHolder> {
     private Context context;
-    private ArrayList productId, productName, productPrice, productQty;
+    private ArrayList productName, productPrice, productQty;
     private OnItemClickListener listener;
     private List<Product> productList;
     public interface OnItemClickListener {
         void onItemClick(int position, String productName, String productPrice, String productQty);
     }
 
-    CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
+    /*CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
         this.context = context;
         this.productId = productId;
         this.productName = productName;
         this.productPrice = productPrice;
         this.productQty = productQty;
         this.listener = listener;
+    }*/
+
+    CustomAdapter(Context context , ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
+        this.context = context;
+        this.productName = productName;
+        this.productPrice = productPrice;
+        this.productQty = productQty;
+        this.listener = listener;
     }
-    CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty){
+    /*CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty){
         this.context = context;
         this.productId = productId;
         this.productName = productName;
         this.productPrice = productPrice;
         this.productQty = productQty;
         this.listener = listener;
-    }
+    }*/
     @NonNull
     @Override
     public CustomAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -76,12 +84,12 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
 
     }
     public void setFilteredList(ArrayList<Product> filteredList){
-        this.productId.clear();
+        //this.productId.clear();
         this.productName.clear();
         this.productPrice.clear();
         this.productQty.clear();
         for(Product p : filteredList){
-            this.productId.add(String.valueOf(p.getProductID()));
+            //this.productId.add(String.valueOf(p.getProductID()));
             this.productName.add(p.getProductName());
             this.productPrice.add(String.valueOf(p.getProductPrice()));
             this.productQty.add(String.valueOf(p.getProductQty()));

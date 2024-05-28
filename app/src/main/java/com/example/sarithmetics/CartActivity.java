@@ -58,7 +58,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         /*Listing*/
         cartedProduct = (ArrayList<Product>) getIntent().getSerializableExtra("key");
         storeDataInArrays();
-        customAdapter = new CustomAdapter(CartActivity.this, cartedProductID, cartedProductName, cartedProductPrice, cartedProductQty, this);
+        customAdapter = new CustomAdapter(CartActivity.this, cartedProductName, cartedProductPrice, cartedProductQty, this);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
 

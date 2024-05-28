@@ -36,6 +36,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference userRef, itemsRef, userBusCodeRef;
+    DatabaseReference userRef, itemsRef, current_user_ref;
 
     //Net
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
@@ -251,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         listItemPrice.add(String.valueOf(item.getPrice()));
                         listItemQty.add(String.valueOf(item.getQuantity()));
                     }
+                    refreshItems();
                 }
 
                 @Override
@@ -260,14 +263,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // ...
                 }
             });
-
-            userBusCodeRef = firebaseDatabase.getReference("Users").child(cUser.getUid()).child("business_code");
             btnEnterBusinessCode.setOnClickListener(view -> {
                 String code = etBusinessCode.getText().toString();
-                userBusCodeRef.setValue(code);
+                userRef.child(cUser.getUid()).child("business_code").setValue(code);
                 recreate();
             });
         });
+        //set current user reference
+        current_user_ref = userRef.child(user.getUid());
 
         /*tool bar*/
         setSupportActionBar(toolbar);
@@ -296,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*database arraylist storing*/
         //storeDataInArrays();
-        customAdapter = new CustomAdapter(MainActivity.this, listItemID, listItemName, listItemPrice, listItemQty, this);
+        customAdapter = new CustomAdapter(MainActivity.this, listItemName, listItemPrice, listItemQty, this);
         rvItems.setAdapter(customAdapter);
         rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
@@ -438,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //myDB.addItem(pName, pPrice, pQty);
 
             itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
-            refreshItems();
+            //refreshItems();
             popupWindow.dismiss();
         });
     }
@@ -457,18 +460,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0);
             }
         });
+
         MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
         NumberPicker editPopupNumberPicker;
-        Button edit, close, delete, cart;
+        Button button_edit, button_close, button_delete, button_add_to_cart;
         EditText productName, productPrice, productQuantity;
         productName = popupView.findViewById(R.id.productNameEdit);
         productPrice = popupView.findViewById(R.id.productPriceEdit);
         productQuantity = popupView.findViewById(R.id.productQuantityEdit);
-        edit = popupView.findViewById(R.id.btnEditPopupEdit);
-        close = popupView.findViewById(R.id.btnEditPopupClose);
+        button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
+        button_close = popupView.findViewById(R.id.btnEditPopupClose);
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
-        delete = popupView.findViewById(R.id.btnEditPopupDelete);
-        cart = popupView.findViewById(R.id.btnAddToCart);
+        button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
+        button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
 
         editPopupNumberPicker.setMinValue(0);
         editPopupNumberPicker.setMaxValue(currProductQty);
@@ -477,9 +481,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         productPrice.setText(String.valueOf(currProductPrice));
         productQuantity.setText(String.valueOf(currProductQty));
 
-        close.setOnClickListener(view -> popupWindow.dismiss());
+        button_close.setOnClickListener(view -> popupWindow.dismiss());
 
-        edit.setOnClickListener(view -> {
+        button_edit.setOnClickListener(view -> {
 
             //set default values
             String pName = "NULL";
@@ -508,16 +512,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
-            refreshItems();
+            //refreshItems();
             popupWindow.dismiss();
         });
-        delete.setOnClickListener(view -> {
+        button_delete.setOnClickListener(view -> {
 
             //myDB.deleteItem(currProductID);
 
             itemsRef.child(currProductName).removeValue();
-            refreshItems();
+            //refreshItems();
             popupWindow.dismiss();
+        });
+        button_add_to_cart.setOnClickListener(view -> {
+            int selected_product_quantity = editPopupNumberPicker.getValue();
+
+            if (selected_product_quantity == 0) {
+                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
+            } else {
+                current_user_ref.child("cart").child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                itemsRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
+                //refreshItems();
+                popupWindow.dismiss();
+            }
         });
         /*cart.setOnClickListener(view -> {
             int pQty = editPopupNumberPicker.getValue();
@@ -559,8 +575,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void refreshItems(){
-        //storeDataInArrays();
-        clearArrays();
         customAdapter.notifyDataSetChanged();
         itemSearchBar.clearFocus();
     }
