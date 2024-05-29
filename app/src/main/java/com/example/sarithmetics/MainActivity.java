@@ -51,6 +51,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
+    private static final String TAG = "firebaseDatabase MainAct";
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -73,12 +74,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button btnEnterBusinessCode;
 
     //Database
+    FirebaseDatabaseHelper firebaseDatabaseHelper;
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference userRef, itemsRef, current_user_ref;
+    DatabaseReference userRef, itemsRef, current_user_ref, cartRef;
 
-    //Net
+    /*Internet monitoring*/
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
@@ -112,11 +114,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*Sets up internet monitoring*/
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
         connectivityManager.requestNetwork(networkRequest, networkCallback);
+        ////Make some checks for internet connectivity, thank you in advance me -Jethan
 
         /*firebase*/
         firebaseDatabase = FirebaseDatabase.getInstance(DB);
+        firebaseDatabaseHelper = new FirebaseDatabaseHelper();
 
         /*session*/
         sessionManager = new SessionManager(getApplicationContext());
@@ -181,12 +186,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Get current user information
-        userRef = firebaseDatabase.getReference("Users");
-        userRef.child(user.getUid()).get().addOnCompleteListener(task -> {
+        userRef = firebaseDatabaseHelper.getUserRef();
+        userRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                Log.e("firebaseDatabase", "Error getting data", task.getException());
+                Log.e(TAG, "Error getting data", task.getException());
             } else {
-                Log.d("firebaseDatabase", "Got User object: " + String.valueOf(task.getResult().getValue()));
+                Log.d(TAG, "Got User object: " + String.valueOf(task.getResult().getValue()));
                 cUser = task.getResult().getValue(User.class);
                 //Check usertype
                 //[Employee, Business Owner, Employee - Inventory Manager]
@@ -244,7 +249,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 navigationView.setCheckedItem(R.id.nav_home);
             }
 
-            itemsRef = firebaseDatabase.getReference("businesses").child(cUser.getBusiness_code()).child("items");
+            cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+
+            itemsRef = firebaseDatabaseHelper.getItemRef(cUser.getBusiness_code());
             itemsRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -262,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                     // Getting Post failed, log a message
-                    Log.w("item value event listener", "loadPost:onCancelled", databaseError.toException());
+                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                     // ...
                 }
             });
@@ -273,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         });
         //set current user reference
-        current_user_ref = userRef.child(user.getUid());
 
         /*tool bar*/
         setSupportActionBar(toolbar);
@@ -340,13 +346,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         });
         cart_button.setOnClickListener(view -> {
-            if(cartedItem.isEmpty()){
-                Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
-            }else{
-                Intent intent = new Intent(MainActivity.this, CartActivity.class);
-                intent.putExtra("key", cartedItem);
-                startActivity(intent);
-            }
+            /*cartRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DataSnapshot snapshot = task.getResult();
+                    if(snapshot.exists()) {
+                        Intent intent = new Intent(MainActivity.this, CartActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e(TAG, "cart_button error");
+                }
+            });*/
+            Intent intent = new Intent(MainActivity.this, CartActivity.class);
+            startActivity(intent);
         });
         add_button.setOnClickListener(view -> {
             /*Add Item Activity PENDING*/
@@ -417,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //Initialize data (In case of empty fields)
             String pName = "NULL";
-            float pPrice = 0;
+            double pPrice = 0;
             int pQty = 0;
 
             //Store field data in temp variables
@@ -432,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             if (!isEmpty(tempPPrice)) {
-                pPrice = Float.parseFloat(tempPPrice);
+                pPrice = Double.parseDouble(tempPPrice);
             }
 
             if (!isEmpty(tempPQty)) {
@@ -449,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
     /*Popup when editing an item*/
-    private void CreateEditPopUpWindow(String currProductName, float currProductPrice, int currProductQty) {
+    private void CreateEditPopUpWindow(String currProductName, double currProductPrice, int currProductQty) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.editpopup, null);
 
@@ -490,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //set default values
             String pName = "NULL";
-            float pPrice = 0;
+            double pPrice = 0;
             int pQty = 0;
             String tempPName, tempPPrice, tempPQty;
             //take inputted values
@@ -502,7 +516,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 pName = tempPName;
             }
             if(!isEmpty(tempPPrice)){
-                pPrice = Float.parseFloat(tempPPrice);
+                pPrice = Double.parseDouble(tempPPrice);
             }
             if(!isEmpty(tempPQty)){
                 pQty = Integer.parseInt(tempPQty);
@@ -533,7 +547,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             } else {
                 //cartedItem.add(new Item(currProductName, currProductPrice, selected_product_quantity));
-                current_user_ref.child("cart").child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                cartRef.child(currProductName).get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DataSnapshot dataSnapshot = task.getResult();
+                        if (dataSnapshot.exists()) {
+                            Item item = dataSnapshot.getValue(Item.class);
+                            if (item != null) {
+                                int added_qty_result = selected_product_quantity + item.getQuantity();
+                                cartRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, added_qty_result));
+                            } else {
+                                Log.e(TAG, "add to cart is null 557");
+                            }
+                        } else {
+                            cartRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                        }
+                    } else {
+                        Log.e(TAG, "cart item unsuccessful");
+                    }
+                });
                 itemsRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
                 popupWindow.dismiss();
             }
@@ -573,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onItemClick(int position, String productName, String productPrice, String productQty) {
         /*Toast.makeText(MainActivity.this, "Selected: " + productId + productName + productPrice + productQty, Toast.LENGTH_SHORT).show();*/
-        CreateEditPopUpWindow(productName, Float.parseFloat(productPrice), Integer.parseInt(productQty));
+        CreateEditPopUpWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
     }
 
     void storeProductDataInCurrProduct(){

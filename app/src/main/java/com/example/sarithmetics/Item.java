@@ -2,10 +2,10 @@ package com.example.sarithmetics;
 
 public class Item {
     private String name;
-    private float price;
+    private double price;
     private int quantity;
 
-    public Item(String name, float price, int quantity) {
+    public Item(String name, double price, int quantity) {
         this.name = name;
         this.price = price;
         this.quantity = quantity;
