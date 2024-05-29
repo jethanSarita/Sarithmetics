@@ -14,6 +14,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "dbSarithemtics";
     private static final int DATABASE_VERSION = 1;
     /*tblProduct*/
+
     private static final String TABLE_PRODUCT = "tblProduct";
     private static final String COL_PRODUCT_ID = "productID";
     private static final String COL_PRODUCT_NAME = "productName";

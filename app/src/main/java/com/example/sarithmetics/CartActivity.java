@@ -7,10 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,20 +18,26 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class CartActivity extends AppCompatActivity implements CustomAdapter.OnItemClickListener {
-    ArrayList<String> cartedProductID, cartedProductName, cartedProductPrice, cartedProductQty;
-    ArrayList<Product> cartedProduct;
+    ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
+    ArrayList<Item> cartedItem;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
     ImageView back, emptyCart;
     TextView totalTextView, changeTextView;
     Button calculate, checkOut;
     EditText customerPayment;
-    float total;
+    float price_total;
+    /*database*/
+    FirebaseDatabaseHelper firebaseDatabaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
+
+        /*database*/
+        firebaseDatabaseHelper = new FirebaseDatabaseHelper();
+
         /*id hook*/
         recyclerView = findViewById(R.id.recyclerViewCart);
         totalTextView = findViewById(R.id.tvCartTotal);
@@ -41,78 +45,62 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         calculate = findViewById(R.id.btnCartCalculate);
         checkOut = findViewById(R.id.btnCartCheckOut);
         customerPayment = findViewById(R.id.etnCustomerPayment);
-        /*Pseudo buttons*/
         back = findViewById(R.id.ivToolBarCartBack);
         emptyCart = findViewById(R.id.ivToolBarCartEmptyCart);
 
-        total = 0;
+        price_total = 0;
 
         /*ArrayList hook*/
-        cartedProductID = new ArrayList<>();
-        cartedProductName = new ArrayList<>();
-        cartedProductPrice = new ArrayList<>();
-        cartedProductQty = new ArrayList<>();
-        cartedProduct = new ArrayList<>();
-        cartedProduct.clear();
+        cartedItemName = new ArrayList<>();
+        cartedItemPrice = new ArrayList<>();
+        cartedItemQty = new ArrayList<>();
+        cartedItem = new ArrayList<>();
+        cartedItem.clear();
+        /*cartedProduct = new ArrayList<>();
+        cartedProduct.clear();*/
 
         /*Listing*/
-        cartedProduct = (ArrayList<Product>) getIntent().getSerializableExtra("key");
+        //cartedItem = (ArrayList<Item>) getIntent().getSerializableExtra("key");
         storeDataInArrays();
-        customAdapter = new CustomAdapter(CartActivity.this, cartedProductName, cartedProductPrice, cartedProductQty, this);
+        customAdapter = new CustomAdapter(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
 
-        totalTextView.setText(String.valueOf(total));
+        totalTextView.setText(String.valueOf(price_total));
 
-        calculate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                float customerPaymentFloat = 0;
-                String tempPayment = customerPayment.getText().toString().trim();
-                if(!isEmpty(tempPayment)){
-                    customerPaymentFloat = Float.parseFloat(tempPayment);
-                }
-                float result = customerPaymentFloat - total;
-                if(result < 0){
-                    Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
-                }else{
-                    changeTextView.setText("₱" + String.valueOf(result));
-                    checkOut.setVisibility(View.VISIBLE);
-                }
+        calculate.setOnClickListener(view -> {
+            float customerPaymentFloat = 0;
+            String tempPayment = customerPayment.getText().toString().trim();
+            if(!isEmpty(tempPayment)){
+                customerPaymentFloat = Float.parseFloat(tempPayment);
+            }
+            float result = customerPaymentFloat - price_total;
+            if(result < 0){
+                Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
+            }else{
+                changeTextView.setText("₱" + String.valueOf(result));
+                checkOut.setVisibility(View.VISIBLE);
             }
         });
 
-        checkOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cartedProduct.clear();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                finish();
-            }
+        checkOut.setOnClickListener(view -> {
+            cartedItem.clear();
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         });
 
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        back.setOnClickListener(view -> finish());
 
-        emptyCart.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                int prodID, prodQty;
-                MyDatabaseHelper myDB = new MyDatabaseHelper(CartActivity.this);
-                for(Product p : cartedProduct){
-                    prodID = p.getProductID();
-                    prodQty = p.getProductQty();
-                    myDB.addStock(prodID, prodQty);
-                }
-                cartedProduct.clear();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                finish();
+        emptyCart.setOnClickListener(view -> {
+            int prodID, prodQty;
+            MyDatabaseHelper myDB = new MyDatabaseHelper(CartActivity.this);
+            for(Item i : cartedItem){
+                prodQty = i.getQuantity();
+                //Add restocking system in here
             }
+            cartedItem.clear();
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         });
     }
 
@@ -120,19 +108,20 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         storeDataInArrays();
         customAdapter.notifyDataSetChanged();
     }
+
     void storeDataInArrays(){
-        cartedProductID.clear();
-        cartedProductName.clear();
-        cartedProductPrice.clear();
-        cartedProductQty.clear();
-        for(Product p : cartedProduct){
-            cartedProductID.add(String.valueOf(p.getProductID()));
-            cartedProductName.add(p.getProductName());
-            cartedProductPrice.add(String.valueOf(p.getProductPrice()));
-            cartedProductQty.add(String.valueOf(p.getProductQty()));
-            total += p.getProductPrice() * (float) p.getProductQty();
+        cartedItemName.clear();
+        cartedItemPrice.clear();
+        cartedItemQty.clear();
+        for(Item i : cartedItem){
+            cartedItemName.add(i.getName());
+            cartedItemPrice.add(String.valueOf(i.getPrice()));
+            cartedItemQty.add(String.valueOf(i.getQuantity()));
+            price_total += i.getPrice() * (float) i.getQuantity();
         }
     }
+
+
 
     @Override
     public void onItemClick(int position, String productName, String productPrice, String productQty) {

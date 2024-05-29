@@ -66,11 +66,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     CustomAdapter customAdapter;
     RecyclerView rvItems;
     ArrayList<Product> cartedProduct, currProduct;
+    ArrayList<Item> cartedItem;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
     androidx.appcompat.widget.SearchView itemSearchBar;
     EditText etBusinessCode;
     Button btnEnterBusinessCode;
 
+    //Database
     User cUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
@@ -155,13 +157,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*array lists*/
         currProduct = new ArrayList<>();
         cartedProduct = new ArrayList<>();
+        cartedItem = new ArrayList<>();
         listItemID = new ArrayList<>();
         listItemName = new ArrayList<>();
         listItemPrice = new ArrayList<>();
         listItemQty = new ArrayList<>();
 
         //Clear cart
-        cartedProduct.clear();
+        cartedItem.clear();
 
         //Check if session exists
         if (!sessionManager.getLogin()) {
@@ -337,12 +340,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         });
         cart_button.setOnClickListener(view -> {
-            /*Cart Activity PENDING*/
-            if(cartedProduct.isEmpty()){
+            if(cartedItem.isEmpty()){
                 Toast.makeText(MainActivity.this, "Cart is empty", Toast.LENGTH_SHORT).show();
             }else{
                 Intent intent = new Intent(MainActivity.this, CartActivity.class);
-                intent.putExtra("key", cartedProduct);
+                intent.putExtra("key", cartedItem);
                 startActivity(intent);
             }
         });
@@ -369,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if(item.getItemId() == R.id.nav_logout){
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
+            FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
             finish();
         }else if (item.getItemId() == R.id.nav_share) {
@@ -529,24 +532,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (selected_product_quantity == 0) {
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             } else {
+                //cartedItem.add(new Item(currProductName, currProductPrice, selected_product_quantity));
                 current_user_ref.child("cart").child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
                 itemsRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
-                //refreshItems();
                 popupWindow.dismiss();
             }
         });
-        /*cart.setOnClickListener(view -> {
-            int pQty = editPopupNumberPicker.getValue();
-            if(pQty == 0){
-                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
-            }else{
-                Product product = new Product(currProductID, currProductName, currProductPrice, pQty);
-                cartedProduct.add(product);
-                myDB.removeStock(currProductID, pQty);
-                refreshItems();
-                popupWindow.dismiss();
-            }
-        });*/
     }
 
     void clearArrays(){
