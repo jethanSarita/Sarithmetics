@@ -21,16 +21,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
     public interface OnItemClickListener {
         void onItemClick(int position, String productName, String productPrice, String productQty);
     }
-
-    /*CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
-        this.context = context;
-        this.productId = productId;
-        this.productName = productName;
-        this.productPrice = productPrice;
-        this.productQty = productQty;
-        this.listener = listener;
-    }*/
-
     CustomAdapter(Context context , ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
         this.context = context;
         this.productName = productName;
@@ -38,14 +28,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
         this.productQty = productQty;
         this.listener = listener;
     }
-    /*CustomAdapter(Context context, ArrayList productId, ArrayList productName, ArrayList productPrice, ArrayList productQty){
-        this.context = context;
-        this.productId = productId;
-        this.productName = productName;
-        this.productPrice = productPrice;
-        this.productQty = productQty;
-        this.listener = listener;
-    }*/
     @NonNull
     @Override
     public CustomAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

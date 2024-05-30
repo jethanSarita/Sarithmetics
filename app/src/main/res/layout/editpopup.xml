@@ -17,7 +17,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:text="Edit Product"
+                    android:text="Edit Item"
                     android:textAlignment="center"
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
@@ -26,7 +26,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:text="Product Name"
+                    android:text="Item Name"
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
@@ -36,14 +36,14 @@
                     android:layout_height="48dp"
                     android:layout_weight="0"
                     android:ems="10"
-                    android:hint="Product Name"
+                    android:hint="Item Name"
                     android:inputType="text" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:text="Product Price"
+                    android:text="Item Price"
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
@@ -60,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:text="Product Quantity"
+                    android:text="Item Quantity"
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
@@ -106,7 +106,6 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="25dp"
@@ -129,7 +128,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView4"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
@@ -138,7 +136,6 @@
                             android:textColor="@color/colorTextPrimary" />
 
                         <NumberPicker
-
                             android:id="@+id/editPopupNumberPicker"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"

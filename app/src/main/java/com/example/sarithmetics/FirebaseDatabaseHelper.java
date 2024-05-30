@@ -1,7 +1,5 @@
 package com.example.sarithmetics;
 
-import android.util.Log;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -37,11 +35,19 @@ public class FirebaseDatabaseHelper {
         return firebaseDatabase.getReference("Users").child(firebaseUser.getUid());
     }
 
-    public DatabaseReference getItemRef(String business_code) {
+    public DatabaseReference getItemsRef(String business_code) {
         return firebaseDatabase.getReference("businesses").child(business_code).child("items");
     }
 
     public DatabaseReference getCartRef(String user_uid) {
         return firebaseDatabase.getReference("Users").child(user_uid).child("cart");
+    }
+
+    public DatabaseReference getBusinessRef(String business_code) {
+        return firebaseDatabase.getReference("businesses");
+    }
+
+    public DatabaseReference getItemsCategories(String business_code) {
+        return firebaseDatabase.getReference("businesses").child("categories");
     }
 }

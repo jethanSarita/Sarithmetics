@@ -13,21 +13,19 @@
         android:padding="15dp">
 
         <TextView
-            android:id="@+id/textView8"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Add Product"
+            android:text="Add Item"
             android:textAlignment="center"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Product Name"
+            android:text="Item Name"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
@@ -37,15 +35,14 @@
             android:layout_height="48dp"
             android:layout_weight="0"
             android:ems="10"
-            android:hint="Product Name"
+            android:hint="Item Name"
             android:inputType="text" />
 
         <TextView
-            android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Product Price"
+            android:text="Item Price"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
@@ -59,11 +56,10 @@
             android:inputType="numberDecimal" />
 
         <TextView
-            android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Product Quantity"
+            android:text="Item Quantity"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
@@ -75,6 +71,11 @@
             android:ems="10"
             android:hint="0"
             android:inputType="number" />
+        <Spinner
+            android:id="@+id/main_popup_category_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
