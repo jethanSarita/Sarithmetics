@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });*/
             btnEnterBusinessCode.setOnClickListener(view -> {
                 String code = etBusinessCode.getText().toString();
-                userRef.child(cUser.getUid()).child("business_code").setValue(code);
+                userRef.child("business_code").setValue(code);
                 recreate();
             });
 
@@ -294,26 +294,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mainAdapter = new MainAdapter(options, this, cUser);
             rvItems.setAdapter(mainAdapter);
             mainAdapter.startListening();
+
+            itemSearchBar.clearFocus();
+            itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    txtSearch(query);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    txtSearch(query);
+                    //filterList(newText);
+                    return true;
+                }
+            });
         });
 
         /*tool bar*/
         setSupportActionBar(toolbar);
 
-        itemSearchBar.clearFocus();
-        itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                txtSearch(query);
-                return false;
-            }
 
-            @Override
-            public boolean onQueryTextChange(String query) {
-                txtSearch(query);
-                //filterList(newText);
-                return true;
-            }
-        });
 
 
         /*navigation drawer menu*/

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class CartActivity extends AppCompatActivity implements CustomAdapter.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
-    LinearLayout cart_activity_layout;
+    LinearLayout cart_activity_layout, calculation_layout;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
     ArrayList<Item> cartedItem, items;
     CustomAdapter customAdapter;
@@ -40,6 +40,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
     TextView totalTextView, changeTextView;
     Button calculate, checkOut;
     EditText customerPayment;
+    TextView cart_status;
     double price_total;
 
     /*database*/
@@ -70,6 +71,8 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         back = findViewById(R.id.ivToolBarCartBack);
         emptyCart = findViewById(R.id.ivToolBarCartEmptyCart);
         cart_activity_layout = findViewById(R.id.cart_activity_layout);
+        calculation_layout = findViewById(R.id.calculation_layout);
+        cart_status = findViewById(R.id.cart_status);
 
         price_total = 0;
 
@@ -85,6 +88,8 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         customAdapter = new CustomAdapter(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
+
+        cart_status.setText("Cart loading...");
 
         /*Get Current User*/
         firebaseDatabaseHelper.getUserRef().get().addOnCompleteListener(task -> {
@@ -110,13 +115,16 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
                             }
 
                             if (cartedItem.isEmpty()) {
+                                //cart is empty
+                                cart_status.setText("Cart is empty");
                                 emptyCart.setVisibility(View.GONE);
-                                findViewById(R.id.calculation_layout).setVisibility(View.INVISIBLE);
-                                findViewById(R.id.cart_status).setVisibility(View.VISIBLE);
+                                calculation_layout.setVisibility(View.INVISIBLE);
+                                cart_status.setVisibility(View.VISIBLE);
                             } else {
+                                //cart is not empty
                                 emptyCart.setVisibility(View.VISIBLE);
-                                findViewById(R.id.calculation_layout).setVisibility(View.VISIBLE);
-                                findViewById(R.id.cart_status).setVisibility(View.GONE);
+                                calculation_layout.setVisibility(View.VISIBLE);
+                                cart_status.setVisibility(View.GONE);
                             }
                             customAdapter.notifyDataSetChanged();
                             totalTextView.setText(String.valueOf(price_total));
@@ -137,6 +145,8 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
 
         calculate.setOnClickListener(view -> {
             double customerPaymentFloat = 0;
+            changeTextView.setText("");
+            checkOut.setVisibility(View.GONE);
             String tempPayment = customerPayment.getText().toString().trim();
             if(!isEmpty(tempPayment)){
                 customerPaymentFloat = Double.parseDouble(tempPayment);
