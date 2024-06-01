@@ -92,7 +92,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         cart_status.setText("Cart loading...");
 
         /*Get Current User*/
-        firebaseDatabaseHelper.getUserRef().get().addOnCompleteListener(task -> {
+        firebaseDatabaseHelper.getCurrentUserRef().get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 Log.d(TAG, "Got User object: " + task.getResult().getValue());
                 cUser = task.getResult().getValue(User.class);

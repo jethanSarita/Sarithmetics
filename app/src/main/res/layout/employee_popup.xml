@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/employee_popup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="100dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/popupbg"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Employee"
+            android:textAlignment="center"
+            android:textColor="@color/colorTextPrimary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/epTvEmployeeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Employee Name"
+            android:textColor="@color/colorTextPrimary"
+            android:textStyle="bold"
+            android:textSize="34sp"/>
+
+        <TextView
+            android:id="@+id/epTvEmployeeStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Employee Status"
+            android:textColor="@color/colorTextPrimary"
+            android:textStyle="bold"
+            android:textSize="22sp"/>
+
+        <RadioGroup
+            android:id="@+id/epRbEmpType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/epRbEmpTypeNorm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Standard"
+                android:textColor="@color/colorTextPrimary"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/epRbEmpTypeInv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Inventory Manager"
+                android:textColor="@color/colorTextPrimary"
+                android:textStyle="bold" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/epBtnDismiss"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorTextPrimary"
+                android:text="Dismiss" />
+
+            <Button
+                android:id="@+id/epBtnUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorTextPrimary"
+                android:text="Update" />
+
+            <Button
+                android:id="@+id/epBtnClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorTextPrimary"
+                android:text="Close" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

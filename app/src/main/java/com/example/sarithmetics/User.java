@@ -8,16 +8,21 @@ public class User {
     private String last_name;
     private String business_code;
     private int user_type;
+    private int status;
+
+    /*0 - Employee
+    * 1 - Owner
+    * 2 - Inventory Employee*/
 
     public User() {
     }
-
     public User(String uid, String first_name, String last_name, String business_code, int user_type) {
         this.uid = uid;
         this.first_name = first_name;
         this.last_name = last_name;
         this.business_code = business_code;
         this.user_type = user_type;
+        this.status = 0;
     }
 
     public String getUid() {
@@ -58,5 +63,13 @@ public class User {
 
     public void setUser_type(int user_type) {
         this.user_type = user_type;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -35,8 +35,7 @@
             android:id="@+id/layoutHomeEmployee"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -199,7 +198,8 @@
             android:id="@+id/layoutHomeBusinessOwner"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -312,9 +312,16 @@
                         android:textSize="34sp"
                         android:textStyle="bold" />
 
-                    <androidx.recyclerview.widget.RecyclerView
+                    <ScrollView
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvEmployees"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </ScrollView>
+
                 </LinearLayout>
 
             </LinearLayout>

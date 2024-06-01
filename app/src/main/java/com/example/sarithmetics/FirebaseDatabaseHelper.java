@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 public class FirebaseDatabaseHelper {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -31,8 +32,12 @@ public class FirebaseDatabaseHelper {
         this.firebaseUser = firebaseUser;
     }
 
-    public DatabaseReference getUserRef() {
+    public DatabaseReference getCurrentUserRef() {
         return firebaseDatabase.getReference("Users").child(firebaseUser.getUid());
+    }
+
+    public DatabaseReference getUserRef(String uid) {
+        return firebaseDatabase.getReference("Users").child(uid);
     }
 
     public DatabaseReference getItemsRef(String business_code) {
@@ -49,5 +54,9 @@ public class FirebaseDatabaseHelper {
 
     public DatabaseReference getItemsCategories(String business_code) {
         return firebaseDatabase.getReference("businesses").child("categories");
+    }
+
+    public Query getEmployeesQuery(String business_code) {
+        return firebaseDatabase.getReference("Users").orderByChild("business_code").equalTo(business_code);
     }
 }

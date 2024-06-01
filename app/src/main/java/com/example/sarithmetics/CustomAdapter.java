@@ -58,9 +58,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
         LinearLayout rowListLayout;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            productNameText = itemView.findViewById(R.id.tvProductName);
+            productNameText = itemView.findViewById(R.id.tvEmployeeName);
             productPriceText = itemView.findViewById(R.id.tvProductPrice);
-            productQtyText = itemView.findViewById(R.id.tvProductQty);
+            productQtyText = itemView.findViewById(R.id.tvEmployeeType);
             rowListLayout = itemView.findViewById(R.id.rowListLayoutID);
         }
 

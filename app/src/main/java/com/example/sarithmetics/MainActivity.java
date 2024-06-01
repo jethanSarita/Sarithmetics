@@ -34,6 +34,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,15 +45,13 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
     Toolbar toolbar;
@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code;
     CustomAdapter customAdapter;
     MainAdapter mainAdapter;
-    RecyclerView rvItems;
+    EmployeeAdapter employeeAdapter;
+    RecyclerView rvItems, rvEmployees;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference userRef, itemsRef, current_user_ref, cartRef;
-    Query query;
+    Query item_query, employee_query;
 
     ArrayAdapter<String> adp;
 
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileFnLNameBusinessOwner = findViewById(R.id.profileFnLNameBusinessOwner);
         tv_business_code = findViewById(R.id.tvBusinessCode);
         rvItems = findViewById(R.id.recyclerViewItem);
+        rvEmployees = findViewById(R.id.rvEmployees);
 
         /*employee session hooks*/
         llEmployeeLayoutYesSync = findViewById(R.id.llEmployeeLayoutYesSync);
@@ -192,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Get current user information
-        userRef = firebaseDatabaseHelper.getUserRef();
+        userRef = firebaseDatabaseHelper.getCurrentUserRef();
         userRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
@@ -257,27 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
             itemsRef = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-            /*itemsRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    clearArrays();
-                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                        // TODO: handle the post
-                        Item item = postSnapshot.getValue(Item.class);
-                        listItemName.add(item.getName());
-                        listItemPrice.add(String.valueOf(item.getPrice()));
-                        listItemQty.add(String.valueOf(item.getQuantity()));
-                    }
-                    refreshItems();
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Getting Post failed, log a message
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                    // ...
-                }
-            });*/
             btnEnterBusinessCode.setOnClickListener(view -> {
                 String code = etBusinessCode.getText().toString();
                 userRef.child("business_code").setValue(code);
@@ -285,15 +267,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
 
             rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-            query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-            FirebaseRecyclerOptions<Item> options =
+            item_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+            FirebaseRecyclerOptions<Item> options1 =
                     new FirebaseRecyclerOptions.Builder<Item>()
-                            .setQuery(query, Item.class)
+                            .setQuery(item_query, Item.class)
                             .build();
-
-            mainAdapter = new MainAdapter(options, this, cUser);
+            mainAdapter = new MainAdapter(options1, this, cUser);
             rvItems.setAdapter(mainAdapter);
             mainAdapter.startListening();
+
+            rvEmployees.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            employee_query = firebaseDatabaseHelper.getEmployeesQuery(cUser.getBusiness_code());
+            FirebaseRecyclerOptions<User> options2 =
+                    new FirebaseRecyclerOptions.Builder<User>()
+                            .setQuery(employee_query, User.class)
+                            .build();
+            employeeAdapter = new EmployeeAdapter(options2, this);
+            rvEmployees.setAdapter(employeeAdapter);
+            employeeAdapter.startListening();
+
 
             itemSearchBar.clearFocus();
             itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -625,5 +617,109 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             customAdapter.setFilteredList(filteredList);
         }
+    }
+
+    @Override
+    public void onEmployeeClick(int position, User emp_user, boolean pending_approval) {
+        if (pending_approval) {
+            createEmployeeApprovalPopupWindow(emp_user);
+        } else {
+            createEmployeePopupWindow(emp_user);
+        }
+    }
+
+    private void createEmployeeApprovalPopupWindow(User emp_user) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.employee_approval_popup, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        TextView employee_name;
+        Button yes, no;
+        DatabaseReference emp_user_ref;
+
+        employee_name = popupView.findViewById(R.id.eapTvEmployeeName);
+        yes = popupView.findViewById(R.id.eapBtnYes);
+        no = popupView.findViewById(R.id.eapBtnNo);
+        emp_user_ref = firebaseDatabaseHelper.getUserRef(emp_user.getUid());
+
+        employee_name.setText(String.format("%s %s", emp_user.getFirst_name(), emp_user.getLast_name()));
+
+        yes.setOnClickListener(view -> {
+            emp_user_ref.child("status").setValue(1);
+            popupWindow.dismiss();
+        });
+
+        no.setOnClickListener(view -> {
+            emp_user_ref.child("business_code").setValue("null");
+            popupWindow.dismiss();
+        });
+    }
+
+    private void createEmployeePopupWindow(User emp_user) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.employee_popup, null);
+
+        int width = ViewGroup.LayoutParams.MATCH_PARENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        TextView employee_name, employee_status;
+        RadioButton employee_standard, employee_inv_manager;
+        RadioGroup employee_type;
+        Button dismiss, update, close;
+        DatabaseReference emp_user_type_ref;
+
+        employee_name = popupView.findViewById(R.id.epTvEmployeeName);
+        employee_status = popupView.findViewById(R.id.epTvEmployeeStatus);
+        employee_type = popupView.findViewById(R.id.epRbEmpType);
+        employee_standard = popupView.findViewById(R.id.epRbEmpTypeNorm);
+        employee_inv_manager = popupView.findViewById(R.id.epRbEmpTypeInv);
+        dismiss = popupView.findViewById(R.id.epBtnDismiss);
+        update = popupView.findViewById(R.id.epBtnUpdate);
+        close = popupView.findViewById(R.id.epBtnClose);
+        emp_user_type_ref = firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("user_type");
+
+        employee_name.setText(String.format("%s %s", emp_user.getFirst_name(), emp_user.getLast_name()));
+        if (emp_user.getStatus() == 1) {
+            employee_status.setText("Inactive");
+            employee_status.setBackgroundColor(Color.GRAY);
+        } else {
+            employee_status.setText("Active");
+            employee_status.setBackgroundColor(Color.GREEN);
+        }
+
+        switch (emp_user.getUser_type()) {
+            case 0:
+                employee_type.check(R.id.epRbEmpTypeNorm);
+                break;
+            case 2:
+                employee_type.check(R.id.epRbEmpTypeInv);
+                break;
+        }
+
+        dismiss.setOnClickListener(view -> {
+            firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("business_code").setValue("null");
+            popupWindow.dismiss();
+        });
+
+        update.setOnClickListener(view -> {
+            if (employee_standard.isChecked()) {
+                emp_user_type_ref.setValue(0);
+            } else if (employee_inv_manager.isChecked()) {
+                emp_user_type_ref.setValue(2);
+            }
+            popupWindow.dismiss();
+        });
+
+        close.setOnClickListener(view -> {
+            popupWindow.dismiss();
+        });
     }
 }

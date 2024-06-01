@@ -1,12 +1,9 @@
 package com.example.sarithmetics;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -16,9 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DataSnapshot;
-
-import java.util.ArrayList;
 
 public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myViewHolder> {
 
@@ -84,9 +78,9 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
         Spinner categories_spinner;
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
-            productNameText = itemView.findViewById(R.id.tvProductName);
+            productNameText = itemView.findViewById(R.id.tvEmployeeName);
             productPriceText = itemView.findViewById(R.id.tvProductPrice);
-            productQtyText = itemView.findViewById(R.id.tvProductQty);
+            productQtyText = itemView.findViewById(R.id.tvEmployeeType);
             rowListLayout = itemView.findViewById(R.id.rowListLayoutID);
             categories_spinner = itemView.findViewById(R.id.main_popup_category_spinner);
         }
