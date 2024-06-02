@@ -244,6 +244,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             //Not synced
                             maTvStatusNotSync.setVisibility(View.VISIBLE);
                             llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
+
+                            btnEnterBusinessCode.setOnClickListener(view -> {
+                                String code = etBusinessCode.getText().toString();
+                                businessRef.child(code).get().addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        DataSnapshot snapshot = task1.getResult();
+                                        if (snapshot.exists()) {
+                                            userRef.child("business_code").setValue(code);
+                                            recreate();
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                            });
                         } else {
                             //Synced
                             //Check approval
@@ -266,6 +281,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                     }
                                 });
+
+                                userRef.child("business_code").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        String bus_code = snapshot.getValue(String.class);
+                                        if (bus_code.equals("null")) {
+                                            recreate();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                             } else {
                                 //Approved
                                 llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
@@ -276,9 +306,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         int curr_status = snapshot.getValue(Integer.class);
                                         switch (curr_status) {
                                             case 0:
-                                                //Error
+                                                //User has been dismissed
                                                 employeeStatus.setText("ERROR");
                                                 employeeStatus.setBackgroundColor(Color.YELLOW);
+                                                recreate();
                                                 break;
                                             case 1:
                                                 //Inactive
@@ -345,21 +376,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                 userRef.child("curr_punch_in_code").setValue(punch_in_code);
                                             } else {
                                                 Toast.makeText(MainActivity.this, "Punch in code incorrect", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                                });
-
-                                btnEnterBusinessCode.setOnClickListener(view -> {
-                                    String code = etBusinessCode.getText().toString();
-                                    businessRef.child(code).get().addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            DataSnapshot snapshot = task1.getResult();
-                                            if (snapshot.exists()) {
-                                                userRef.child("business_code").setValue(code);
-                                                recreate();
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     });
