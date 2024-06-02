@@ -48,8 +48,8 @@ public class FirebaseDatabaseHelper {
         return firebaseDatabase.getReference("Users").child(user_uid).child("cart");
     }
 
-    public DatabaseReference getBusinessRef(String business_code) {
-        return firebaseDatabase.getReference("businesses");
+    public DatabaseReference getBusinessCodeRef(String business_code) {
+        return firebaseDatabase.getReference("businesses").child(business_code);
     }
 
     public DatabaseReference getItemsCategories(String business_code) {
@@ -58,5 +58,9 @@ public class FirebaseDatabaseHelper {
 
     public Query getEmployeesQuery(String business_code) {
         return firebaseDatabase.getReference("Users").orderByChild("business_code").equalTo(business_code);
+    }
+
+    public DatabaseReference getBusinessRef() {
+        return firebaseDatabase.getReference("businesses");
     }
 }

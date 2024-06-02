@@ -43,7 +43,7 @@ public class EmployeeAdapter extends FirebaseRecyclerAdapter<User, EmployeeAdapt
                     break;
                 case 2:
                     holder.tvEmployeeStatus.setText("Active");
-                    holder.tvEmployeeStatus.setBackgroundColor(Color.GRAY);
+                    holder.tvEmployeeStatus.setBackgroundColor(Color.GREEN);
                     break;
             }
             switch (model.getUser_type()) {

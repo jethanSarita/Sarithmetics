@@ -72,8 +72,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                    android:visibility="gone">
 
 
                     <TextView
@@ -129,20 +128,24 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:id="@+id/employeeStatus"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@android:color/darker_gray"
                         android:fontFamily="@font/alata"
                         android:text="Inactive"
                         android:textAlignment="center"
-                        android:textColor="@color/colorTextPrimary"
+                        android:textColor="@color/white"
                         android:textSize="34sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvPunchIn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/alata"
@@ -179,6 +182,33 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/llEmployeeLayoutPendingSync"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/alata"
+                        android:text="Pending sync approval from Business Owner"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal" />
+
+                </LinearLayout>
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -198,8 +228,7 @@
             android:id="@+id/layoutHomeBusinessOwner"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -306,6 +335,60 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/alata"
+                        android:text="Current punch in code"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/amTvCurrentPunchInCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/alata"
+                        android:text=""
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="50dp"
+                        android:paddingRight="50dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <Button
+                        android:id="@+id/amBtnGeneratePunchInCode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/colorTextPrimary"
+                        android:text="Generate" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="30dp"
+                        android:paddingRight="30dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/alata"
                         android:text="Employees"
                         android:textAlignment="center"
                         android:textColor="@color/colorTextPrimary"
@@ -331,7 +414,8 @@
             android:id="@+id/layoutItems"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -423,7 +507,47 @@
                         app:queryHint="Search" />
                 </RelativeLayout>
 
+                <TextView
+                    android:id="@+id/maTvStatusNotSync"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Not synced to any business"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/maTvStatusPending"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Pending sync approval by owner"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/maTvNotPunchedIn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="You are currently not punched in"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorTextPrimary"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
                 <ScrollView
+                    android:id="@+id/maSvItems"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 

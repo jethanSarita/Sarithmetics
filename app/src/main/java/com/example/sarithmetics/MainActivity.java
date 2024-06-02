@@ -37,6 +37,7 @@ import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,15 +46,18 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
+    String punch_in_code;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -65,24 +69,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listItemPrice;
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
-    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code;
+    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus;
     CustomAdapter customAdapter;
     MainAdapter mainAdapter;
     EmployeeAdapter employeeAdapter;
     RecyclerView rvItems, rvEmployees;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
-    LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync;
+    LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
     androidx.appcompat.widget.SearchView itemSearchBar;
-    EditText etBusinessCode;
-    Button btnEnterBusinessCode;
+    EditText etBusinessCode, etPunchInCode;
+    Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
+    ScrollView maSvItems;
+    RandomHelper randomHelper;
 
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
-    User cUser;
+    User cUser, lUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference userRef, itemsRef, current_user_ref, cartRef;
+    DatabaseReference userRef, itemsRef, cartRef, businessRef, businessCodeRef;
     Query item_query, employee_query;
 
     ArrayAdapter<String> adp;
@@ -121,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        randomHelper = new RandomHelper();
+
+        punch_in_code = null;
+
         /*Sets up internet monitoring*/
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
         connectivityManager.requestNetwork(networkRequest, networkCallback);
@@ -150,10 +160,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tv_business_code = findViewById(R.id.tvBusinessCode);
         rvItems = findViewById(R.id.recyclerViewItem);
         rvEmployees = findViewById(R.id.rvEmployees);
+        maTvStatusNotSync = findViewById(R.id.maTvStatusNotSync);
+        maTvStatusPending = findViewById(R.id.maTvStatusPending);
+        amBtnGeneratePunchInCode = findViewById(R.id.amBtnGeneratePunchInCode);
+        amTvCurrentPunchInCode = findViewById(R.id.amTvCurrentPunchInCode);
+        etPunchInCode = findViewById(R.id.etPunchInCode);
+        btnEnterPunchInCode = findViewById(R.id.btnEnterPunchInCode);
+        employeeStatus = findViewById(R.id.employeeStatus);
 
         /*employee session hooks*/
         llEmployeeLayoutYesSync = findViewById(R.id.llEmployeeLayoutYesSync);
         llEmployeeLayoutNoSync = findViewById(R.id.llEmployeeLayoutNoSync);
+        llEmployeeLayoutPendingSync = findViewById(R.id.llEmployeeLayoutPendingSync);
         etBusinessCode = findViewById(R.id.etBusinessCode);
         btnEnterBusinessCode = findViewById(R.id.btnEnterBusinessCode);
 
@@ -162,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemsLayout = findViewById(R.id.layoutItems);
         cart_button = findViewById(R.id.ivCart);
         add_button = findViewById(R.id.ivAddItem);
+        maSvItems = findViewById(R.id.maSvItems);
 
         eye_open_button = findViewById(R.id.ivEyeOpenIcon);
         eye_close_button = findViewById(R.id.ivEyeCloseIcon);
@@ -201,6 +220,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
                 cUser = task.getResult().getValue(User.class);
+
+                cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+                itemsRef = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+                businessRef = firebaseDatabaseHelper.getBusinessRef();
+                businessCodeRef = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
+
                 //Check usertype
                 //[Employee, Business Owner, Employee - Inventory Manager]
                 switch (cUser.getUser_type()) {
@@ -216,11 +241,130 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         //User is sync to business?
                         if (cUser.getBusiness_code().equals("null")) {
-                            //No
+                            //Not synced
+                            maTvStatusNotSync.setVisibility(View.VISIBLE);
                             llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
                         } else {
-                            //Yes
-                            llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
+                            //Synced
+                            //Check approval
+                            if (cUser.getStatus() == 0) {
+                                //Pending approval
+                                llEmployeeLayoutPendingSync.setVisibility(View.VISIBLE);
+                                maSvItems.setVisibility(View.GONE);
+                                maTvStatusPending.setVisibility(View.VISIBLE);
+                                userRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        lUser = snapshot.getValue(User.class);
+                                        if (lUser.getStatus() != 0) {
+                                            recreate();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            } else {
+                                //Approved
+                                llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
+
+                                userRef.child("status").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        int curr_status = snapshot.getValue(Integer.class);
+                                        switch (curr_status) {
+                                            case 0:
+                                                //Error
+                                                employeeStatus.setText("ERROR");
+                                                employeeStatus.setBackgroundColor(Color.YELLOW);
+                                                break;
+                                            case 1:
+                                                //Inactive
+                                                employeeStatus.setText("Inactive");
+                                                employeeStatus.setBackgroundColor(Color.GRAY);
+                                                findViewById(R.id.tvPunchIn).setVisibility(View.VISIBLE);
+                                                etPunchInCode.setVisibility(View.VISIBLE);
+                                                btnEnterPunchInCode.setVisibility(View.VISIBLE);
+                                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.VISIBLE);
+                                                maSvItems.setVisibility(View.GONE);
+                                                break;
+                                            case 2:
+                                                //Active
+                                                employeeStatus.setText("Active");
+                                                employeeStatus.setBackgroundColor(Color.GREEN);
+                                                findViewById(R.id.tvPunchIn).setVisibility(View.GONE);
+                                                etPunchInCode.setVisibility(View.GONE);
+                                                btnEnterPunchInCode.setVisibility(View.GONE);
+                                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.GONE);
+                                                maSvItems.setVisibility(View.VISIBLE);
+                                                break;
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                                businessCodeRef.child("punch in code").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.exists()) {
+                                            String new_punch_in_code = snapshot.getValue(String.class);
+                                            userRef.child("curr_punch_in_code").get().addOnCompleteListener(task1 -> {
+                                                if (task1.isSuccessful()) {
+                                                    DataSnapshot snapshot1 = task1.getResult();
+                                                    if (snapshot1.exists()) {
+                                                        String current_punch_in_code = snapshot1.getValue(String.class);
+                                                        if (!(new_punch_in_code.equals(current_punch_in_code))) {
+                                                            userRef.child("status").setValue(1);
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                                btnEnterPunchInCode.setOnClickListener(view -> {
+                                    punch_in_code = etPunchInCode.getText().toString();
+                                    businessCodeRef.child("punch in code").get().addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            DataSnapshot snapshot = task1.getResult();
+                                            String current_punch_in_code = snapshot.getValue(String.class);
+                                            if (punch_in_code.equals(current_punch_in_code)) {
+                                                userRef.child("status").setValue(2);
+                                                userRef.child("curr_punch_in_code").setValue(punch_in_code);
+                                            } else {
+                                                Toast.makeText(MainActivity.this, "Punch in code incorrect", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                });
+
+                                btnEnterBusinessCode.setOnClickListener(view -> {
+                                    String code = etBusinessCode.getText().toString();
+                                    businessRef.child(code).get().addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            DataSnapshot snapshot = task1.getResult();
+                                            if (snapshot.exists()) {
+                                                userRef.child("business_code").setValue(code);
+                                                recreate();
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                });
+                            }
                         }
                         break;
                     case 1:
@@ -232,6 +376,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         tv_business_code.setText(cUser.getBusiness_code());
                         //Set username text view
                         profileFnLNameBusinessOwner.setText(sessionManager.getUsername());
+
+                        firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code()).child("punch in code").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                String punch_in_code = snapshot.getValue(String.class);
+                                amTvCurrentPunchInCode.setText(punch_in_code);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+
+                        amBtnGeneratePunchInCode.setOnClickListener(view -> {
+                            businessCodeRef.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+                        });
+
                         break;
                     case 2:
                         //Employee - Inventory Manager
@@ -256,15 +418,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 homeLayout.setVisibility(View.VISIBLE);
                 navigationView.setCheckedItem(R.id.nav_home);
             }
-
-            cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
-            itemsRef = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-
-            btnEnterBusinessCode.setOnClickListener(view -> {
-                String code = etBusinessCode.getText().toString();
-                userRef.child("business_code").setValue(code);
-                recreate();
-            });
 
             rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
             item_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
@@ -469,27 +622,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
 
-        NumberPicker editPopupNumberPicker;
-        Button button_edit, button_close, button_delete, button_add_to_cart;
+        /*title*/
+        TextView epp_title;
+        epp_title = popupView.findViewById(R.id.epp_title);
+
+        /*info*/
+        LinearLayout epp_ll_info;
+        TextView epp_tv_item_name, epp_tv_item_price, epp_tv_item_quantity;
+
+        epp_ll_info = popupView.findViewById(R.id.epp_ll_info);
+        epp_tv_item_name = popupView.findViewById(R.id.epp_tv_item_name);
+        epp_tv_item_price = popupView.findViewById(R.id.epp_tv_item_price);
+        epp_tv_item_quantity = popupView.findViewById(R.id.epp_tv_item_quantity);
+
+        /*edit*/
+        LinearLayout epp_ll_edit;
+        Button button_edit, button_close, button_delete;
         EditText productName, productPrice, productQuantity;
+
+        epp_ll_edit = popupView.findViewById(R.id.epp_ll_edit);
         productName = popupView.findViewById(R.id.productNameEdit);
         productPrice = popupView.findViewById(R.id.productPriceEdit);
         productQuantity = popupView.findViewById(R.id.productQuantityEdit);
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
         button_close = popupView.findViewById(R.id.btnEditPopupClose);
-        editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
+
+        /*Both*/
+        Button button_add_to_cart;
+        NumberPicker editPopupNumberPicker;
+
+        editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
 
+        //Set number picker
         editPopupNumberPicker.setMinValue(0);
         editPopupNumberPicker.setMaxValue(currProductQty);
 
+        //Set edit text fields
         productName.setText(currProductName);
         productPrice.setText(String.valueOf(currProductPrice));
         productQuantity.setText(String.valueOf(currProductQty));
 
+        //Set text view fields
+        epp_tv_item_name.setText(currProductName);
+        epp_tv_item_price.setText(String.valueOf(currProductPrice));
+        epp_tv_item_quantity.setText(String.valueOf(currProductQty));
+
+        //Check user type
+        if (cUser.getUser_type() == 0) {
+            //Standard employee
+
+            //Remove edit permissions
+            epp_ll_info.setVisibility(View.VISIBLE);
+        } else {
+            //Not standard employee
+
+            //Grant edit permissions
+            epp_ll_edit.setVisibility(View.VISIBLE);
+        }
+
+        //Close button
         button_close.setOnClickListener(view -> popupWindow.dismiss());
 
+        //Edit button
         button_edit.setOnClickListener(view -> {
 
             //set default values
@@ -522,6 +718,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //refreshItems();
             popupWindow.dismiss();
         });
+
+        //Delete button
         button_delete.setOnClickListener(view -> {
 
             //myDB.deleteItem(currProductID);
@@ -530,6 +728,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //refreshItems();
             popupWindow.dismiss();
         });
+
+        //Add to cart button
         button_add_to_cart.setOnClickListener(view -> {
             int selected_product_quantity = editPopupNumberPicker.getValue();
 
@@ -706,6 +906,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         dismiss.setOnClickListener(view -> {
             firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("business_code").setValue("null");
+            firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("status").setValue(0);
+            firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("curr_punch_in_code").removeValue();
             popupWindow.dismiss();
         });
 

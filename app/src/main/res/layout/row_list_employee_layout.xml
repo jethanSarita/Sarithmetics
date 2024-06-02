@@ -54,7 +54,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Employee status"
-                        android:textColor="@color/colorTextPrimary"
+                        android:textColor="@color/white"
                         android:textStyle="bold" />
                 </LinearLayout>
 

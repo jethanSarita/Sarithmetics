@@ -43,6 +43,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
     Button registerBtn, loginBtn;
     EditText etRegisterFirstName, etRegisterLastName, etRegisterPassword, etRegisterConfirmPassword, etLoginEmail, etLoginPassword, etEmail;
     RadioButton rbEmployee, rbBusinessOwner;
+    RandomHelper randomHelper;
 
     SessionManager sessionManager;
     //firebase
@@ -121,6 +122,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
         etLoginPassword = findViewById(R.id.etLoginPassword);
         rbEmployee = findViewById(R.id.rbEmployee);
         rbBusinessOwner = findViewById(R.id.rbBusinessOwner);
+
+        randomHelper = new RandomHelper();
 
         database = FirebaseDatabase.getInstance(DB);
 
@@ -205,7 +208,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                                                 cUser = new User(user.getUid(), first_name, last_name, "null", 0);
                                             } else if (user_type == 1) {
                                                 //Business owner
-                                                cUser = new User(user.getUid(), first_name, last_name, generateRandom5CharString(), 1);
+                                                cUser = new User(user.getUid(), first_name, last_name, randomHelper.generateRandom5CharString(), 1);
                                             }
                                             myRef = database.getReference("Users");
                                             myRef.child(cUser.getUid()).setValue(cUser);
@@ -294,17 +297,6 @@ public class LoginRegisterActivity extends AppCompatActivity {
             return 1;
         }
         return -1;
-    }
-
-    private String generateRandom5CharString() {
-        int length = 5;
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            char c = (char) (random.nextInt(26) + 'A');
-            sb.append(c);
-        }
-        return sb.toString();
     }
 
     public boolean checkConnection() {

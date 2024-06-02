@@ -14,6 +14,7 @@
                 android:padding="15dp">
 
                 <TextView
+                    android:id="@+id/epp_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
@@ -22,87 +23,157 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="Item Name"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/productNameEdit"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_weight="0"
-                    android:ems="10"
-                    android:hint="Item Name"
-                    android:inputType="text" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="Item Price"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/productPriceEdit"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_weight="0"
-                    android:ems="10"
-                    android:hint="₱0.00"
-                    android:inputType="numberDecimal" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="Item Quantity"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/productQuantityEdit"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_weight="0"
-                    android:ems="10"
-                    android:hint="0"
-                    android:inputType="number" />
-
                 <LinearLayout
+                    android:id="@+id/epp_ll_info"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-                    <Button
-                        android:id="@+id/btnEditPopupEdit"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:text="Item Name"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/epp_tv_item_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:text="Place holder"
+                        android:textSize="34sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:text="Item Price"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/epp_tv_item_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:text="Place holder"
+                        android:textSize="34sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:text="Item Quantity"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/epp_tv_item_quantity"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:text="Place holder"
+                        android:textSize="34sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/epp_ll_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/colorTextPrimary"
-                        android:text="Edit" />
+                        android:layout_weight="0"
+                        android:text="Item Name"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/btnEditPopupDelete"
+                    <EditText
+                        android:id="@+id/productNameEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:hint="Item Name"
+                        android:inputType="text" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/colorTextPrimary"
-                        android:text="Delete" />
+                        android:layout_weight="0"
+                        android:text="Item Price"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/btnEditPopupClose"
+                    <EditText
+                        android:id="@+id/productPriceEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:hint="₱0.00"
+                        android:inputType="numberDecimal" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/colorTextPrimary"
-                        android:text="Close" />
+                        android:layout_weight="0"
+                        android:text="Item Quantity"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
 
+                    <EditText
+                        android:id="@+id/productQuantityEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:ems="10"
+                        android:hint="0"
+                        android:inputType="number" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btnEditPopupEdit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Edit" />
+
+                        <Button
+                            android:id="@+id/btnEditPopupDelete"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Delete" />
+
+                        <Button
+                            android:id="@+id/btnEditPopupClose"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Close" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
                 <TextView
