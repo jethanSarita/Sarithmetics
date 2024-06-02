@@ -388,6 +388,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
+                                userRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        cUser = snapshot.getValue(User.class);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
                                 btnEnterPunchInCode.setOnClickListener(view -> {
                                     punch_in_code = etPunchInCode.getText().toString();
                                     businessCodeRef.child("punch in code").get().addOnCompleteListener(task1 -> {
