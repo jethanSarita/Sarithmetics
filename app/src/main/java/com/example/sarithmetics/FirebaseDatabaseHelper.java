@@ -63,4 +63,8 @@ public class FirebaseDatabaseHelper {
     public DatabaseReference getBusinessRef() {
         return firebaseDatabase.getReference("businesses");
     }
+
+    public DatabaseReference getBusinessTransactionHistory(String business_code) {
+        return firebaseDatabase.getReference("businesses").child(business_code).child("history");
+    }
 }

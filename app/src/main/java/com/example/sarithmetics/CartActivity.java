@@ -28,6 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class CartActivity extends AppCompatActivity implements CustomAdapter.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
@@ -161,6 +162,12 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         });
 
         checkOut.setOnClickListener(view -> {
+            for (Item item: cartedItem) {
+                item.setDate_and_time(Calendar.getInstance().getTime().toString());
+                firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code())
+                        .child(Calendar.getInstance().get(Calendar.YEAR) + "_" + (Calendar.getInstance().get(Calendar.MONTH) + 1) + "_" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+                        .child(item.getName()).setValue(item);
+            }
             clearArrays();
             cartRef.removeValue();
             finish();

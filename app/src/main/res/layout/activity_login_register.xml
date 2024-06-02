@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="visible"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <ImageView
             android:layout_width="100dp"
@@ -96,8 +96,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/imageView5"
@@ -113,8 +112,8 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/alata"
-            android:textSize="20sp"
-            android:text="Welcome to the team!"/>
+            android:text="Welcome to the team!"
+            android:textSize="20sp" />
 
 
         <TextView
@@ -214,8 +213,8 @@
                 android:id="@+id/rbEmployee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Employee"
-                android:paddingRight="10dp"/>
+                android:paddingRight="10dp"
+                android:text="Employee" />
 
             <RadioButton
                 android:id="@+id/rbBusinessOwner"

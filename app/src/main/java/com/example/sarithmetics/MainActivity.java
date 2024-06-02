@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listItemPrice;
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
-    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus;
+    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType;
     CustomAdapter customAdapter;
     MainAdapter mainAdapter;
     EmployeeAdapter employeeAdapter;
@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         etPunchInCode = findViewById(R.id.etPunchInCode);
         btnEnterPunchInCode = findViewById(R.id.btnEnterPunchInCode);
         employeeStatus = findViewById(R.id.employeeStatus);
+        profileFnLUserType = findViewById(R.id.profileFnLUserType);
 
         /*employee session hooks*/
         llEmployeeLayoutYesSync = findViewById(R.id.llEmployeeLayoutYesSync);
@@ -230,12 +231,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //[Employee, Business Owner, Employee - Inventory Manager]
                 switch (cUser.getUser_type()) {
                     case 0:
+                    case 2:
                         //Employee
 
                         //Set home layout to employee version
                         homeLayout = findViewById(R.id.layoutHomeEmployee);
-                        //Get rid of add item button
-                        add_button.setVisibility(View.GONE);
                         //Set username text view
                         profileFnLNameEmployee.setText(sessionManager.getUsername());
 
@@ -252,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         DataSnapshot snapshot = task1.getResult();
                                         if (snapshot.exists()) {
                                             userRef.child("business_code").setValue(code);
+                                            Log.e("recChecka", "1");
                                             recreate();
                                         } else {
                                             Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
@@ -272,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         lUser = snapshot.getValue(User.class);
                                         if (lUser.getStatus() != 0) {
+                                            Log.e("recChecka", "2");
                                             recreate();
                                         }
                                     }
@@ -287,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         String bus_code = snapshot.getValue(String.class);
                                         if (bus_code.equals("null")) {
+                                            Log.e("recChecka", "3");
                                             recreate();
                                         }
                                     }
@@ -309,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                 //User has been dismissed
                                                 employeeStatus.setText("ERROR");
                                                 employeeStatus.setBackgroundColor(Color.YELLOW);
+                                                Log.e("recChecka", "4");
                                                 recreate();
                                                 break;
                                             case 1:
@@ -365,6 +369,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
+                                userRef.child("user_type").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        int current_user_type = snapshot.getValue(Integer.class);
+                                        if (current_user_type == 0) {
+                                            profileFnLUserType.setText("Standard Employee");
+                                            add_button.setVisibility(View.GONE);
+                                        } else if (current_user_type == 2) {
+                                            profileFnLUserType.setText("Inventory Manager");
+                                            add_button.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
                                 btnEnterPunchInCode.setOnClickListener(view -> {
                                     punch_in_code = etPunchInCode.getText().toString();
                                     businessCodeRef.child("punch in code").get().addOnCompleteListener(task1 -> {
@@ -410,17 +433,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             businessCodeRef.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
                         });
 
-                        break;
-                    case 2:
-                        //Employee - Inventory Manager
-
-                        //Set home layout to employee version
-                        homeLayout = findViewById(R.id.layoutHomeEmployee);
-                        //Set username text view
-                        profileFnLNameEmployee.setText(sessionManager.getUsername());
-                        //No need to check business sync, since employee cant exist
-                        //without an already in sync of a business
-                        llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
                         break;
                 }
             }
@@ -924,6 +936,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("business_code").setValue("null");
             firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("status").setValue(0);
             firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("curr_punch_in_code").removeValue();
+            firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("user_type").setValue(0);
             popupWindow.dismiss();
         });
 
