@@ -54,6 +54,7 @@
                 android:layout_height="wrap_content"
                 android:text="Standard"
                 android:textColor="@color/colorTextPrimary"
+                android:textColorLink="@color/colorTextPrimary"
                 android:textStyle="bold" />
 
             <RadioButton
@@ -62,6 +63,7 @@
                 android:layout_height="wrap_content"
                 android:text="Inventory Manager"
                 android:textColor="@color/colorTextPrimary"
+                android:textColorLink="@color/colorTextPrimary"
                 android:textStyle="bold" />
         </RadioGroup>
 

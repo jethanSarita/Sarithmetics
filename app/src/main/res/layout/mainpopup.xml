@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/popupbg"
+        android:elevation="10dp"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -71,11 +72,11 @@
             android:ems="10"
             android:hint="0"
             android:inputType="number" />
+
         <Spinner
             android:id="@+id/main_popup_category_spinner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="match_parent"
