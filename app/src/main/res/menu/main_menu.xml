@@ -10,9 +10,14 @@
             android:title="Items"
             android:icon="@drawable/items_icon"/>
         <item
+            android:id="@+id/nav_insights"
+            android:title="Insights"
+            android:icon="@drawable/insights_icon" />
+        <item
             android:id="@+id/nav_logout"
             android:title="Logout"
             android:icon="@drawable/analytics_icon" />
+
     </group>
 
     <item android:title="Feedback">

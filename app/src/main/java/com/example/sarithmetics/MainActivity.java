@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,10 +39,12 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -53,29 +56,35 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
+    FloatingActionButton add_button;
     String punch_in_code;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
-    ImageView settings, homeIcon, cart_button, add_button, eye_open_button, eye_close_button;
-    RelativeLayout homeLayout, itemsLayout;
+    ImageView settings, homeIcon, cart_button, eye_open_button, eye_close_button;
+    RelativeLayout home_layout, items_layout, insights_layout;
     MyDatabaseHelper database;
     ArrayList<String> listItemID;
     ArrayList<String> listItemName;
     ArrayList<String> listItemPrice;
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
-    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType;
+    TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
     CustomAdapter customAdapter;
     MainAdapter mainAdapter;
     EmployeeAdapter employeeAdapter;
     RecyclerView rvItems, rvEmployees;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
+    Spinner insight_item_spinner, insight_context_spinner;
+    ArrayList<String> insight_item_list, insight_context_list;
+    ArrayAdapter<String> insight_item_adapter, insight_context_adapter;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
     androidx.appcompat.widget.SearchView itemSearchBar;
     EditText etBusinessCode, etPunchInCode;
@@ -83,12 +92,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ScrollView maSvItems;
     RandomHelper randomHelper;
 
+
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
     User cUser, lUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference userRef, itemsRef, cartRef, businessRef, businessCodeRef;
+    DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref;
     Query item_query, employee_query;
 
     ArrayAdapter<String> adp;
@@ -177,11 +187,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnEnterBusinessCode = findViewById(R.id.btnEnterBusinessCode);
 
         /*items page hooks*/
+        items_layout = findViewById(R.id.layoutItems);
         itemSearchBar = findViewById(R.id.itemSearchBar);
-        itemsLayout = findViewById(R.id.layoutItems);
         cart_button = findViewById(R.id.ivCart);
         add_button = findViewById(R.id.ivAddItem);
         maSvItems = findViewById(R.id.maSvItems);
+
+        /*insights layout*/
+        insights_layout = findViewById(R.id.layout_insight);
+        insight_item_list = new ArrayList<>();
+        insight_context_list = new ArrayList<>(Arrays.asList("Choose Context", "Today", "Yesterday", "This Week", "This Month"));
+        insight_item_adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, insight_item_list);
+        insight_context_adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, insight_context_list);
+        item_total_sales_vol_tv = findViewById(R.id.item_total_sales_vol_tv);
+        item_revenue_tv = findViewById(R.id.item_revenue_tv);
+        //item_turnover_rate_tv = findViewById(R.id.item_turnover_rate_tv);
+        top1_tv = findViewById(R.id.top1_tv);
+        top2_tv = findViewById(R.id.top2_tv);
+        top3_tv = findViewById(R.id.top3_tv);
 
         eye_open_button = findViewById(R.id.ivEyeOpenIcon);
         eye_close_button = findViewById(R.id.ivEyeCloseIcon);
@@ -199,6 +222,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Clear cart
         cartedItem.clear();
 
+        insight_item_spinner = findViewById(R.id.insight_item_perf_spinner);
+        insight_context_spinner = findViewById(R.id.insight_context_perf_spinner);
+
         //Check if session exists
         if (!sessionManager.getLogin()) {
             sessionManager.setLogin(false);
@@ -214,18 +240,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Get current user information
-        userRef = firebaseDatabaseHelper.getCurrentUserRef();
-        userRef.get().addOnCompleteListener(task -> {
+        user_ref = firebaseDatabaseHelper.getCurrentUserRef();
+        user_ref.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
             } else {
                 Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
                 cUser = task.getResult().getValue(User.class);
 
-                cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
-                itemsRef = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-                businessRef = firebaseDatabaseHelper.getBusinessRef();
-                businessCodeRef = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
+                cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+                items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+                business_ref = firebaseDatabaseHelper.getBusinessRef();
+                business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
+                history_ref = firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code());
+                //item_list_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()); //might be unnecessary
 
                 //Check usertype
                 //[Employee, Business Owner, Employee - Inventory Manager]
@@ -235,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         //Employee
 
                         //Set home layout to employee version
-                        homeLayout = findViewById(R.id.layoutHomeEmployee);
+                        home_layout = findViewById(R.id.layoutHomeEmployee);
                         //Set username text view
                         profileFnLNameEmployee.setText(sessionManager.getUsername());
 
@@ -247,11 +275,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                             btnEnterBusinessCode.setOnClickListener(view -> {
                                 String code = etBusinessCode.getText().toString();
-                                businessRef.child(code).get().addOnCompleteListener(task1 -> {
+                                business_ref.child(code).get().addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
                                         DataSnapshot snapshot = task1.getResult();
                                         if (snapshot.exists()) {
-                                            userRef.child("business_code").setValue(code);
+                                            user_ref.child("business_code").setValue(code);
                                             Log.e("recChecka", "1");
                                             recreate();
                                         } else {
@@ -268,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 llEmployeeLayoutPendingSync.setVisibility(View.VISIBLE);
                                 maSvItems.setVisibility(View.GONE);
                                 maTvStatusPending.setVisibility(View.VISIBLE);
-                                userRef.addValueEventListener(new ValueEventListener() {
+                                user_ref.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         lUser = snapshot.getValue(User.class);
@@ -284,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
-                                userRef.child("business_code").addValueEventListener(new ValueEventListener() {
+                                user_ref.child("business_code").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         String bus_code = snapshot.getValue(String.class);
@@ -303,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 //Approved
                                 llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
 
-                                userRef.child("status").addValueEventListener(new ValueEventListener() {
+                                user_ref.child("status").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         int curr_status = snapshot.getValue(Integer.class);
@@ -344,18 +372,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
-                                businessCodeRef.child("punch in code").addValueEventListener(new ValueEventListener() {
+                                business_code_ref.child("punch in code").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         if (snapshot.exists()) {
                                             String new_punch_in_code = snapshot.getValue(String.class);
-                                            userRef.child("curr_punch_in_code").get().addOnCompleteListener(task1 -> {
+                                            user_ref.child("curr_punch_in_code").get().addOnCompleteListener(task1 -> {
                                                 if (task1.isSuccessful()) {
                                                     DataSnapshot snapshot1 = task1.getResult();
                                                     if (snapshot1.exists()) {
                                                         String current_punch_in_code = snapshot1.getValue(String.class);
                                                         if (!(new_punch_in_code.equals(current_punch_in_code))) {
-                                                            userRef.child("status").setValue(1);
+                                                            user_ref.child("status").setValue(1);
                                                         }
                                                     }
                                                 }
@@ -369,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
-                                userRef.child("user_type").addValueEventListener(new ValueEventListener() {
+                                user_ref.child("user_type").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         int current_user_type = snapshot.getValue(Integer.class);
@@ -388,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                 });
 
-                                userRef.addValueEventListener(new ValueEventListener() {
+                                user_ref.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         cUser = snapshot.getValue(User.class);
@@ -402,13 +430,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                 btnEnterPunchInCode.setOnClickListener(view -> {
                                     punch_in_code = etPunchInCode.getText().toString();
-                                    businessCodeRef.child("punch in code").get().addOnCompleteListener(task1 -> {
+                                    business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
                                             DataSnapshot snapshot = task1.getResult();
                                             String current_punch_in_code = snapshot.getValue(String.class);
                                             if (punch_in_code.equals(current_punch_in_code)) {
-                                                userRef.child("status").setValue(2);
-                                                userRef.child("curr_punch_in_code").setValue(punch_in_code);
+                                                user_ref.child("status").setValue(2);
+                                                user_ref.child("curr_punch_in_code").setValue(punch_in_code);
                                             } else {
                                                 Toast.makeText(MainActivity.this, "Punch in code incorrect", Toast.LENGTH_SHORT).show();
                                             }
@@ -422,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         //Business Owner
 
                         //Set home layout to business owner version
-                        homeLayout = findViewById(R.id.layoutHomeBusinessOwner);
+                        home_layout = findViewById(R.id.layoutHomeBusinessOwner);
                         //Set business code text
                         tv_business_code.setText(cUser.getBusiness_code());
                         //Set username text view
@@ -442,21 +470,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         });
 
                         amBtnGeneratePunchInCode.setOnClickListener(view -> {
-                            businessCodeRef.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+                            business_code_ref.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
                         });
 
                         break;
                 }
+
+                //Insight
+                insight_item_spinner.setAdapter(insight_item_adapter);
+                insight_context_spinner.setAdapter(insight_context_adapter);
+                items_ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        insight_item_list.clear();
+                        insight_item_list.add("Choose Item");
+                        for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                            //Spinner list - data source
+                            Item item =  postSnapshot.getValue(Item.class);
+                            String item_name = item.getName();
+                            insight_item_list.add(item_name);
+                        }
+                        insight_item_adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                insight_item_spinner.setOnItemSelectedListener(this);
+                insight_context_spinner.setOnItemSelectedListener(this);
             }
 
-            if(sessionManager.getMainStatus()){
-                itemsLayout.setVisibility(View.VISIBLE);
-                homeLayout.setVisibility(View.GONE);
-                navigationView.setCheckedItem(R.id.nav_items);
-            }else{
-                itemsLayout.setVisibility(View.GONE);
-                homeLayout.setVisibility(View.VISIBLE);
-                navigationView.setCheckedItem(R.id.nav_home);
+            //Sidebar continuity
+            switch (sessionManager.getMainStatus()) {
+                case 0:
+                    items_layout.setVisibility(View.GONE);
+                    home_layout.setVisibility(View.VISIBLE);
+                    insights_layout.setVisibility(View.GONE);
+                    navigationView.setCheckedItem(R.id.nav_home);
+                    break;
+                case 1:
+                    items_layout.setVisibility(View.VISIBLE);
+                    home_layout.setVisibility(View.GONE);
+                    insights_layout.setVisibility(View.GONE);
+                    navigationView.setCheckedItem(R.id.nav_items);
+                    break;
+                case 2:
+                    items_layout.setVisibility(View.GONE);
+                    home_layout.setVisibility(View.GONE);
+                    insights_layout.setVisibility(View.VISIBLE);
+                    navigationView.setCheckedItem(R.id.nav_insights);
+                    break;
             }
 
             rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -478,7 +544,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             employeeAdapter = new EmployeeAdapter(options2, this);
             rvEmployees.setAdapter(employeeAdapter);
             employeeAdapter.startListening();
-
 
             itemSearchBar.clearFocus();
             itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -548,10 +613,172 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    int total_sales_vol;
+    double total_rev;
+    ArrayList<Item> top_list_item;
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        String current_item = insight_item_spinner.getSelectedItem().toString();
+        String current_context = insight_context_spinner.getSelectedItem().toString();
+        total_sales_vol = 0;
+        total_rev = 0;
+        top_list_item = new ArrayList<>();
+
+        if (!(current_item.equals("Choose Item") || current_context.equals("Choose Context"))) {
+            switch (current_context) {
+                case "Today":
+                case "Yesterday":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                Item item = snapshot.getValue(Item.class);
+                                if (item != null) {
+                                    if (item.getName().equals(current_item)) {
+                                        total_sales_vol += item.getQuantity();
+                                        total_rev += item.getPrice() * item.getQuantity();
+                                    }
+                                } else {
+                                    Log.e("Insight Error", "Today/Yesterday - item is null");
+                                }
+                            }
+                        }
+                        item_total_sales_vol_tv.setText("" + total_sales_vol);
+                        item_revenue_tv.setText("" + total_rev);
+                    });
+                    break;
+                case "This Week":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            for (DataSnapshot week : dataSnapshot.getChildren()) {
+                                for (DataSnapshot day : week.getChildren()) {
+                                    Item item = day.getValue(Item.class);
+                                    if (item != null) {
+                                        if (item.getName().equals(current_item)) {
+                                            total_sales_vol += item.getQuantity();
+                                            total_rev += item.getPrice() * item.getQuantity();
+                                        }
+                                    } else {
+                                        Log.e("Insight Error", "This Week - item is null");
+                                    }
+                                }
+                            }
+                            item_total_sales_vol_tv.setText("" + total_sales_vol);
+                            item_revenue_tv.setText("" + total_rev);
+                        }
+                    });
+                    break;
+                case "This Month":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            for (DataSnapshot month : dataSnapshot.getChildren()) {
+                                for (DataSnapshot week : month.getChildren()) {
+                                    for (DataSnapshot day : week.getChildren()) {
+                                        Item item = day.getValue(Item.class);
+                                        if (item != null) {
+                                            if (item.getName().equals(current_item)) {
+                                                total_sales_vol += item.getQuantity();
+                                                total_rev += item.getPrice() * item.getQuantity();
+                                            }
+                                        } else {
+                                            Log.e("Insight Error", "This Week - item is null");
+                                        }
+                                    }
+                                }
+                            }
+                            item_total_sales_vol_tv.setText("" + total_sales_vol);
+                            item_revenue_tv.setText("" + total_rev);
+                        }
+                    });
+                    break;
+            }
+        }
+
+        if (!(current_context.equals("Choose Context"))) {
+            switch (current_context) {
+                case "Today":
+                case "Yesterday":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                Item item = snapshot.getValue(Item.class);
+                                if (item != null) {
+                                    top_list_item.add(item);
+                                } else {
+                                    Log.e("Insight Error", "Today/Yesterday - item is null");
+                                }
+                            }
+                        }
+                        ArrayList<String> top_list = sortList(top_list_item);
+                        top1_tv.setText(top_list.get(2));
+                        top2_tv.setText(top_list.get(1));
+                        top3_tv.setText(top_list.get(0));
+                    });
+                    break;
+            }
+        }
+    }
+
+    ArrayList<String> sortList(ArrayList<Item> arr) {
+        ArrayList<String> list = new ArrayList<>();
+        for (int i = 1; i < arr.size() ; i++) {
+            Item key = arr.get(i);
+            int j = i - 1;
+
+            while (j >= 0 && arr.get(j).getQuantity() > key.getQuantity()) {
+                arr.set(j + 1, arr.get(j));
+                j = j - 1;
+            }
+            arr.set(j + 1, key);
+        }
+        for (int i = 0; i < 3; i++) {
+            list.add(arr.get(i).getName() + " - " + arr.get(i).getQuantity());
+        }
+        return list;
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    public DatabaseReference getInsightReference(String context) {
+        switch (context) {
+            case "Today":
+                return history_ref
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                        .child(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "-" + firebaseDatabaseHelper.getDayOfWeek(0));
+            case "Yesterday":
+                return history_ref
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1) + "-" + firebaseDatabaseHelper.getDayOfWeek(1));
+            case "This Week":
+                return history_ref
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)));
+            case "This Month":
+                return history_ref
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1));
+            default:
+                return null;
+        }
+    }
+
     private void txtSearch(String str) {
         FirebaseRecyclerOptions<Item> options =
                 new FirebaseRecyclerOptions.Builder<Item>()
-                        .setQuery(itemsRef.orderByChild("name").startAt(str).endAt(str + "~"), Item.class)
+                        .setQuery(items_ref.orderByChild("name").startAt(str).endAt(str + "~"), Item.class)
                         .build();
 
         mainAdapter = new MainAdapter(options, this, cUser);
@@ -563,14 +790,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         if(item.getItemId() == R.id.nav_home){
-            itemsLayout.setVisibility(View.GONE);
-            homeLayout.setVisibility(View.VISIBLE);
-            sessionManager.setMainStatus(false);
+            items_layout.setVisibility(View.GONE);
+            insights_layout.setVisibility(View.GONE);
+            home_layout.setVisibility(View.VISIBLE);
+            sessionManager.setMainStatus(0);
         }else if(item.getItemId() == R.id.nav_items){
-            homeLayout.setVisibility(View.GONE);
-            itemsLayout.setVisibility(View.VISIBLE);
-            sessionManager.setMainStatus(true);
-            /*need to add extra option her for partner's part*/
+            home_layout.setVisibility(View.GONE);
+            insights_layout.setVisibility(View.GONE);
+            items_layout.setVisibility(View.VISIBLE);
+            sessionManager.setMainStatus(1);
+        }else if(item.getItemId() == R.id.nav_insights){
+            items_layout.setVisibility(View.GONE);
+            home_layout.setVisibility(View.GONE);
+            insights_layout.setVisibility(View.VISIBLE);
+            sessionManager.setMainStatus(2);
         }else if(item.getItemId() == R.id.nav_logout){
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
@@ -612,7 +845,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         add = popupView.findViewById(R.id.btnPopupAdd);
         close = popupView.findViewById(R.id.btnPopupClose);
 
-        close.setOnClickListener(view -> popupWindow.dismiss());
+        close.setOnClickListener(view -> {
+            popupWindow.dismiss();
+            itemSearchBar.clearFocus();
+        });
 
         add.setOnClickListener(view -> {
             /*Write sql insertion code here*/
@@ -646,9 +882,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //old local database
             //myDB.addItem(pName, pPrice, pQty);
 
-            itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
+            items_ref.child(pName).setValue(new Item(pName, pPrice, pQty));
             //refreshItems();
             popupWindow.dismiss();
+            itemSearchBar.clearFocus();
         });
     }
     /*Popup when editing an item*/
@@ -715,15 +952,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //Remove edit permissions
             epp_ll_info.setVisibility(View.VISIBLE);
+            //Change title (Can hard code this to the editpopup.xml, might need to do later)
+            epp_title.setText("Item Information");
         } else {
             //Not standard employee
 
             //Grant edit permissions
             epp_ll_edit.setVisibility(View.VISIBLE);
+            ////Change title (Can hard code this to the editpopup.xml, might need to do later)
+            epp_title.setText("Edit Item");
         }
 
         //Close button
-        button_close.setOnClickListener(view -> popupWindow.dismiss());
+        button_close.setOnClickListener(view -> {
+            popupWindow.dismiss();
+            itemSearchBar.clearFocus();
+        });
 
         //Edit button
         button_edit.setOnClickListener(view -> {
@@ -751,12 +995,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //myDB.editItem(currProductID, pName, pPrice, pQty);
 
             if(!(currProductName.equals(pName))){
-                itemsRef.child(currProductName).removeValue();
+                items_ref.child(currProductName).removeValue();
             }
 
-            itemsRef.child(pName).setValue(new Item(pName, pPrice, pQty));
+            items_ref.child(pName).setValue(new Item(pName, pPrice, pQty));
             //refreshItems();
             popupWindow.dismiss();
+            itemSearchBar.clearFocus();
         });
 
         //Delete button
@@ -764,9 +1009,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //myDB.deleteItem(currProductID);
 
-            itemsRef.child(currProductName).removeValue();
+            items_ref.child(currProductName).removeValue();
             //refreshItems();
             popupWindow.dismiss();
+            itemSearchBar.clearFocus();
         });
 
         //Add to cart button
@@ -777,26 +1023,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             } else {
                 //cartedItem.add(new Item(currProductName, currProductPrice, selected_product_quantity));
-                cartRef.child(currProductName).get().addOnCompleteListener(task -> {
+                cart_ref.child(currProductName).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DataSnapshot dataSnapshot = task.getResult();
                         if (dataSnapshot.exists()) {
                             Item item = dataSnapshot.getValue(Item.class);
                             if (item != null) {
                                 int added_qty_result = selected_product_quantity + item.getQuantity();
-                                cartRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, added_qty_result));
+                                cart_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, added_qty_result));
                             } else {
                                 Log.e(TAG, "add to cart is null 557");
                             }
                         } else {
-                            cartRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                            cart_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
                         }
                     } else {
                         Log.e(TAG, "cart item unsuccessful");
                     }
                 });
-                itemsRef.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
+                items_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
                 popupWindow.dismiss();
+                itemSearchBar.clearFocus();
             }
         });
     }

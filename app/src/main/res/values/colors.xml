@@ -3,7 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="colorActionBar">#f0c4ac</color>
-    <color name="colorBackground">#fff5f0</color>
-    <color name="colorTextPrimary">#7b3f18</color>
+    <color name="colorBackground">#f6f1ee</color>
+    <color name="colorTextPrimary">#ED7D31</color>
     <color name="colorTextSecondary">#b87c64</color>
+    <color name="colorSpacing">#DA9276</color>
 </resources>

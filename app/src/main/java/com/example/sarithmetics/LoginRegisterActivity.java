@@ -173,7 +173,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         });
 
         if(sessionManager.getLogin()){
-            sessionManager.setMainStatus(false);
+            sessionManager.setMainStatus(0);
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
@@ -284,7 +284,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         sessionManager.setLogin(true);
-        sessionManager.setMainStatus(false);
+        sessionManager.setMainStatus(0);
         sessionManager.setUser(user);
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
         finish();

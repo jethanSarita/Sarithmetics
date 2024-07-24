@@ -26,8 +26,11 @@ public class SessionManager {
         editor.commit();
     }
 
-    public void setMainStatus(boolean status){
-        editor.putBoolean("key_mainstatus", status);
+    public void setMainStatus(int status){
+        //0 - Home
+        //1 - Items
+        //2 - Insights
+        editor.putInt("key_mainstatus", status);
         editor.commit();
     }
 
@@ -41,8 +44,8 @@ public class SessionManager {
         return sharedPreferences.getBoolean("key_login", false);
     }
 
-    public boolean getMainStatus(){
-        return sharedPreferences.getBoolean("key_mainstatus", false);
+    public int getMainStatus(){
+        return sharedPreferences.getInt("key_mainstatus", 0);
     }
 
     public String getUid() {

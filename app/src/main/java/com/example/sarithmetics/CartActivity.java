@@ -52,7 +52,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //You're probably wondering why this one is using customerAdpater rather than MainAdapter.
+        //You're probably wondering why this one is using customerAdapter rather than MainAdapter.
         //Mainly because I've made too much commitments to the code so the changes would be too
         //difficult for now. It's not broken, but it can be improved SOME OTHER TIME..
 
@@ -163,9 +163,12 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
 
         checkOut.setOnClickListener(view -> {
             for (Item item: cartedItem) {
-                item.setDate_and_time(Calendar.getInstance().getTime().toString());
-                firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code())
-                        .child(Calendar.getInstance().get(Calendar.YEAR) + "_" + (Calendar.getInstance().get(Calendar.MONTH) + 1) + "_" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+                firebaseDatabaseHelper
+                        .getBusinessTransactionHistory(cUser.getBusiness_code())
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
                         .child(item.getName()).setValue(item);
             }
             clearArrays();
