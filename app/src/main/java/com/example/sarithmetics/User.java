@@ -1,7 +1,4 @@
 package com.example.sarithmetics;
-
-import java.util.Map;
-
 public class User {
     private String uid;
     private String first_name;
