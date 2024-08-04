@@ -36,8 +36,7 @@
             android:id="@+id/layoutHomeEmployee"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -597,7 +596,8 @@
             android:id="@+id/layout_insight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -710,7 +710,9 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="@font/varela_round"
-                                        android:text="" />
+                                        android:text=""
+                                        android:textColor="@color/colorTextSecondary"
+                                        android:textSize="20sp" />
                                 </LinearLayout>
 
                                 <LinearLayout
@@ -733,7 +735,9 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="@font/varela_round"
-                                        android:text="" />
+                                        android:text=""
+                                        android:textColor="@color/colorTextSecondary"
+                                        android:textSize="20sp" />
                                 </LinearLayout>
 
                             </LinearLayout>
@@ -785,26 +789,38 @@
                                         android:textSize="25sp"
                                         android:textStyle="bold" />
 
-                                    <TextView
-                                        android:id="@+id/top1_tv"
+                                    <LinearLayout
                                         android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/varela_round"
-                                        android:text="" />
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical">
 
-                                    <TextView
-                                        android:id="@+id/top2_tv"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/varela_round"
-                                        android:text="" />
+                                        <TextView
+                                            android:id="@+id/top1_tv"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:fontFamily="@font/varela_round"
+                                            android:text=""
+                                            android:textColor="@color/colorTextSecondary"
+                                            android:textSize="20sp" />
 
-                                    <TextView
-                                        android:id="@+id/top3_tv"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/varela_round"
-                                        android:text="" />
+                                        <TextView
+                                            android:id="@+id/top2_tv"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:fontFamily="@font/varela_round"
+                                            android:text=""
+                                            android:textColor="@color/colorTextSecondary"
+                                            android:textSize="20sp" />
+
+                                        <TextView
+                                            android:id="@+id/top3_tv"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:fontFamily="@font/varela_round"
+                                            android:text=""
+                                            android:textColor="@color/colorTextSecondary"
+                                            android:textSize="20sp" />
+                                    </LinearLayout>
 
 
                                 </LinearLayout>

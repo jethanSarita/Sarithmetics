@@ -11,10 +11,6 @@
             android:title="Items"
             android:icon="@drawable/items_icon"/>
         <item
-            android:id="@+id/nav_insights"
-            android:icon="@drawable/insights_icon"
-            android:title="Insights" />
-        <item
             android:id="@+id/nav_logout"
             android:title="Logout"
             android:icon="@drawable/analytics_icon" />

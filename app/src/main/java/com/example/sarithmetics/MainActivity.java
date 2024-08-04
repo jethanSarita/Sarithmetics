@@ -58,6 +58,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
     ScrollView maSvItems;
     RandomHelper randomHelper;
-
+    MenuItem nav_insights;
 
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
@@ -163,6 +166,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView = findViewById(R.id.nav_view);
         settings = findViewById(R.id.vEyeCloseIcon);
         homeIcon = findViewById(R.id.homeIcon);
+
+        /*navigation*/
+        nav_insights = navigationView.getMenu().findItem(R.id.nav_insights);
 
         /*home page layout*/
         profileFnLNameEmployee = findViewById(R.id.profileFnLNameEmployee);
@@ -266,6 +272,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         home_layout = findViewById(R.id.layoutHomeEmployee);
                         //Set username text view
                         profileFnLNameEmployee.setText(sessionManager.getUsername());
+
+                        nav_insights.setVisible(false);
 
                         //User is sync to business?
                         if (cUser.getBusiness_code().equals("null")) {
@@ -615,7 +623,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     int total_sales_vol;
     double total_rev;
-    ArrayList<Item> top_list_item;
+    List<Item> top_list_item;
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -633,8 +641,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     getInsightReference(current_context).get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                Item item = snapshot.getValue(Item.class);
+                            for (DataSnapshot day : dataSnapshot.getChildren()) {
+                                Item item = day.getValue(Item.class);
                                 if (item != null) {
                                     if (item.getName().equals(current_item)) {
                                         total_sales_vol += item.getQuantity();
@@ -705,8 +713,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     getInsightReference(current_context).get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                Item item = snapshot.getValue(Item.class);
+                            for (DataSnapshot day : dataSnapshot.getChildren()) {
+                                Item item = day.getValue(Item.class);
                                 if (item != null) {
                                     top_list_item.add(item);
                                 } else {
@@ -714,18 +722,86 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 }
                             }
                         }
-                        ArrayList<String> top_list = sortList(top_list_item);
-                        top1_tv.setText(top_list.get(2));
-                        top2_tv.setText(top_list.get(1));
-                        top3_tv.setText(top_list.get(0));
+                        if (!top_list_item.isEmpty()) {
+                            SortAndDisplay(top_list_item);
+                        } else {
+                            //List is empty
+                        }
+                    });
+                    break;
+                case "This Week":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            for (DataSnapshot week : dataSnapshot.getChildren()) {
+                                for (DataSnapshot day : week.getChildren()) {
+                                    Item item = day.getValue(Item.class);
+                                    if (item != null) {
+                                        top_list_item.add(item);
+                                    } else {
+                                        Log.e("Insight Error", "This Week - item is null");
+                                    }
+                                }
+                            }
+                        }
+                        if (!top_list_item.isEmpty()) {
+                            SortAndDisplay(top_list_item);
+                        } else {
+                            //List is empty
+                        }
+                    });
+                    break;
+                case "This Month":
+                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                       if (task.isSuccessful()) {
+                           DataSnapshot dataSnapshot = task.getResult();
+                           for (DataSnapshot month : dataSnapshot.getChildren()) {
+                               for (DataSnapshot week : month.getChildren()) {
+                                   for (DataSnapshot day : week.getChildren()) {
+                                       Item item = day.getValue(Item.class);
+                                       if (item != null) {
+                                           top_list_item.add(item);
+                                       } else {
+                                           Log.e("Insight Error", "This Week - item is null");
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                       if (!top_list_item.isEmpty()) {
+                            SortAndDisplay(top_list_item);
+                       } else {
+                            //List is empty
+                       }
                     });
                     break;
             }
         }
     }
 
+    private void SortAndDisplay(List<Item> top_list_item) {
+        int count = 0;
+        top_list_item.sort((o1, o2) -> Integer.compare(o2.getQuantity(), o1.getQuantity()));
+        for (Item item : top_list_item) {
+            switch (count) {
+                case 0:
+                    top1_tv.setText(item.getName() + " - " + item.getQuantity());
+                    break;
+                case 1:
+                    top2_tv.setText(item.getName() + " - " + item.getQuantity());
+                    break;
+                case 2:
+                    top3_tv.setText(item.getName() + " - " + item.getQuantity());
+                    break;
+            }
+            count++;
+        }
+    }
+
     ArrayList<String> sortList(ArrayList<Item> arr) {
+
         ArrayList<String> list = new ArrayList<>();
+
         for (int i = 1; i < arr.size() ; i++) {
             Item key = arr.get(i);
             int j = i - 1;

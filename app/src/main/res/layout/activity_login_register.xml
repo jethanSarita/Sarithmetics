@@ -30,7 +30,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Who's working?"
             android:textSize="20sp" />
 
@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Email" />
 
         <EditText
@@ -47,7 +47,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Email"
             android:inputType="text" />
 
@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Password" />
 
         <EditText
@@ -64,7 +64,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Password"
             android:inputType="textPassword" />
 
@@ -76,7 +76,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             android:background="@drawable/btn1"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Login"
             android:textColor="#FFFFFF" />
 
@@ -84,7 +84,7 @@
             android:id="@+id/tvRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="No account? Register here!"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
@@ -112,7 +112,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Welcome to the team!"
             android:textSize="20sp" />
 
@@ -121,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="First name" />
 
         <EditText
@@ -130,7 +130,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  First name"
             android:inputType="text" />
 
@@ -138,7 +138,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Last name" />
 
         <EditText
@@ -147,7 +147,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Last name"
             android:inputType="text" />
 
@@ -155,7 +155,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Email" />
 
         <EditText
@@ -164,7 +164,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Email"
             android:inputType="text" />
 
@@ -172,7 +172,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Password" />
 
         <EditText
@@ -181,7 +181,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Password"
             android:inputType="textPassword" />
 
@@ -189,7 +189,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Confirm Password" />
 
         <EditText
@@ -198,7 +198,7 @@
             android:layout_height="40dp"
             android:background="@drawable/search_view_bg"
             android:ems="10"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:hint="  Confirm Password"
             android:inputType="textPassword" />
 
@@ -214,6 +214,8 @@
                 android:id="@+id/rbEmployee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:buttonTint="@color/colorTextPrimary"
+                android:fontFamily="@font/varela_round"
                 android:paddingRight="10dp"
                 android:text="Employee" />
 
@@ -221,6 +223,9 @@
                 android:id="@+id/rbBusinessOwner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:backgroundTint="@color/colorTextPrimary"
+                android:buttonTint="@color/colorTextPrimary"
+                android:fontFamily="@font/varela_round"
                 android:text="Business owner" />
 
         </RadioGroup>
@@ -232,7 +237,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             android:background="@drawable/btn1"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Register"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
@@ -241,7 +246,7 @@
             android:id="@+id/tvLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/alata"
+            android:fontFamily="@font/varela_round"
             android:text="Already have an account? Log in here!"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
