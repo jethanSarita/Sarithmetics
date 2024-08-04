@@ -47,7 +47,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
     SessionManager sessionManager;
     //firebase
-    FirebaseAnalytics mFirebaseAnalytics;
+    //FirebaseAnalytics mFirebaseAnalytics;
     FirebaseAuth mAuth;
     FirebaseDatabase database;
     DatabaseReference myRef;
@@ -87,20 +87,14 @@ public class LoginRegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
 
-        if (checkConnection()) {
-            Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Not connected to internet", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-            finish();
-        }
+        checkInternet();
 
         //Register for network updates
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
         connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*firebase*/
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mAuth = FirebaseAuth.getInstance();
         UserProfileChangeRequest.Builder builder = new UserProfileChangeRequest.Builder();
 
@@ -128,10 +122,10 @@ public class LoginRegisterActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance(DB);
 
         tvRegister.setOnClickListener(view -> {
-            Bundle bundle = new Bundle();
+            /*Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "tvRegister");
             bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Register redirect button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);*/
             openRegister(view);
         });
 
@@ -140,42 +134,62 @@ public class LoginRegisterActivity extends AppCompatActivity {
         });
 
         registerBtn.setOnClickListener(view -> {
-
-            String first_name = etRegisterFirstName.getText().toString();
-            String last_name = etRegisterLastName.getText().toString();
-            String email = etEmail.getText().toString();
-            String password = etRegisterPassword.getText().toString();
-            String confirm_password = etRegisterConfirmPassword.getText().toString();
-            int user_type = getUserType();
-
-            if (isEmpty(first_name) || isEmpty(last_name) || isEmpty(email) || isEmpty(password) || isEmpty(confirm_password) || user_type == -1) {
-                Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            } else if (password.equals(confirm_password)) {
-                //Toast.makeText(LoginRegisterActivity.this, "Account created please login", Toast.LENGTH_SHORT).show();
-                createAccount(first_name, last_name, email, password, user_type);
-            } else {
-                Toast.makeText(LoginRegisterActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
-                etRegisterPassword.setText("");
-                etRegisterConfirmPassword.setText("");
-            }
+            registerUser();
         });
 
         loginBtn.setOnClickListener(view -> {
-
-            //MyDatabaseHelper myDB = new MyDatabaseHelper(LoginRegisterActivity.this);
-            String email = etLoginEmail.getText().toString();
-            String password = etLoginPassword.getText().toString();
-            if (isEmpty(email) || isEmpty(password)){
-                Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            } else {
-                signIn(email, password);
-            }
+            loginUser();
         });
 
+        checkSession();
+
+    }
+
+    private void checkInternet() {
+        if (checkConnection()) {
+            Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Not connected to internet", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+            finish();
+        }
+    }
+
+    private void checkSession() {
         if(sessionManager.getLogin()){
             sessionManager.setMainStatus(0);
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
+        }
+    }
+
+    private void loginUser() {
+        String email = etLoginEmail.getText().toString();
+        String password = etLoginPassword.getText().toString();
+        if (isEmpty(email) || isEmpty(password)){
+            Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        } else {
+            signIn(email, password);
+        }
+    }
+
+    private void registerUser() {
+        String first_name = etRegisterFirstName.getText().toString();
+        String last_name = etRegisterLastName.getText().toString();
+        String email = etEmail.getText().toString();
+        String password = etRegisterPassword.getText().toString();
+        String confirm_password = etRegisterConfirmPassword.getText().toString();
+        int user_type = getUserType();
+
+        if (isEmpty(first_name) || isEmpty(last_name) || isEmpty(email) || isEmpty(password) || isEmpty(confirm_password) || user_type == -1) {
+            Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        } else if (password.equals(confirm_password)) {
+            //Toast.makeText(LoginRegisterActivity.this, "Account created please login", Toast.LENGTH_SHORT).show();
+            createAccount(first_name, last_name, email, password, user_type);
+        } else {
+            Toast.makeText(LoginRegisterActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
+            etRegisterPassword.setText("");
+            etRegisterConfirmPassword.setText("");
         }
     }
 
