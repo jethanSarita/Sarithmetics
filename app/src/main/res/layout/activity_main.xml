@@ -78,6 +78,7 @@
                         android:background="@color/colorSpacing" />
                 </RelativeLayout>
 
+                <!--Employee Layout No Sync-->
                 <LinearLayout
                     android:id="@+id/llEmployeeLayoutNoSync"
                     android:layout_width="match_parent"
@@ -135,13 +136,15 @@
 
                 </LinearLayout>
 
+                <!--Employee Layout Yes Sync-->
                 <LinearLayout
                     android:id="@+id/llEmployeeLayoutYesSync"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -157,6 +160,7 @@
                         android:id="@+id/employeeStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
                         android:background="@android:color/darker_gray"
                         android:fontFamily="@font/varela_round"
                         android:text="Inactive"
@@ -164,6 +168,18 @@
                         android:textColor="@color/white"
                         android:textSize="34sp"
                         android:textStyle="bold" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="30dp"
+                        android:paddingRight="30dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorSpacing" />
+                    </RelativeLayout>
 
                     <TextView
                         android:id="@+id/tvPunchIn"
@@ -204,6 +220,7 @@
 
                 </LinearLayout>
 
+                <!--Employee Layout Pending Sync-->
                 <LinearLayout
                     android:id="@+id/llEmployeeLayoutPendingSync"
                     android:layout_width="match_parent"
@@ -438,7 +455,8 @@
             android:id="@+id/layoutItems"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/ivAddItem"
@@ -596,8 +614,7 @@
             android:id="@+id/layout_insight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
