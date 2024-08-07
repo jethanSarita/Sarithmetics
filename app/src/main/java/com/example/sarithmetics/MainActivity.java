@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -58,8 +57,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
@@ -232,6 +229,440 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         insight_context_spinner = findViewById(R.id.insight_context_perf_spinner);
 
         //Check if session exists
+        checkInternet();
+
+        //Get current user information
+        getCurrentUserInformation();
+
+        /*tool bar*/
+        setSupportActionBar(toolbar);
+
+        /*navigation drawer menu*/
+        setNavigationDrawerMenu();
+
+        // THIS IS REDUNDANT NOW but keeping it for some reason idk uwu
+        /*database arraylist storing*/
+        //storeDataInArrays();
+        /*customAdapter = new CustomAdapter(MainActivity.this, listItemName, listItemPrice, listItemQty, this);
+        rvItems.setAdapter(customAdapter);
+        rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));*/
+
+
+        eye_close_button.setOnClickListener(view -> {
+            eyeClose();
+        });
+        eye_open_button.setOnClickListener(view -> {
+            eyeOpen();
+        });
+
+        settings.setOnClickListener(view -> {
+            openSettings();
+        });
+        homeIcon.setOnClickListener(view -> {
+
+        });
+        cart_button.setOnClickListener(view -> {
+            openCart();
+        });
+        add_button.setOnClickListener(view -> {
+            OpenAddItemPopup();
+        });
+    }
+
+    private void openCart() {
+        Intent intent = new Intent(MainActivity.this, CartActivity.class);
+        startActivity(intent);
+    }
+
+    private void openSettings() {
+        //This has no functionality or system yet just a debugging and testing button
+        refreshItems();
+        Toast.makeText(getApplicationContext(), "Settings clicked", Toast.LENGTH_SHORT).show();
+    }
+
+    private void eyeOpen() {
+        eye_open_button.setVisibility(View.GONE);
+        eye_close_button.setVisibility(View.VISIBLE);
+        boxBusinessCode.setBackgroundColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
+        tv_business_code.setVisibility(View.INVISIBLE);
+    }
+
+    private void eyeClose() {
+        eye_close_button.setVisibility(View.GONE);
+        eye_open_button.setVisibility(View.VISIBLE);
+        boxBusinessCode.setBackgroundColor(Color.TRANSPARENT);
+        tv_business_code.setVisibility(View.VISIBLE);
+    }
+
+    private void setNavigationDrawerMenu() {
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void getCurrentUserInformation() {
+        user_ref = firebaseDatabaseHelper.getCurrentUserRef();
+        user_ref.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error getting data", task.getException());
+            } else {
+                Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
+                
+                cUser = task.getResult().getValue(User.class);
+                
+                setUserData();
+
+                //item_list_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()); //might be unnecessary
+
+                //Check usertype
+                //[Employee, Business Owner, Employee - Inventory Manager]
+                switch (cUser.getUser_type()) {
+                    case 0:
+                    case 2:
+                        //Employee / Stock Employee
+                        processEmployeeUser();
+                        break;
+                    case 1:
+                        //Business Owner
+                        processBusinessOwnerUser();
+                        break;
+                }
+                //Insight
+                setUpInsightAdapters();
+            }
+
+            //Sidebar continuity
+            sidebarContinuity();
+
+            //List of Items
+            setUpItemList();
+
+            //List of Employees
+            setUpEmployeeList();
+
+            //Search bar functionality
+            setUpSearchBar();
+        });
+    }
+
+    private void setUpSearchBar() {
+        itemSearchBar.clearFocus();
+        itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                txtSearch(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                txtSearch(query);
+                //filterList(newText);
+                return true;
+            }
+        });
+    }
+
+    private void setUpEmployeeList() {
+        rvEmployees.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        employee_query = firebaseDatabaseHelper.getEmployeesQuery(cUser.getBusiness_code());
+        FirebaseRecyclerOptions<User> options2 =
+                new FirebaseRecyclerOptions.Builder<User>()
+                        .setQuery(employee_query, User.class)
+                        .build();
+        employeeAdapter = new EmployeeAdapter(options2, this);
+        rvEmployees.setAdapter(employeeAdapter);
+        employeeAdapter.startListening();
+    }
+
+    private void setUpItemList() {
+        rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        item_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+        FirebaseRecyclerOptions<Item> options1 =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(item_query, Item.class)
+                        .build();
+        mainAdapter = new MainAdapter(options1, this, cUser);
+        rvItems.setAdapter(mainAdapter);
+        mainAdapter.startListening();
+    }
+
+    private void sidebarContinuity() {
+        switch (sessionManager.getMainStatus()) {
+            case 0:
+                items_layout.setVisibility(View.GONE);
+                home_layout.setVisibility(View.VISIBLE);
+                insights_layout.setVisibility(View.GONE);
+                navigationView.setCheckedItem(R.id.nav_home);
+                break;
+            case 1:
+                items_layout.setVisibility(View.VISIBLE);
+                home_layout.setVisibility(View.GONE);
+                insights_layout.setVisibility(View.GONE);
+                navigationView.setCheckedItem(R.id.nav_items);
+                break;
+            case 2:
+                items_layout.setVisibility(View.GONE);
+                home_layout.setVisibility(View.GONE);
+                insights_layout.setVisibility(View.VISIBLE);
+                navigationView.setCheckedItem(R.id.nav_insights);
+                break;
+        }
+    }
+
+    private void setUpInsightAdapters() {
+        insight_item_spinner.setAdapter(insight_item_adapter);
+        insight_context_spinner.setAdapter(insight_context_adapter);
+
+        insight_item_spinner.setOnItemSelectedListener(this);
+        insight_context_spinner.setOnItemSelectedListener(this);
+
+        items_ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                insight_item_list.clear();
+                insight_item_list.add("Choose Item");
+                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                    //Spinner list - data source
+                    Item item =  postSnapshot.getValue(Item.class);
+                    String item_name = item.getName();
+                    insight_item_list.add(item_name);
+                }
+                insight_item_adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void processBusinessOwnerUser() {
+        //Set home layout to business owner version
+        home_layout = findViewById(R.id.layoutHomeBusinessOwner);
+        //Set business code text
+        tv_business_code.setText(cUser.getBusiness_code());
+        //Set username text view
+        profileFnLNameBusinessOwner.setText(sessionManager.getUsername());
+
+        firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code()).child("punch in code").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String punch_in_code = snapshot.getValue(String.class);
+                amTvCurrentPunchInCode.setText(punch_in_code);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        amBtnGeneratePunchInCode.setOnClickListener(view -> {
+            business_code_ref.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+        });
+    }
+
+    private void processEmployeeUser() {
+        //Set home layout to employee version
+        home_layout = findViewById(R.id.layoutHomeEmployee);
+        //Set username text view
+        profileFnLNameEmployee.setText(sessionManager.getUsername());
+
+        nav_insights.setVisible(false);
+
+        //User is sync to business?
+        if (cUser.getBusiness_code().equals("null")) {
+            //Not synced
+            maTvStatusNotSync.setVisibility(View.VISIBLE);
+            llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
+
+            btnEnterBusinessCode.setOnClickListener(view -> {
+                String code = etBusinessCode.getText().toString();
+                business_ref.child(code).get().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        DataSnapshot snapshot = task1.getResult();
+                        if (snapshot.exists()) {
+                            user_ref.child("business_code").setValue(code);
+                            Log.e("recChecka", "1");
+                            recreate();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            });
+        } else {
+            //Synced
+            //Check approval
+            if (cUser.getStatus() == 0) {
+                //Pending approval
+                llEmployeeLayoutPendingSync.setVisibility(View.VISIBLE);
+                maSvItems.setVisibility(View.GONE);
+                maTvStatusPending.setVisibility(View.VISIBLE);
+                user_ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        lUser = snapshot.getValue(User.class);
+                        if (lUser.getStatus() != 0) {
+                            Log.e("recChecka", "2");
+                            recreate();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                user_ref.child("business_code").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String bus_code = snapshot.getValue(String.class);
+                        if (bus_code.equals("null")) {
+                            Log.e("recChecka", "3");
+                            recreate();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            } else {
+                //Approved
+                llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
+
+                user_ref.child("status").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int curr_status = snapshot.getValue(Integer.class);
+                        switch (curr_status) {
+                            case 0:
+                                //User has been dismissed
+                                employeeStatus.setText("ERROR");
+                                employeeStatus.setBackgroundColor(Color.YELLOW);
+                                Log.e("recChecka", "4");
+                                recreate();
+                                break;
+                            case 1:
+                                //Inactive
+                                employeeStatus.setText("Inactive");
+                                employeeStatus.setBackgroundColor(Color.GRAY);
+                                findViewById(R.id.tvPunchIn).setVisibility(View.VISIBLE);
+                                etPunchInCode.setVisibility(View.VISIBLE);
+                                btnEnterPunchInCode.setVisibility(View.VISIBLE);
+                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.VISIBLE);
+                                maSvItems.setVisibility(View.GONE);
+                                break;
+                            case 2:
+                                //Active
+                                employeeStatus.setText("Active");
+                                employeeStatus.setBackgroundColor(Color.GREEN);
+                                findViewById(R.id.tvPunchIn).setVisibility(View.GONE);
+                                etPunchInCode.setVisibility(View.GONE);
+                                btnEnterPunchInCode.setVisibility(View.GONE);
+                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.GONE);
+                                maSvItems.setVisibility(View.VISIBLE);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                business_code_ref.child("punch in code").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            String new_punch_in_code = snapshot.getValue(String.class);
+                            user_ref.child("curr_punch_in_code").get().addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    DataSnapshot snapshot1 = task1.getResult();
+                                    if (snapshot1.exists()) {
+                                        String current_punch_in_code = snapshot1.getValue(String.class);
+                                        if (!(new_punch_in_code.equals(current_punch_in_code))) {
+                                            user_ref.child("status").setValue(1);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                user_ref.child("user_type").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int current_user_type = snapshot.getValue(Integer.class);
+                        if (current_user_type == 0) {
+                            profileFnLUserType.setText("Standard Employee");
+                            add_button.setVisibility(View.GONE);
+                        } else if (current_user_type == 2) {
+                            profileFnLUserType.setText("Inventory Manager");
+                            add_button.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                user_ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        cUser = snapshot.getValue(User.class);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                btnEnterPunchInCode.setOnClickListener(view -> {
+                    punch_in_code = etPunchInCode.getText().toString();
+                    business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            DataSnapshot snapshot = task1.getResult();
+                            String current_punch_in_code = snapshot.getValue(String.class);
+                            if (punch_in_code.equals(current_punch_in_code)) {
+                                user_ref.child("status").setValue(2);
+                                user_ref.child("curr_punch_in_code").setValue(punch_in_code);
+                            } else {
+                                Toast.makeText(MainActivity.this, "Punch in code incorrect", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                });
+            }
+        }
+    }
+
+    private void setUserData() {
+        cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+        items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+        business_ref = firebaseDatabaseHelper.getBusinessRef();
+        business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
+        history_ref = firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code());
+    }
+
+    private void checkInternet() {
         if (!sessionManager.getLogin()) {
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
@@ -244,381 +675,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
             finish();
         }
-
-        //Get current user information
-        user_ref = firebaseDatabaseHelper.getCurrentUserRef();
-        user_ref.get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
-            } else {
-                Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
-                cUser = task.getResult().getValue(User.class);
-
-                cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
-                items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-                business_ref = firebaseDatabaseHelper.getBusinessRef();
-                business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
-                history_ref = firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code());
-                //item_list_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()); //might be unnecessary
-
-                //Check usertype
-                //[Employee, Business Owner, Employee - Inventory Manager]
-                switch (cUser.getUser_type()) {
-                    case 0:
-                    case 2:
-                        //Employee
-
-                        //Set home layout to employee version
-                        home_layout = findViewById(R.id.layoutHomeEmployee);
-                        //Set username text view
-                        profileFnLNameEmployee.setText(sessionManager.getUsername());
-
-                        nav_insights.setVisible(false);
-
-                        //User is sync to business?
-                        if (cUser.getBusiness_code().equals("null")) {
-                            //Not synced
-                            maTvStatusNotSync.setVisibility(View.VISIBLE);
-                            llEmployeeLayoutNoSync.setVisibility(View.VISIBLE);
-
-                            btnEnterBusinessCode.setOnClickListener(view -> {
-                                String code = etBusinessCode.getText().toString();
-                                business_ref.child(code).get().addOnCompleteListener(task1 -> {
-                                    if (task1.isSuccessful()) {
-                                        DataSnapshot snapshot = task1.getResult();
-                                        if (snapshot.exists()) {
-                                            user_ref.child("business_code").setValue(code);
-                                            Log.e("recChecka", "1");
-                                            recreate();
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), "Business doesn't exist", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                            });
-                        } else {
-                            //Synced
-                            //Check approval
-                            if (cUser.getStatus() == 0) {
-                                //Pending approval
-                                llEmployeeLayoutPendingSync.setVisibility(View.VISIBLE);
-                                maSvItems.setVisibility(View.GONE);
-                                maTvStatusPending.setVisibility(View.VISIBLE);
-                                user_ref.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        lUser = snapshot.getValue(User.class);
-                                        if (lUser.getStatus() != 0) {
-                                            Log.e("recChecka", "2");
-                                            recreate();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                                user_ref.child("business_code").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        String bus_code = snapshot.getValue(String.class);
-                                        if (bus_code.equals("null")) {
-                                            Log.e("recChecka", "3");
-                                            recreate();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            } else {
-                                //Approved
-                                llEmployeeLayoutYesSync.setVisibility(View.VISIBLE);
-
-                                user_ref.child("status").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        int curr_status = snapshot.getValue(Integer.class);
-                                        switch (curr_status) {
-                                            case 0:
-                                                //User has been dismissed
-                                                employeeStatus.setText("ERROR");
-                                                employeeStatus.setBackgroundColor(Color.YELLOW);
-                                                Log.e("recChecka", "4");
-                                                recreate();
-                                                break;
-                                            case 1:
-                                                //Inactive
-                                                employeeStatus.setText("Inactive");
-                                                employeeStatus.setBackgroundColor(Color.GRAY);
-                                                findViewById(R.id.tvPunchIn).setVisibility(View.VISIBLE);
-                                                etPunchInCode.setVisibility(View.VISIBLE);
-                                                btnEnterPunchInCode.setVisibility(View.VISIBLE);
-                                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.VISIBLE);
-                                                maSvItems.setVisibility(View.GONE);
-                                                break;
-                                            case 2:
-                                                //Active
-                                                employeeStatus.setText("Active");
-                                                employeeStatus.setBackgroundColor(Color.GREEN);
-                                                findViewById(R.id.tvPunchIn).setVisibility(View.GONE);
-                                                etPunchInCode.setVisibility(View.GONE);
-                                                btnEnterPunchInCode.setVisibility(View.GONE);
-                                                findViewById(R.id.maTvNotPunchedIn).setVisibility(View.GONE);
-                                                maSvItems.setVisibility(View.VISIBLE);
-                                                break;
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                                business_code_ref.child("punch in code").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            String new_punch_in_code = snapshot.getValue(String.class);
-                                            user_ref.child("curr_punch_in_code").get().addOnCompleteListener(task1 -> {
-                                                if (task1.isSuccessful()) {
-                                                    DataSnapshot snapshot1 = task1.getResult();
-                                                    if (snapshot1.exists()) {
-                                                        String current_punch_in_code = snapshot1.getValue(String.class);
-                                                        if (!(new_punch_in_code.equals(current_punch_in_code))) {
-                                                            user_ref.child("status").setValue(1);
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                                user_ref.child("user_type").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        int current_user_type = snapshot.getValue(Integer.class);
-                                        if (current_user_type == 0) {
-                                            profileFnLUserType.setText("Standard Employee");
-                                            add_button.setVisibility(View.GONE);
-                                        } else if (current_user_type == 2) {
-                                            profileFnLUserType.setText("Inventory Manager");
-                                            add_button.setVisibility(View.VISIBLE);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                                user_ref.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        cUser = snapshot.getValue(User.class);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                                btnEnterPunchInCode.setOnClickListener(view -> {
-                                    punch_in_code = etPunchInCode.getText().toString();
-                                    business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            DataSnapshot snapshot = task1.getResult();
-                                            String current_punch_in_code = snapshot.getValue(String.class);
-                                            if (punch_in_code.equals(current_punch_in_code)) {
-                                                user_ref.child("status").setValue(2);
-                                                user_ref.child("curr_punch_in_code").setValue(punch_in_code);
-                                            } else {
-                                                Toast.makeText(MainActivity.this, "Punch in code incorrect", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        }
-                        break;
-                    case 1:
-                        //Business Owner
-
-                        //Set home layout to business owner version
-                        home_layout = findViewById(R.id.layoutHomeBusinessOwner);
-                        //Set business code text
-                        tv_business_code.setText(cUser.getBusiness_code());
-                        //Set username text view
-                        profileFnLNameBusinessOwner.setText(sessionManager.getUsername());
-
-                        firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code()).child("punch in code").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                String punch_in_code = snapshot.getValue(String.class);
-                                amTvCurrentPunchInCode.setText(punch_in_code);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
-                        amBtnGeneratePunchInCode.setOnClickListener(view -> {
-                            business_code_ref.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
-                        });
-
-                        break;
-                }
-
-                //Insight
-                insight_item_spinner.setAdapter(insight_item_adapter);
-                insight_context_spinner.setAdapter(insight_context_adapter);
-                items_ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        insight_item_list.clear();
-                        insight_item_list.add("Choose Item");
-                        for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                            //Spinner list - data source
-                            Item item =  postSnapshot.getValue(Item.class);
-                            String item_name = item.getName();
-                            insight_item_list.add(item_name);
-                        }
-                        insight_item_adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-                insight_item_spinner.setOnItemSelectedListener(this);
-                insight_context_spinner.setOnItemSelectedListener(this);
-            }
-
-            //Sidebar continuity
-            switch (sessionManager.getMainStatus()) {
-                case 0:
-                    items_layout.setVisibility(View.GONE);
-                    home_layout.setVisibility(View.VISIBLE);
-                    insights_layout.setVisibility(View.GONE);
-                    navigationView.setCheckedItem(R.id.nav_home);
-                    break;
-                case 1:
-                    items_layout.setVisibility(View.VISIBLE);
-                    home_layout.setVisibility(View.GONE);
-                    insights_layout.setVisibility(View.GONE);
-                    navigationView.setCheckedItem(R.id.nav_items);
-                    break;
-                case 2:
-                    items_layout.setVisibility(View.GONE);
-                    home_layout.setVisibility(View.GONE);
-                    insights_layout.setVisibility(View.VISIBLE);
-                    navigationView.setCheckedItem(R.id.nav_insights);
-                    break;
-            }
-
-            rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-            item_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-            FirebaseRecyclerOptions<Item> options1 =
-                    new FirebaseRecyclerOptions.Builder<Item>()
-                            .setQuery(item_query, Item.class)
-                            .build();
-            mainAdapter = new MainAdapter(options1, this, cUser);
-            rvItems.setAdapter(mainAdapter);
-            mainAdapter.startListening();
-
-            rvEmployees.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-            employee_query = firebaseDatabaseHelper.getEmployeesQuery(cUser.getBusiness_code());
-            FirebaseRecyclerOptions<User> options2 =
-                    new FirebaseRecyclerOptions.Builder<User>()
-                            .setQuery(employee_query, User.class)
-                            .build();
-            employeeAdapter = new EmployeeAdapter(options2, this);
-            rvEmployees.setAdapter(employeeAdapter);
-            employeeAdapter.startListening();
-
-            itemSearchBar.clearFocus();
-            itemSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    txtSearch(query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String query) {
-                    txtSearch(query);
-                    //filterList(newText);
-                    return true;
-                }
-            });
-        });
-
-        /*tool bar*/
-        setSupportActionBar(toolbar);
-
-
-
-
-        /*navigation drawer menu*/
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
-
-        /*database arraylist storing*/
-        //storeDataInArrays();
-        /*customAdapter = new CustomAdapter(MainActivity.this, listItemName, listItemPrice, listItemQty, this);
-        rvItems.setAdapter(customAdapter);
-        rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));*/
-
-        eye_close_button.setOnClickListener(view -> {
-            eye_close_button.setVisibility(View.GONE);
-            eye_open_button.setVisibility(View.VISIBLE);
-            boxBusinessCode.setBackgroundColor(Color.TRANSPARENT);
-            tv_business_code.setVisibility(View.VISIBLE);
-        });
-        eye_open_button.setOnClickListener(view -> {
-            eye_open_button.setVisibility(View.GONE);
-            eye_close_button.setVisibility(View.VISIBLE);
-            boxBusinessCode.setBackgroundColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
-            tv_business_code.setVisibility(View.INVISIBLE);
-        });
-
-        settings.setOnClickListener(view -> {
-            refreshItems();
-            Toast.makeText(getApplicationContext(), "Settings clicked", Toast.LENGTH_SHORT).show();
-        });
-        homeIcon.setOnClickListener(view -> {
-
-        });
-        cart_button.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, CartActivity.class);
-            startActivity(intent);
-        });
-        add_button.setOnClickListener(view -> {
-            /*Add Item Activity PENDING*/
-            CreatePopUpWindow();
-        });
-
-
     }
 
     int total_sales_vol;
@@ -899,7 +955,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void CreatePopUpWindow() {
+    private void OpenAddItemPopup() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.mainpopup, null);
 
@@ -1124,13 +1180,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    void clearArrays(){
+    /*void clearArrays(){
         listItemName.clear();
         listItemPrice.clear();
         listItemQty.clear();
-    }
+    }*/
 
-    void storeDataInArrays(){
+    /*void storeDataInArrays(){
         listItemID.clear();
         listItemName.clear();
         listItemPrice.clear();
@@ -1147,7 +1203,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             storeProductDataInCurrProduct();
         }
-    }
+    }*/
 
     void refreshItems(){
         //customAdapter.notifyDataSetChanged();
