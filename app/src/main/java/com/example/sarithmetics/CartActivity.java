@@ -7,6 +7,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,11 +27,17 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -37,9 +48,9 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
     ArrayList<Item> cartedItem, items;
     CustomAdapter customAdapter;
     RecyclerView recyclerView;
-    ImageView back, emptyCart;
+    ImageView back, btn_empty_cart;
     TextView totalTextView, changeTextView;
-    Button calculate, checkOut;
+    Button btn_calculate, btn_checkout;
     EditText customerPayment;
     TextView cart_status;
     double price_total;
@@ -48,6 +59,37 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
     FirebaseDatabaseHelper firebaseDatabaseHelper;
     User cUser;
     DatabaseReference cartRef, itemsRef;
+
+    //ads
+    AdView mAdView;
+
+    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(@NonNull Network network) {
+            super.onAvailable(network);
+            Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onLost(@NonNull Network network) {
+            super.onLost(network);
+            Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+            finish();
+        }
+
+        @Override
+        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+            super.onCapabilitiesChanged(network, networkCapabilities);
+            final boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        }
+    };
+
+    NetworkRequest networkRequest = new NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,18 +101,24 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
+        initializeAds();
+
         //*database*/
         firebaseDatabaseHelper = new FirebaseDatabaseHelper();
+
+        /*Sets up internet monitoring*/
+        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*id hook*/
         recyclerView = findViewById(R.id.recyclerViewCart);
         totalTextView = findViewById(R.id.tvCartTotal);
         changeTextView = findViewById(R.id.tvCartChange);
-        calculate = findViewById(R.id.btnCartCalculate);
-        checkOut = findViewById(R.id.btnCartCheckOut);
+        btn_calculate = findViewById(R.id.btnCartCalculate);
+        btn_checkout = findViewById(R.id.btnCartCheckOut);
         customerPayment = findViewById(R.id.etnCustomerPayment);
         back = findViewById(R.id.ivToolBarCartBack);
-        emptyCart = findViewById(R.id.ivToolBarCartEmptyCart);
+        btn_empty_cart = findViewById(R.id.ivToolBarCartEmptyCart);
         cart_activity_layout = findViewById(R.id.cart_activity_layout);
         calculation_layout = findViewById(R.id.calculation_layout);
         cart_status = findViewById(R.id.cart_status);
@@ -93,6 +141,96 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         cart_status.setText("Cart loading...");
 
         /*Get Current User*/
+        getCurrentUserInformation();
+
+        btn_calculate.setOnClickListener(view -> {
+            calculate();
+        });
+
+        btn_checkout.setOnClickListener(view -> {
+            checkOut();
+        });
+
+        back.setOnClickListener(view -> finish());
+
+        btn_empty_cart.setOnClickListener(view -> {
+            emptyCart();
+        });
+
+    }
+
+    private void initializeAds() {
+        MobileAds.initialize(this, initializationStatus -> {
+
+        });
+
+        mAdView = findViewById(R.id.adViewItems);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+    private void emptyCart() {
+        for (Item curr_item : cartedItem) {
+            itemsRef.child(curr_item.getName()).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DataSnapshot dataSnapshot = task.getResult();
+                    if (dataSnapshot.exists()) {
+                        Item item = dataSnapshot.getValue(Item.class);
+                        if (item != null) {
+                            int added_qty_result = curr_item.getQuantity() + item.getQuantity();
+                            itemsRef.child(curr_item.getName()).setValue(new Item(curr_item.getName(), curr_item.getPrice(), added_qty_result));
+                        } else {
+                            Log.e(TAG, "add to cart is null 158");
+                        }
+                    } else {
+                        itemsRef.child(curr_item.getName()).setValue(curr_item);
+                    }
+                    cartRef.removeValue();
+                } else {
+                    Log.e(TAG, "empty cart unsuccessful");
+                }
+            });
+        }
+        clearArrays();
+        cartedItem.clear();
+        finish();
+    }
+
+    private void checkOut() {
+        SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
+        for (Item item: cartedItem) {
+            firebaseDatabaseHelper
+                    .getBusinessTransactionHistory(cUser.getBusiness_code())
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
+                    .child(time_format.format(Calendar.getInstance().getTime()))
+                    .child(item.getName()).setValue(item);
+        }
+        clearArrays();
+        cartRef.removeValue();
+        finish();
+    }
+
+    private void calculate() {
+        double customerPaymentFloat = 0;
+        changeTextView.setText("");
+        btn_checkout.setVisibility(View.GONE);
+        String tempPayment = customerPayment.getText().toString().trim();
+        if(!isEmpty(tempPayment)){
+            customerPaymentFloat = Double.parseDouble(tempPayment);
+        }
+        double result = customerPaymentFloat - price_total;
+        if(result < 0){
+            Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
+        }else{
+            changeTextView.setText("₱" + String.valueOf(result));
+            btn_checkout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void getCurrentUserInformation() {
         firebaseDatabaseHelper.getCurrentUserRef().get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 Log.d(TAG, "Got User object: " + task.getResult().getValue());
@@ -118,12 +256,12 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
                             if (cartedItem.isEmpty()) {
                                 //cart is empty
                                 cart_status.setText("Cart is empty");
-                                emptyCart.setVisibility(View.GONE);
+                                btn_empty_cart.setVisibility(View.GONE);
                                 calculation_layout.setVisibility(View.INVISIBLE);
                                 cart_status.setVisibility(View.VISIBLE);
                             } else {
                                 //cart is not empty
-                                emptyCart.setVisibility(View.VISIBLE);
+                                btn_empty_cart.setVisibility(View.VISIBLE);
                                 calculation_layout.setVisibility(View.VISIBLE);
                                 cart_status.setVisibility(View.GONE);
                             }
@@ -143,68 +281,6 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
                 Log.e(TAG, "Error getting data", task.getException());
             }
         });
-
-        calculate.setOnClickListener(view -> {
-            double customerPaymentFloat = 0;
-            changeTextView.setText("");
-            checkOut.setVisibility(View.GONE);
-            String tempPayment = customerPayment.getText().toString().trim();
-            if(!isEmpty(tempPayment)){
-                customerPaymentFloat = Double.parseDouble(tempPayment);
-            }
-            double result = customerPaymentFloat - price_total;
-            if(result < 0){
-                Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
-            }else{
-                changeTextView.setText("₱" + String.valueOf(result));
-                checkOut.setVisibility(View.VISIBLE);
-            }
-        });
-
-        checkOut.setOnClickListener(view -> {
-            for (Item item: cartedItem) {
-                firebaseDatabaseHelper
-                        .getBusinessTransactionHistory(cUser.getBusiness_code())
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                        .child(item.getName()).setValue(item);
-            }
-            clearArrays();
-            cartRef.removeValue();
-            finish();
-        });
-
-        back.setOnClickListener(view -> finish());
-
-        emptyCart.setOnClickListener(view -> {
-            for (Item curr_item : cartedItem) {
-                itemsRef.child(curr_item.getName()).get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DataSnapshot dataSnapshot = task.getResult();
-                        if (dataSnapshot.exists()) {
-                            Item item = dataSnapshot.getValue(Item.class);
-                            if (item != null) {
-                                int added_qty_result = curr_item.getQuantity() + item.getQuantity();
-                                itemsRef.child(curr_item.getName()).setValue(new Item(curr_item.getName(), curr_item.getPrice(), added_qty_result));
-                            } else {
-                                Log.e(TAG, "add to cart is null 158");
-                            }
-                        } else {
-                            itemsRef.child(curr_item.getName()).setValue(curr_item);
-                        }
-                        cartRef.removeValue();
-                    } else {
-                        Log.e(TAG, "empty cart unsuccessful");
-                    }
-                });
-            }
-            clearArrays();
-            cartedItem.clear();
-            finish();
-        });
-
     }
 
     public void clearArrays() {

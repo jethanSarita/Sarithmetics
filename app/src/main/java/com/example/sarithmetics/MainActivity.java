@@ -43,6 +43,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,6 +65,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -103,18 +115,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ArrayAdapter<String> adp;
 
+    //Ads
+    AdView mAdView;
+
+    PieChart pieChart;
+    ArrayList<PieEntry> entries;
+    PieDataSet pieDataSet;
+    PieData pieData;
+
     /*Internet monitoring*/
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
             super.onAvailable(network);
-            Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onLost(@NonNull Network network) {
             super.onLost(network);
-            Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
             finish();
         }
@@ -137,6 +157,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initializeAds();
+
         randomHelper = new RandomHelper();
 
         punch_in_code = null;
@@ -144,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*Sets up internet monitoring*/
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
         connectivityManager.requestNetwork(networkRequest, networkCallback);
-        ////Make some checks for internet connectivity, thank you in advance me -Jethan
 
         /*firebase*/
         firebaseDatabase = FirebaseDatabase.getInstance(DB);
@@ -204,6 +225,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         insight_context_adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, insight_context_list);
         item_total_sales_vol_tv = findViewById(R.id.item_total_sales_vol_tv);
         item_revenue_tv = findViewById(R.id.item_revenue_tv);
+        pieChart = findViewById(R.id.insight_piechart);
+        initializePieChart();
+
         //item_turnover_rate_tv = findViewById(R.id.item_turnover_rate_tv);
         top1_tv = findViewById(R.id.top1_tv);
         top2_tv = findViewById(R.id.top2_tv);
@@ -229,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         insight_context_spinner = findViewById(R.id.insight_context_perf_spinner);
 
         //Check if session exists
-        checkInternet();
+        checkSession();
 
         //Get current user information
         getCurrentUserInformation();
@@ -269,6 +293,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void initializePieChart() {
+        pieChart.setNoDataTextColor(getResources().getColor(R.color.colorTextPrimary));
+        pieChart.setNoDataText("Pending context");
+        pieChart.setCenterTextSize(20);
+        pieChart.setEntryLabelTextSize(15f);
+        pieChart.setHoleColor(getResources().getColor(R.color.colorBackground));
+        pieChart.setCenterTextColor(getResources().getColor(R.color.colorTextPrimary));
+        pieChart.getLegend().setTextColor(getResources().getColor(R.color.colorTextPrimary));
+        pieChart.getLegend().setTextSize(15f);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.animateY(1000);
+    }
+
+    private void initializeAds() {
+        MobileAds.initialize(this, initializationStatus -> {
+
+        });
+
+        mAdView = findViewById(R.id.adViewItems);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
     private void openCart() {
         Intent intent = new Intent(MainActivity.this, CartActivity.class);
         startActivity(intent);
@@ -304,6 +351,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void getCurrentUserInformation() {
         user_ref = firebaseDatabaseHelper.getCurrentUserRef();
+        if (firebaseDatabaseHelper.getFirebaseUser() == null) {
+            logout();
+        }
         user_ref.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
@@ -558,6 +608,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 etPunchInCode.setVisibility(View.VISIBLE);
                                 btnEnterPunchInCode.setVisibility(View.VISIBLE);
                                 findViewById(R.id.maTvNotPunchedIn).setVisibility(View.VISIBLE);
+                                add_button.setVisibility(View.GONE);
                                 maSvItems.setVisibility(View.GONE);
                                 break;
                             case 2:
@@ -568,6 +619,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 etPunchInCode.setVisibility(View.GONE);
                                 btnEnterPunchInCode.setVisibility(View.GONE);
                                 findViewById(R.id.maTvNotPunchedIn).setVisibility(View.GONE);
+                                add_button.setVisibility(View.VISIBLE);
                                 maSvItems.setVisibility(View.VISIBLE);
                                 break;
                         }
@@ -662,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         history_ref = firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code());
     }
 
-    private void checkInternet() {
+    private void checkSession() {
         if (!sessionManager.getLogin()) {
             sessionManager.setLogin(false);
             sessionManager.setUsername(null);
@@ -680,159 +732,260 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int total_sales_vol;
     double total_rev;
     List<Item> top_list_item;
+    String insight_selected_item, insight_selected_context;
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        String current_item = insight_item_spinner.getSelectedItem().toString();
-        String current_context = insight_context_spinner.getSelectedItem().toString();
+        insight_selected_item = insight_item_spinner.getSelectedItem().toString();
+        insight_selected_context = insight_context_spinner.getSelectedItem().toString();
         total_sales_vol = 0;
         total_rev = 0;
         top_list_item = new ArrayList<>();
 
-        if (!(current_item.equals("Choose Item") || current_context.equals("Choose Context"))) {
-            switch (current_context) {
+        if (!(insight_selected_item.equals("Choose Item") || insight_selected_context.equals("Choose Context"))) {
+            displayPerformance();
+        }
+
+        if (insight_selected_item.equals("Choose Item")) {
+            item_total_sales_vol_tv.setText("Pending Choice");
+            item_revenue_tv.setText("Pending Choice");
+        }
+
+        if (!(insight_selected_context.equals("Choose Context"))) {
+            switch (insight_selected_context) {
                 case "Today":
                 case "Yesterday":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot day : dataSnapshot.getChildren()) {
-                                Item item = day.getValue(Item.class);
-                                if (item != null) {
-                                    if (item.getName().equals(current_item)) {
-                                        total_sales_vol += item.getQuantity();
-                                        total_rev += item.getPrice() * item.getQuantity();
+                            DataSnapshot day = task.getResult();
+                            for (DataSnapshot time : day.getChildren()) {
+                                for (DataSnapshot cItem : time.getChildren()) {
+                                    Item item = cItem.getValue(Item.class);
+                                    if (item != null) {
+                                        top_list_item.add(item);
+                                    } else {
+                                        Log.e("Insight Error", "Today/Yesterday - item is null");
                                     }
-                                } else {
-                                    Log.e("Insight Error", "Today/Yesterday - item is null");
                                 }
                             }
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
+                            }
                         }
-                        item_total_sales_vol_tv.setText("" + total_sales_vol);
-                        item_revenue_tv.setText("" + total_rev);
                     });
                     break;
                 case "This Week":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
+                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task ->{
                         if (task.isSuccessful()) {
-                            DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot week : dataSnapshot.getChildren()) {
-                                for (DataSnapshot day : week.getChildren()) {
-                                    Item item = day.getValue(Item.class);
-                                    if (item != null) {
-                                        if (item.getName().equals(current_item)) {
-                                            total_sales_vol += item.getQuantity();
-                                            total_rev += item.getPrice() * item.getQuantity();
-                                        }
-                                    } else {
-                                        Log.e("Insight Error", "This Week - item is null");
-                                    }
-                                }
-                            }
-                            item_total_sales_vol_tv.setText("" + total_sales_vol);
-                            item_revenue_tv.setText("" + total_rev);
-                        }
-                    });
-                    break;
-                case "This Month":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot month : dataSnapshot.getChildren()) {
-                                for (DataSnapshot week : month.getChildren()) {
-                                    for (DataSnapshot day : week.getChildren()) {
-                                        Item item = day.getValue(Item.class);
+                            DataSnapshot week = task.getResult();
+                            for (DataSnapshot day : week.getChildren()) {
+                                for (DataSnapshot time : day.getChildren()) {
+                                    for (DataSnapshot cItem : time.getChildren()) {
+                                        Item item = cItem.getValue(Item.class);
                                         if (item != null) {
-                                            if (item.getName().equals(current_item)) {
-                                                total_sales_vol += item.getQuantity();
-                                                total_rev += item.getPrice() * item.getQuantity();
-                                            }
+                                            top_list_item.add(item);
                                         } else {
                                             Log.e("Insight Error", "This Week - item is null");
                                         }
                                     }
                                 }
                             }
-                            item_total_sales_vol_tv.setText("" + total_sales_vol);
-                            item_revenue_tv.setText("" + total_rev);
-                        }
-                    });
-                    break;
-            }
-        }
-
-        if (!(current_context.equals("Choose Context"))) {
-            switch (current_context) {
-                case "Today":
-                case "Yesterday":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot day : dataSnapshot.getChildren()) {
-                                Item item = day.getValue(Item.class);
-                                if (item != null) {
-                                    top_list_item.add(item);
-                                } else {
-                                    Log.e("Insight Error", "Today/Yesterday - item is null");
-                                }
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
                             }
-                        }
-                        if (!top_list_item.isEmpty()) {
-                            SortAndDisplay(top_list_item);
-                        } else {
-                            //List is empty
-                        }
-                    });
-                    break;
-                case "This Week":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DataSnapshot dataSnapshot = task.getResult();
-                            for (DataSnapshot week : dataSnapshot.getChildren()) {
-                                for (DataSnapshot day : week.getChildren()) {
-                                    Item item = day.getValue(Item.class);
-                                    if (item != null) {
-                                        top_list_item.add(item);
-                                    } else {
-                                        Log.e("Insight Error", "This Week - item is null");
-                                    }
-                                }
-                            }
-                        }
-                        if (!top_list_item.isEmpty()) {
-                            SortAndDisplay(top_list_item);
-                        } else {
-                            //List is empty
                         }
                     });
                     break;
                 case "This Month":
-                    getInsightReference(current_context).get().addOnCompleteListener(task -> {
-                       if (task.isSuccessful()) {
-                           DataSnapshot dataSnapshot = task.getResult();
-                           for (DataSnapshot month : dataSnapshot.getChildren()) {
-                               for (DataSnapshot week : month.getChildren()) {
-                                   for (DataSnapshot day : week.getChildren()) {
-                                       Item item = day.getValue(Item.class);
-                                       if (item != null) {
-                                           top_list_item.add(item);
-                                       } else {
-                                           Log.e("Insight Error", "This Week - item is null");
-                                       }
-                                   }
-                               }
-                           }
-                       }
-                       if (!top_list_item.isEmpty()) {
-                            SortAndDisplay(top_list_item);
-                       } else {
-                            //List is empty
-                       }
+                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot month = task.getResult();
+                            for (DataSnapshot week : month.getChildren()) {
+                                for (DataSnapshot day : week.getChildren()) {
+                                    for (DataSnapshot time : day.getChildren()) {
+                                        for (DataSnapshot cItem : time.getChildren()) {
+                                            Item item = cItem.getValue(Item.class);
+                                            if (item != null) {
+                                                top_list_item.add(item);
+                                            } else {
+                                                Log.e("Insight Error", "This Week - item is null");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
+                            }
+                        }
                     });
                     break;
             }
+        } else {
+            pieChart.clear();
         }
+    }
+
+    private void displayPerformance() {
+        switch (insight_selected_context) {
+            case "Today":
+            case "Yesterday":
+                displayPerformanceTodayOrYesterday();
+                break;
+            case "This Week":
+                displayPerformanceWeek();
+                break;
+            case "This Month":
+                displayPerformanceMonth();
+                break;
+        }
+    }
+
+    private void displayPerformanceMonth() {
+        getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DataSnapshot month = task.getResult();
+                for (DataSnapshot week : month.getChildren()) {
+                    for (DataSnapshot day : week.getChildren()) {
+                        for (DataSnapshot time : day.getChildren()) {
+                            for (DataSnapshot cItem : time.getChildren()) {
+                                Item item = cItem.getValue(Item.class);
+                                if (item != null) {
+                                    if (item.getName().equals(insight_selected_item)) {
+                                        total_sales_vol += item.getQuantity();
+                                        total_rev += item.getPrice() * item.getQuantity();
+                                    }
+                                } else {
+                                    Log.e("Insight Error", "This Week - item is null");
+                                }
+                            }
+                        }
+                    }
+                }
+                item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
+                item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
+            }
+        });
+    }
+
+    private void displayPerformanceWeek() {
+        getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DataSnapshot week = task.getResult();
+                for (DataSnapshot day : week.getChildren()) {
+                    for (DataSnapshot time : day.getChildren()) {
+                        for (DataSnapshot cItem : time.getChildren()) {
+                            Item item = cItem.getValue(Item.class);
+                            if (item != null) {
+                                if (item.getName().equals(insight_selected_item)) {
+                                    total_sales_vol += item.getQuantity();
+                                    total_rev += item.getPrice() * item.getQuantity();
+                                }
+                            } else {
+                                Log.e("Insight Error", "This Week - item is null");
+                            }
+                        }
+                    }
+                }
+                item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
+                item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
+            }
+        });
+    }
+
+    private void displayPerformanceTodayOrYesterday() {
+        getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DataSnapshot day = task.getResult();
+                for (DataSnapshot time : day.getChildren()) {
+                    for (DataSnapshot cItem : time.getChildren()) {
+                        Item item = cItem .getValue(Item.class);
+                        if (item != null) {
+                            if (item.getName().equals(insight_selected_item)) {
+                                total_sales_vol += item.getQuantity();
+                                total_rev += item.getPrice() * item.getQuantity();
+                            }
+                        } else {
+                            Log.e("Insight Error", "Today/Yesterday - item is null");
+                        }
+                    }
+                }
+            }
+            item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
+            item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
+        });
+    }
+
+    private List<Item> combineItems(List<Item> list) {
+
+        List<Item> combined_items = new ArrayList<>();
+
+        for (Item item : list) {
+            boolean found = false;
+            for (Item cItem : combined_items) {
+                if (cItem.getName().equals(item.getName())) {
+                    cItem.setQuantity(cItem.getQuantity() + item.getQuantity());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                combined_items.add(new Item(item.getName(), item.getPrice(), item.getQuantity()));
+            }
+        }
+        return combined_items;
+    }
+
+    private void displayInsightPieChart(List<Item> topListItem, String current_context) {
+        entries = new ArrayList<>();
+        int curr_count = 1;
+
+        for (Item item : topListItem) {
+            if (curr_count > 5) {
+                break;
+            }
+
+            float quantity = (float) item.getQuantity();
+            String name = item.getName();
+
+            entries.add(new PieEntry(quantity, name));
+
+            curr_count++;
+        }
+
+        //getResources().getColor(R.color.colorTextPrimary)
+
+        pieDataSet = new PieDataSet(entries, "");
+        pieDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        pieData = new PieData(pieDataSet);
+        pieData.setValueTextSize(15f);
+
+        pieChart.setData(pieData);
+        pieChart.setCenterText(current_context);
+        pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                PieEntry e1 = (PieEntry) e;
+                insight_item_spinner.setSelection(insight_item_adapter.getPosition(e1.getLabel()));
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+        pieChart.invalidate();
     }
 
     private void SortAndDisplay(List<Item> top_list_item) {
@@ -852,6 +1005,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             count++;
         }
+    }
+
+    private List<Item> sortList(List<Item> list) {
+        list.sort((o1, o2) -> Integer.compare(o2.getQuantity(), o1.getQuantity()));
+        return list;
     }
 
     ArrayList<String> sortList(ArrayList<Item> arr) {
@@ -926,22 +1084,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             insights_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(0);
+            resetInsight();
         }else if(item.getItemId() == R.id.nav_items){
             home_layout.setVisibility(View.GONE);
             insights_layout.setVisibility(View.GONE);
             items_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(1);
+            resetInsight();
         }else if(item.getItemId() == R.id.nav_insights){
             items_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.GONE);
             insights_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(2);
         }else if(item.getItemId() == R.id.nav_logout){
-            sessionManager.setLogin(false);
-            sessionManager.setUsername(null);
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
-            finish();
+            logout();
         }else if (item.getItemId() == R.id.nav_share) {
 
         }else if (item.getItemId() == R.id.nav_rate) {
@@ -953,6 +1109,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    private void logout() {
+        sessionManager.setLogin(false);
+        sessionManager.setUsername(null);
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
+        finish();
+    }
+
+    private void resetInsight() {
+        insight_item_spinner.setSelection(0);
+        insight_context_spinner.setSelection(0);
+        pieChart.clear();
     }
 
     private void OpenAddItemPopup() {
@@ -1058,11 +1228,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
 
         /*Both*/
-        Button button_add_to_cart;
+        TextView tvAreYouSure;
+        Button button_add_to_cart, button_quick_buy, button_yes, button_no;
         NumberPicker editPopupNumberPicker;
+
 
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
+        button_quick_buy = popupView.findViewById(R.id.btnQuickBuy);
+        button_yes = popupView.findViewById(R.id.btnYesBuy);
+        button_no = popupView.findViewById(R.id.btnNoBuy);
+        tvAreYouSure = popupView.findViewById(R.id.tvAreYouSure);
 
         //Set number picker
         editPopupNumberPicker.setMinValue(0);
@@ -1178,32 +1354,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 itemSearchBar.clearFocus();
             }
         });
-    }
 
-    /*void clearArrays(){
-        listItemName.clear();
-        listItemPrice.clear();
-        listItemQty.clear();
-    }*/
+        //Quick buy button
+        button_quick_buy.setOnClickListener(view -> {
+            int selected_product_quantity = editPopupNumberPicker.getValue();
 
-    /*void storeDataInArrays(){
-        listItemID.clear();
-        listItemName.clear();
-        listItemPrice.clear();
-        listItemQty.clear();
-        Cursor cursor = database.readAllProductData();
-        if(cursor.getCount() == 0){
-            //Toast.makeText(MainActivity.this, "No data", Toast.LENGTH_SHORT).show();
-        }else{
-            while(cursor.moveToNext()){
-                listItemID.add(cursor.getString(0));
-                listItemName.add(cursor.getString(1));
-                listItemPrice.add(cursor.getString(2));
-                listItemQty.add(cursor.getString(3));
+            if (selected_product_quantity == 0) {
+                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
+            } else {
+                button_add_to_cart.setVisibility(View.GONE);
+                button_quick_buy.setVisibility(View.GONE);
+
+                tvAreYouSure.setVisibility(View.VISIBLE);
+                button_yes.setVisibility(View.VISIBLE);
+                button_no.setVisibility(View.VISIBLE);
+                itemSearchBar.clearFocus();
             }
-            storeProductDataInCurrProduct();
-        }
-    }*/
+        });
+
+        button_yes.setOnClickListener(view -> {
+            int selected_product_quantity = editPopupNumberPicker.getValue();
+
+            if (selected_product_quantity == 0) {
+                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
+            } else {
+                SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
+
+                firebaseDatabaseHelper
+                        .getBusinessTransactionHistory(cUser.getBusiness_code())
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
+                        .child(time_format.format(Calendar.getInstance().getTime()))
+                        .child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+
+                items_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
+
+                popupWindow.dismiss();
+                itemSearchBar.clearFocus();
+            }
+        });
+
+        button_no.setOnClickListener(view ->{
+            button_add_to_cart.setVisibility(View.VISIBLE);
+            button_quick_buy.setVisibility(View.VISIBLE);
+
+            tvAreYouSure.setVisibility(View.GONE);
+            button_yes.setVisibility(View.GONE);
+            button_no.setVisibility(View.GONE);
+            itemSearchBar.clearFocus();
+        });
+    }
 
     void refreshItems(){
         //customAdapter.notifyDataSetChanged();

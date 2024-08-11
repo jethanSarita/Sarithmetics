@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/editpopupLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -29,7 +30,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="0"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -229,6 +231,43 @@
                             android:layout_marginRight="10dp"
                             android:backgroundTint="@color/colorTextPrimary"
                             android:text="Add to Cart" />
+
+                        <Button
+                            android:id="@+id/btnQuickBuy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Quick Buy" />
+
+                        <TextView
+                            android:id="@+id/tvAreYouSure"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Are you sure?"
+                            android:textAlignment="center"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/btnYesBuy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Yes"
+                            android:visibility="gone" />
+                        <Button
+                            android:id="@+id/btnNoBuy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="No"
+                            android:visibility="gone" />
+
                     </LinearLayout>
 
                 </LinearLayout>

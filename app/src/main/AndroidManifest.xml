@@ -23,13 +23,6 @@
             android:name=".NoConnectionActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginRegister2Activity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.login.LoginRegisterActivity2"
-            android:exported="false"
-            android:label="@string/title_activity_login_register2" />
-        <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="" />
@@ -50,6 +43,9 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8524862471390434~2218360106"/>
     </application>
 
 </manifest>

@@ -14,10 +14,6 @@
             android:id="@+id/nav_insights"
             android:icon="@drawable/insights_icon"
             android:title="Insights" />
-        <item
-            android:id="@+id/nav_logout"
-            android:title="Logout"
-            android:icon="@drawable/analytics_icon" />
 
     </group>
 
@@ -46,6 +42,10 @@
 
     <group android:id="@+id/nav_exit_group">
 
+        <item
+            android:id="@+id/nav_logout"
+            android:title="Logout"
+            android:icon="@drawable/analytics_icon" />
         <item
             android:id="@+id/nav_exit"
             android:icon="@drawable/exit_icon"

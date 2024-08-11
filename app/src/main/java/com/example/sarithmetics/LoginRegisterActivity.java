@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -87,7 +86,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
 
-        checkInternet();
+        //checkInternet();
 
         //Register for network updates
         ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
@@ -226,6 +225,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                                             }
                                             myRef = database.getReference("Users");
                                             myRef.child(cUser.getUid()).setValue(cUser);
+                                            database.getReference("businesses").child(cUser.getBusiness_code()).child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
                                             updateUI(user);
                                         } else {
                                             Log.d(TAG, "User profile update error.", task.getException());
