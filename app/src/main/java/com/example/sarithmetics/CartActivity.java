@@ -67,13 +67,13 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         @Override
         public void onAvailable(@NonNull Network network) {
             super.onAvailable(network);
-            Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onLost(@NonNull Network network) {
             super.onLost(network);
-            Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
             finish();
         }
