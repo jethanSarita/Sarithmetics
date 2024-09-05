@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 
-public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myViewHolder> {
+public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterItemFirebase.myViewHolder> {
 
     /**
      * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
@@ -27,7 +27,7 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
     private FirebaseDatabaseHelper firebaseDatabaseHelper;
     private User user;
     private Context context;
-    public MainAdapter(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, User user) {
+    public ListAdapterItemFirebase(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, User user) {
         super(options);
         this.listener = listener;
         firebaseDatabaseHelper = new FirebaseDatabaseHelper();
@@ -39,7 +39,7 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull MainAdapter.myViewHolder holder, int position, @NonNull Item model) {
+    protected void onBindViewHolder(@NonNull ListAdapterItemFirebase.myViewHolder holder, int position, @NonNull Item model) {
         holder.productNameText.setText(model.getName());
         holder.productPriceText.setText("₱" + model.getPrice());
         holder.productQtyText.setText("Stock: " + model.getQuantity());
@@ -48,24 +48,11 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
                 listener.onItemClick(position, String.valueOf(model.getName()), String.valueOf(model.getPrice()), String.valueOf(model.getQuantity()));
             }
         });
-        /*firebaseDatabaseHelper.getItemsCategories(user.getBusiness_code()).get().addOnCompleteListener(task -> {
-            ArrayList<String> categories = new ArrayList<>();
-            if (task.isSuccessful()) {
-                DataSnapshot snapshot = task.getResult();
-                if (snapshot.exists()) {
-                    for (DataSnapshot currSnapshot : snapshot.getChildren()) {
-                        categories.add(currSnapshot.getValue(String.class));
-                    }
-                }
-            }
-            ArrayAdapter<String> adp = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, categories);
-            holder.categories_spinner.setAdapter(adp);
-        });*/
     }
 
     @NonNull
     @Override
-    public MainAdapter.myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ListAdapterItemFirebase.myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.list_layout_item, parent, false);
@@ -78,10 +65,10 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
         Spinner categories_spinner;
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
-            productNameText = itemView.findViewById(R.id.tvEmployeeName);
-            productPriceText = itemView.findViewById(R.id.tvProductPrice);
-            productQtyText = itemView.findViewById(R.id.tvEmployeeType);
-            rowListLayout = itemView.findViewById(R.id.rowListLayoutID);
+            productNameText = itemView.findViewById(R.id.tvItemName);
+            productPriceText = itemView.findViewById(R.id.tvItemPrice);
+            productQtyText = itemView.findViewById(R.id.tvItemQuantity);
+            rowListLayout = itemView.findViewById(R.id.listLayoutItem);
             categories_spinner = itemView.findViewById(R.id.main_popup_category_spinner);
         }
     }

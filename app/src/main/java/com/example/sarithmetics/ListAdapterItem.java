@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.MyViewHolder> {
+public class ListAdapterItem extends RecyclerView.Adapter<ListAdapterItem.MyViewHolder> {
     private Context context;
     private ArrayList productName, productPrice, productQty;
     private OnItemClickListener listener;
@@ -21,7 +21,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.MyView
     public interface OnItemClickListener {
         void onItemClick(int position, String productName, String productPrice, String productQty);
     }
-    ItemListAdapter(Context context , ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
+    ListAdapterItem(Context context , ArrayList productName, ArrayList productPrice, ArrayList productQty, OnItemClickListener listener){
         this.context = context;
         this.productName = productName;
         this.productPrice = productPrice;
@@ -30,14 +30,14 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.MyView
     }
     @NonNull
     @Override
-    public ItemListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ListAdapterItem.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.list_layout_item, parent, false);
         return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ItemListAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ListAdapterItem.MyViewHolder holder, int position) {
         holder.productNameText.setText(String.valueOf(productName.get(position)));
         holder.productPriceText.setText("₱" + productPrice.get(position));
         holder.productQtyText.setText("Stock: " + productQty.get(position));
@@ -61,7 +61,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.MyView
             productNameText = itemView.findViewById(R.id.tvItemName);
             productPriceText = itemView.findViewById(R.id.tvItemPrice);
             productQtyText = itemView.findViewById(R.id.tvItemQuantity);
-            rowListLayout = itemView.findViewById(R.id.rowListLayoutID);
+            rowListLayout = itemView.findViewById(R.id.listLayoutItem);
         }
 
     }

@@ -71,7 +71,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemListAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeListAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItem.OnItemClickListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
     FloatingActionButton add_button;
@@ -88,10 +88,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
-    ItemListAdapter itemListAdapter;
-    MainAdapter mainAdapter;
-    EmployeeListAdapter employeeListAdapter;
-    RecyclerView rvItems, rvEmployees;
+    ListAdapterItem listAdapterItem;
+    ListAdapterItemFirebase listAdapterItemFirebase;
+    ListAdapterEmployeeFirebase listAdapterEmployeeFirebase;
+    ListAdapterRestockFirebase listAdapterRestockFirebase;
+    RecyclerView rvItems, rvEmployees, rvRestocking;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
     Spinner insight_item_spinner, insight_context_spinner;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
     ScrollView maSvItems;
     RandomHelper randomHelper;
-    MenuItem nav_insights;
+    MenuItem nav_insights, nav_restock;
 
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref;
-    Query item_query, employee_query;
+    Query item_query, employee_query, restock_query;
 
     ArrayAdapter<String> adp;
 
@@ -187,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*navigation*/
         nav_insights = navigationView.getMenu().findItem(R.id.nav_insights);
+        nav_restock = navigationView.getMenu().findItem(R.id.nav_restock);
 
         /*home page layout*/
         profileFnLNameEmployee = findViewById(R.id.profileFnLNameEmployee);
@@ -194,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tv_business_code = findViewById(R.id.tvBusinessCode);
         rvItems = findViewById(R.id.recyclerViewItem);
         rvEmployees = findViewById(R.id.rvEmployees);
+        rvRestocking = findViewById(R.id.recyclerViewRestocking);
         maTvStatusNotSync = findViewById(R.id.maTvStatusNotSync);
         maTvStatusPending = findViewById(R.id.maTvStatusPending);
         amBtnGeneratePunchInCode = findViewById(R.id.amBtnGeneratePunchInCode);
@@ -392,6 +395,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //List of Employees
             setUpEmployeeList();
 
+            //List of Restock
+            setUpRestockList();
+
             //Search bar functionality
             setUpSearchBar();
         });
@@ -415,18 +421,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void setUpEmployeeList() {
-        rvEmployees.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        employee_query = firebaseDatabaseHelper.getEmployeesQuery(cUser.getBusiness_code());
-        FirebaseRecyclerOptions<User> options2 =
-                new FirebaseRecyclerOptions.Builder<User>()
-                        .setQuery(employee_query, User.class)
-                        .build();
-        employeeListAdapter = new EmployeeListAdapter(options2, this);
-        rvEmployees.setAdapter(employeeListAdapter);
-        employeeListAdapter.startListening();
-    }
-
     private void setUpItemList() {
         rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         item_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
@@ -434,10 +428,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new FirebaseRecyclerOptions.Builder<Item>()
                         .setQuery(item_query, Item.class)
                         .build();
-        mainAdapter = new MainAdapter(options1, this, cUser);
-        rvItems.setAdapter(mainAdapter);
-        mainAdapter.startListening();
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options1, this, cUser);
+        rvItems.setAdapter(listAdapterItemFirebase);
+        listAdapterItemFirebase.startListening();
     }
+
+    private void setUpRestockList() {
+        rvRestocking.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        restock_query = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+        FirebaseRecyclerOptions<Item> options2 =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(restock_query, Item.class)
+                        .build();
+        listAdapterRestockFirebase = new ListAdapterRestockFirebase(options2, this, cUser);
+        rvRestocking.setAdapter(listAdapterRestockFirebase);
+        listAdapterRestockFirebase.startListening();
+    }
+
+    private void setUpEmployeeList() {
+        rvEmployees.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        employee_query = firebaseDatabaseHelper.getEmployeesQuery(cUser.getBusiness_code());
+        FirebaseRecyclerOptions<User> options3 =
+                new FirebaseRecyclerOptions.Builder<User>()
+                        .setQuery(employee_query, User.class)
+                        .build();
+        listAdapterEmployeeFirebase = new ListAdapterEmployeeFirebase(options3, this);
+        rvEmployees.setAdapter(listAdapterEmployeeFirebase);
+        listAdapterEmployeeFirebase.startListening();
+    }
+
+
 
     private void sidebarContinuity() {
         switch (sessionManager.getMainStatus()) {
@@ -521,9 +541,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         home_layout = findViewById(R.id.layoutHomeEmployee);
         //Set username text view
         profileFnLNameEmployee.setText(sessionManager.getUsername());
-
+        //Remove access to insights
         nav_insights.setVisible(false);
-
+        //Check employee subtype
+        if (cUser.getUser_type() != 2) {
+            nav_restock.setVisible(false);
+        }
         //User is sync to business?
         if (cUser.getBusiness_code().equals("null")) {
             //Not synced
@@ -711,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
         business_ref = firebaseDatabaseHelper.getBusinessRef();
         business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
-        history_ref = firebaseDatabaseHelper.getBusinessTransactionHistory(cUser.getBusiness_code());
+        history_ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code());
     }
 
     private void checkSession() {
@@ -1071,38 +1094,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setQuery(items_ref.orderByChild("name").startAt(str).endAt(str + "~"), Item.class)
                         .build();
 
-        mainAdapter = new MainAdapter(options, this, cUser);
-        mainAdapter.startListening();
-        rvItems.setAdapter(mainAdapter);
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        listAdapterItemFirebase.startListening();
+        rvItems.setAdapter(listAdapterItemFirebase);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        if(item.getItemId() == R.id.nav_home){
+        if (item.getItemId() == R.id.nav_home) {
             items_layout.setVisibility(View.GONE);
             insights_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(0);
             resetInsight();
-        }else if(item.getItemId() == R.id.nav_items){
+        } else if(item.getItemId() == R.id.nav_items) {
             home_layout.setVisibility(View.GONE);
             insights_layout.setVisibility(View.GONE);
             items_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(1);
             resetInsight();
-        }else if(item.getItemId() == R.id.nav_insights){
+        } else if(item.getItemId() == R.id.nav_insights) {
             items_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.GONE);
             insights_layout.setVisibility(View.VISIBLE);
             sessionManager.setMainStatus(2);
-        }else if(item.getItemId() == R.id.nav_logout){
+        } else if (item.getItemId() == R.id.nav_restock) {
+
+        } else if(item.getItemId() == R.id.nav_logout) {
             logout();
-        }else if (item.getItemId() == R.id.nav_share) {
+        } else if (item.getItemId() == R.id.nav_share) {
 
-        }else if (item.getItemId() == R.id.nav_rate) {
+        } else if (item.getItemId() == R.id.nav_rate) {
 
-        }else if(item.getItemId() == R.id.nav_exit) {
+        } else if(item.getItemId() == R.id.nav_exit) {
             finishAffinity();
         }
 
@@ -1127,7 +1152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void OpenAddItemPopup() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.mainpopup, null);
+        View popupView = inflater.inflate(R.layout.popup_item_add, null);
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -1193,7 +1218,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /*Popup when editing an item*/
     private void CreateEditPopUpWindow(String currProductName, double currProductPrice, int currProductQty) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.editpopup, null);
+        View popupView = inflater.inflate(R.layout.popup_item_edit, null);
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -1381,7 +1406,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
 
                 firebaseDatabaseHelper
-                        .getBusinessTransactionHistory(cUser.getBusiness_code())
+                        .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
                         .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
                         .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
                         .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
@@ -1412,11 +1437,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemSearchBar.clearFocus();
     }
 
-    @Override
-    public void onItemClick(int position, String productName, String productPrice, String productQty) {
-        CreateEditPopUpWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
-    }
-
     void storeProductDataInCurrProduct(){
         currProduct.clear();
         Product temp;
@@ -1436,9 +1456,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(filteredList.isEmpty()){
             Toast.makeText(MainActivity.this, "No data found", Toast.LENGTH_SHORT).show();
         }else{
-            itemListAdapter.setFilteredList(filteredList);
+            listAdapterItem.setFilteredList(filteredList);
         }
     }
+
+    //Item List OnClick Listener
+
+    @Override
+    public void onItemClick(int position, String productName, String productPrice, String productQty) {
+        CreateEditPopUpWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
+    }
+
+    //Employee List OnClick Listener
 
     @Override
     public void onEmployeeClick(int position, User emp_user, boolean pending_approval) {
@@ -1449,9 +1478,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    //Restock List OnClick Listeners
+
+    @Override
+    public void onRestockPlusButtonClick(int position, Item model) {
+
+    }
+
+    @Override
+    public void onRestockMinusButtonClick(int position, Item model) {
+
+    }
+
+    @Override
+    public void onRestockItemClick(int position, Item model) {
+        createRestockPopupWindow(model);
+    }
+
+    private void createRestockPopupWindow(Item item) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_restock, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        TextView Text_Cost_Price;
+        EditText EditText_New_Cost_Price;
+        Button Button_Set;
+
+        Text_Cost_Price = findViewById(R.id.restockPopupCostPrice);
+        EditText_New_Cost_Price = findViewById(R.id.restockPopupNewCostPrice);
+        Button_Set = findViewById(R.id.restockPopupBtnSet);
+
+        Text_Cost_Price.setText(String.valueOf(item.getCostPrice()));
+
+        Button_Set.setOnClickListener(view -> {
+            Double New_Cost_Price = Double.parseDouble(EditText_New_Cost_Price.getText().toString());
+            item.setCostPrice(New_Cost_Price);
+
+            firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()).setValue(item);
+            popupWindow.dismiss();
+        });
+    }
+
     private void createEmployeeApprovalPopupWindow(User emp_user) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.employee_approval_popup, null);
+        View popupView = inflater.inflate(R.layout.popup_employee_approval, null);
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -1483,7 +1558,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void createEmployeePopupWindow(User emp_user) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.employee_popup, null);
+        View popupView = inflater.inflate(R.layout.popup_employee, null);
 
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;

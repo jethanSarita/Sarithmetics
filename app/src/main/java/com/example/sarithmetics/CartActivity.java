@@ -39,12 +39,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CartActivity extends AppCompatActivity implements ItemListAdapter.OnItemClickListener {
+public class CartActivity extends AppCompatActivity implements ListAdapterItem.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
     LinearLayout cart_activity_layout, calculation_layout;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
     ArrayList<Item> cartedItem, items;
-    ItemListAdapter itemListAdapter;
+    ListAdapterItem listAdapterItem;
     RecyclerView recyclerView;
     ImageView back, btn_empty_cart;
     TextView totalTextView, changeTextView;
@@ -132,8 +132,8 @@ public class CartActivity extends AppCompatActivity implements ItemListAdapter.O
         cartedItem.clear();
 
         /*Listing*/
-        itemListAdapter = new ItemListAdapter(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
-        recyclerView.setAdapter(itemListAdapter);
+        listAdapterItem = new ListAdapterItem(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
+        recyclerView.setAdapter(listAdapterItem);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
 
         cart_status.setText("Cart loading...");
@@ -198,7 +198,7 @@ public class CartActivity extends AppCompatActivity implements ItemListAdapter.O
         SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
         for (Item item: cartedItem) {
             firebaseDatabaseHelper
-                    .getBusinessTransactionHistory(cUser.getBusiness_code())
+                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
                     .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
                     .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
                     .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
@@ -263,7 +263,7 @@ public class CartActivity extends AppCompatActivity implements ItemListAdapter.O
                                 calculation_layout.setVisibility(View.VISIBLE);
                                 cart_status.setVisibility(View.GONE);
                             }
-                            itemListAdapter.notifyDataSetChanged();
+                            listAdapterItem.notifyDataSetChanged();
                             totalTextView.setText(String.valueOf(price_total));
                         }
 
@@ -297,7 +297,7 @@ public class CartActivity extends AppCompatActivity implements ItemListAdapter.O
 
     private void createCartPopupWindow(String item_name, Double item_price, int item_quantity) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.cart_popup, null);
+        View popupView = inflater.inflate(R.layout.popup_cart, null);
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
