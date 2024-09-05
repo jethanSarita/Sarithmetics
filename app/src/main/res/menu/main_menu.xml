@@ -5,14 +5,14 @@
         <item
             android:id="@+id/nav_home"
             android:title="Home"
-            android:icon="@drawable/home_icon2"/>
+            android:icon="@drawable/icon_home_2"/>
         <item
             android:id="@+id/nav_items"
             android:title="Items"
-            android:icon="@drawable/items_icon"/>
+            android:icon="@drawable/icon_items"/>
         <item
             android:id="@+id/nav_insights"
-            android:icon="@drawable/insights_icon"
+            android:icon="@drawable/icon_insights"
             android:title="Insights" />
 
     </group>
@@ -26,12 +26,12 @@
                     <item
                         android:id="@+id/nav_share"
                         android:title="Share"
-                        android:icon="@drawable/share_icon"
+                        android:icon="@drawable/icon_share"
                         />
                     <item
                         android:id="@+id/nav_rate"
                         android:title="Rate us"
-                        android:icon="@drawable/rate_icon"
+                        android:icon="@drawable/icon_rate"
                         />
 
                 </group>
@@ -45,10 +45,10 @@
         <item
             android:id="@+id/nav_logout"
             android:title="Logout"
-            android:icon="@drawable/analytics_icon" />
+            android:icon="@drawable/icon_analytics" />
         <item
             android:id="@+id/nav_exit"
-            android:icon="@drawable/exit_icon"
+            android:icon="@drawable/icon_exit"
             android:title="Exit" />
 
     </group>

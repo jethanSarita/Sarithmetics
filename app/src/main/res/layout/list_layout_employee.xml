@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="15dp"
     android:layout_marginTop="10dp"
     android:layout_marginRight="15dp"
-    android:id="@+id/rowListLayoutID">
+    android:id="@+id/row_list_employee_layout">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/list_bg"
-            android:padding="10dp">
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:background="@drawable/bg_list">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -29,38 +28,34 @@
 
                     <TextView
                         android:id="@+id/tvEmployeeName"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Product name"
+                        android:text="Employee name"
                         android:textColor="@color/colorTextPrimary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvEmployeeType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Employee type"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvEmployeeStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Product quantity"
-                        android:textColor="@color/colorTextPrimary"
+                        android:text="Employee status"
+                        android:textColor="@color/white"
                         android:textStyle="bold" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvProductPrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Product Price"
-                    android:textAlignment="textEnd"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
 
             </LinearLayout>
 
         </RelativeLayout>
-
 </LinearLayout>

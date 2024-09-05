@@ -49,7 +49,7 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    app:srcCompat="@drawable/add_icon" />
+                    app:srcCompat="@drawable/icon_add" />
 
                 <ImageView
                     android:id="@+id/ivCart"
@@ -64,7 +64,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.025"
-                    app:srcCompat="@drawable/cart_icon" />
+                    app:srcCompat="@drawable/icon_cart" />
 
                 <TextView
                     android:id="@+id/textView3"
@@ -114,7 +114,7 @@
                 <androidx.appcompat.widget.SearchView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/search_view_bg"
+                    android:background="@drawable/bg_search"
                     app:iconifiedByDefault="false"
                     app:queryHint="Search" />
             </RelativeLayout>

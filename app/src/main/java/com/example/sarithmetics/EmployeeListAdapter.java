@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 
-public class EmployeeAdapter extends FirebaseRecyclerAdapter<User, EmployeeAdapter.myViewHolder> {
+public class EmployeeListAdapter extends FirebaseRecyclerAdapter<User, EmployeeListAdapter.myViewHolder> {
     /**
      * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
      * {@link FirebaseRecyclerOptions} for configuration options.
@@ -23,7 +23,7 @@ public class EmployeeAdapter extends FirebaseRecyclerAdapter<User, EmployeeAdapt
 
     private OnItemClickListener listener;
 
-    public EmployeeAdapter(@NonNull FirebaseRecyclerOptions<User> options, OnItemClickListener listener) {
+    public EmployeeListAdapter(@NonNull FirebaseRecyclerOptions<User> options, OnItemClickListener listener) {
         super(options);
         this.listener = listener;
     }
@@ -73,8 +73,8 @@ public class EmployeeAdapter extends FirebaseRecyclerAdapter<User, EmployeeAdapt
     @Override
     public myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.row_list_employee_layout, parent, false);
-        return new EmployeeAdapter.myViewHolder(view);
+        View view = inflater.inflate(R.layout.list_layout_employee, parent, false);
+        return new EmployeeListAdapter.myViewHolder(view);
     }
 
     public interface OnItemClickListener {

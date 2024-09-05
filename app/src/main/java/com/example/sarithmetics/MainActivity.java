@@ -71,7 +71,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemListAdapter.OnItemClickListener, MainAdapter.OnItemClickListener, EmployeeListAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
     FloatingActionButton add_button;
@@ -88,9 +88,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
-    CustomAdapter customAdapter;
+    ItemListAdapter itemListAdapter;
     MainAdapter mainAdapter;
-    EmployeeAdapter employeeAdapter;
+    EmployeeListAdapter employeeListAdapter;
     RecyclerView rvItems, rvEmployees;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
@@ -422,9 +422,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new FirebaseRecyclerOptions.Builder<User>()
                         .setQuery(employee_query, User.class)
                         .build();
-        employeeAdapter = new EmployeeAdapter(options2, this);
-        rvEmployees.setAdapter(employeeAdapter);
-        employeeAdapter.startListening();
+        employeeListAdapter = new EmployeeListAdapter(options2, this);
+        rvEmployees.setAdapter(employeeListAdapter);
+        employeeListAdapter.startListening();
     }
 
     private void setUpItemList() {
@@ -1436,7 +1436,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(filteredList.isEmpty()){
             Toast.makeText(MainActivity.this, "No data found", Toast.LENGTH_SHORT).show();
         }else{
-            customAdapter.setFilteredList(filteredList);
+            itemListAdapter.setFilteredList(filteredList);
         }
     }
 

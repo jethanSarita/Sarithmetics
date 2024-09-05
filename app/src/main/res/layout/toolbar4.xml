@@ -5,13 +5,13 @@
     android:layout_height="wrap_content"
     android:background="#f0c4ac"
     android:elevation="4dp"
-    app:navigationIcon="@drawable/menu">
+    app:navigationIcon="@drawable/icon_menu">
 
     <ImageView
         android:id="@+id/ivCartRemove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/cartremove_icon"
+        android:src="@drawable/icon_cart_move"
         android:layout_gravity="right"
         android:layout_margin="15dp"
         />

@@ -68,7 +68,7 @@ public class MainAdapter extends FirebaseRecyclerAdapter<Item,MainAdapter.myView
     public MainAdapter.myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.rowlistlayout, parent, false);
+        View view = inflater.inflate(R.layout.list_layout_item, parent, false);
         return new myViewHolder(view);
     }
 

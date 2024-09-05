@@ -30,8 +30,6 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,12 +39,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CartActivity extends AppCompatActivity implements CustomAdapter.OnItemClickListener {
+public class CartActivity extends AppCompatActivity implements ItemListAdapter.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
     LinearLayout cart_activity_layout, calculation_layout;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
     ArrayList<Item> cartedItem, items;
-    CustomAdapter customAdapter;
+    ItemListAdapter itemListAdapter;
     RecyclerView recyclerView;
     ImageView back, btn_empty_cart;
     TextView totalTextView, changeTextView;
@@ -134,8 +132,8 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
         cartedItem.clear();
 
         /*Listing*/
-        customAdapter = new CustomAdapter(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
-        recyclerView.setAdapter(customAdapter);
+        itemListAdapter = new ItemListAdapter(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
+        recyclerView.setAdapter(itemListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
 
         cart_status.setText("Cart loading...");
@@ -265,7 +263,7 @@ public class CartActivity extends AppCompatActivity implements CustomAdapter.OnI
                                 calculation_layout.setVisibility(View.VISIBLE);
                                 cart_status.setVisibility(View.GONE);
                             }
-                            customAdapter.notifyDataSetChanged();
+                            itemListAdapter.notifyDataSetChanged();
                             totalTextView.setText(String.valueOf(price_total));
                         }
 
