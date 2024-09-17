@@ -40,9 +40,9 @@ public class ListAdapterCartFirebase extends FirebaseRecyclerAdapter<Item, ListA
 
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterCartFirebase.myViewHolder holder, int position, @NonNull Item model) {
-        holder.productNameText.setText(model.getName());
-        holder.productPriceText.setText("₱" + model.getPrice());
-        holder.productQtyText.setText("Stock: " + model.getQuantity());
+        holder.item_name.setText(model.getName());
+        holder.item_price.setText("₱" + model.getPrice());
+        holder.item_quantity.setText("Stock: " + model.getQuantity());
         holder.rowListLayout.setOnClickListener(view -> {
             if (listener != null) {
                 listener.onItemClick(position, model);
@@ -60,14 +60,14 @@ public class ListAdapterCartFirebase extends FirebaseRecyclerAdapter<Item, ListA
     }
 
     class myViewHolder extends RecyclerView.ViewHolder {
-        TextView productNameText, productPriceText, productQtyText;
+        TextView item_name, item_price, item_quantity;
         LinearLayout rowListLayout;
         Spinner categories_spinner;
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
-            productNameText = itemView.findViewById(R.id.tvItemName);
-            productPriceText = itemView.findViewById(R.id.tvItemPrice);
-            productQtyText = itemView.findViewById(R.id.tvItemQuantity);
+            item_name = itemView.findViewById(R.id.tvItemName);
+            item_price = itemView.findViewById(R.id.tvItemPrice);
+            item_quantity = itemView.findViewById(R.id.tvItemQuantity);
             rowListLayout = itemView.findViewById(R.id.listLayoutItem);
             categories_spinner = itemView.findViewById(R.id.main_popup_category_spinner);
         }

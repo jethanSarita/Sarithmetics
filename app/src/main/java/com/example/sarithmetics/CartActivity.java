@@ -35,13 +35,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CartActivity extends AppCompatActivity implements ListAdapterItem.OnItemClickListener, ListAdapterCartFirebase.OnItemClickListener {
+public class CartActivity extends AppCompatActivity implements ListAdapterCartFirebase.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
     LinearLayout cart_activity_layout, calculation_layout;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
@@ -136,11 +137,11 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
         cartedItem.clear();
 
         /*Listing*/
-        listAdapterItem = new ListAdapterItem(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
-        recyclerView.setAdapter(listAdapterItem);
-        recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
+        /*listAdapterItem = new ListAdapterItem(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
+        recyclerView.setAdapter(listAdapterItem);*/
+        /*recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));*/
 
-        cart_status.setText("Cart loading...");
+        //cart_status.setText("Cart loading...");
 
         /*Get Current User*/
         getCurrentUserInformation();
@@ -161,6 +162,26 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
 
     }
 
+    private void getCurrentUserInformation() {
+        firebaseDatabaseHelper.getCurrentUserRef().get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                Log.d(TAG, "Got User object: " + task.getResult().getValue());
+                cUser = task.getResult().getValue(User.class);
+                if (cUser != null) {
+                    /*Set refs*/
+                    cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+                    items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+
+                    setUpCartList();
+                } else {
+                    Log.d(TAG, "User is null");
+                }
+            } else {
+                Log.e(TAG, "Error getting data", task.getException());
+            }
+        });
+    }
+
     private void setUpCartList() {
         recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
         cart_query = firebaseDatabaseHelper.getCartRef(cUser.getUid());
@@ -168,9 +189,38 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
                 new FirebaseRecyclerOptions.Builder<Item>()
                         .setQuery(cart_query, Item.class)
                         .build();
-        listAdapterCartFirebase = new ListAdapterCartFirebase(options1, this, cUser);
+        listAdapterCartFirebase = new ListAdapterCartFirebase(options1, this, cUser) {
+            @Override
+             public void onDataChanged() {
+                super.onDataChanged();
+                updateView();
+            }
+        };
         recyclerView.setAdapter(listAdapterCartFirebase);
         listAdapterCartFirebase.startListening();
+    }
+
+    private void updateView() {
+        if (listAdapterCartFirebase.getItemCount() == 0) {
+            //cart is empty
+            cart_status.setText("Cart is empty");
+            btn_empty_cart.setVisibility(View.GONE);
+            calculation_layout.setVisibility(View.INVISIBLE);
+            cart_status.setVisibility(View.VISIBLE);
+        } else {
+            //cart is not empty
+            btn_empty_cart.setVisibility(View.VISIBLE);
+            calculation_layout.setVisibility(View.VISIBLE);
+            cart_status.setVisibility(View.GONE);
+
+            for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
+                Item item = listAdapterCartFirebase.getItem(i);
+
+                price_total += item.getPrice() * item.getQuantity();
+            }
+
+            totalTextView.setText(String.valueOf(price_total));
+        }
     }
 
     private void initializeAds() {
@@ -184,7 +234,27 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
     }
 
     private void emptyCart() {
-        for (Item curr_item : cartedItem) {
+
+        for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
+            Item item = listAdapterCartFirebase.getItem(i);
+
+            items_ref.child(item.getName()).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DataSnapshot dataSnapshot = task.getResult();
+                    if (dataSnapshot.exists()) {
+                        Item snapshot_item = dataSnapshot.getValue(Item.class);
+                        if (item != null) {
+                            int added_qty_result = item.getQuantity() + snapshot_item.getQuantity();
+                            items_ref.child(item.getName()).setValue(new Item(item.getName(), item.getPrice(), item.getCostPrice(), added_qty_result));
+                        }
+                    }
+                    cart_ref.removeValue();
+                    finish();
+                }
+            });
+        }
+
+        /*for (Item curr_item : cartedItem) {
             items_ref.child(curr_item.getName()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DataSnapshot dataSnapshot = task.getResult();
@@ -206,13 +276,38 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
             });
         }
         clearArrays();
-        cartedItem.clear();
-        finish();
+        cartedItem.clear();*/
     }
 
     private void checkOut() {
         SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
-        for (Item item: cartedItem) {
+
+        for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
+            Item item = listAdapterCartFirebase.getItem(i);
+
+            firebaseDatabaseHelper
+                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
+                    .child(time_format.format(Calendar.getInstance().getTime()))
+                    .child(item.getName()).setValue(item).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            firebaseDatabaseHelper
+                                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
+                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
+                                    .child(time_format.format(Calendar.getInstance().getTime()))
+                                    .child(item.getName()).child("transactionDate").setValue(ServerValue.TIMESTAMP);
+                        }
+                    });
+            //revamp database structure for transaction history
+        }
+
+        /*for (Item item: cartedItem) {
             firebaseDatabaseHelper
                     .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
                     .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
@@ -221,80 +316,37 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
                     .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
                     .child(time_format.format(Calendar.getInstance().getTime()))
                     .child(item.getName()).setValue(item);
-        }
-        clearArrays();
+
+            firebaseDatabaseHelper
+                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
+                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
+                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
+                    .child(time_format.format(Calendar.getInstance().getTime()))
+                    .child(item.getName()).child("transactionDate").setValue(ServerValue.TIMESTAMP);
+        }*/
+        /*clearArrays();*/
+
         cart_ref.removeValue();
         finish();
     }
 
     private void calculate() {
-        double customerPaymentFloat = 0;
+        double customer_payment = 0;
         changeTextView.setText("");
         btn_checkout.setVisibility(View.GONE);
         String tempPayment = customerPayment.getText().toString().trim();
         if(!isEmpty(tempPayment)){
-            customerPaymentFloat = Double.parseDouble(tempPayment);
+            customer_payment = Double.parseDouble(tempPayment);
         }
-        double result = customerPaymentFloat - price_total;
+        double result = customer_payment - price_total;
         if(result < 0){
             Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
         }else{
             changeTextView.setText("₱" + String.valueOf(result));
             btn_checkout.setVisibility(View.VISIBLE);
         }
-    }
-
-    private void getCurrentUserInformation() {
-        firebaseDatabaseHelper.getCurrentUserRef().get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                Log.d(TAG, "Got User object: " + task.getResult().getValue());
-                cUser = task.getResult().getValue(User.class);
-                if (cUser != null) {
-                    /*Set refs*/
-                    cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
-                    items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-                    cart_ref.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            clearArrays();
-                            price_total = 0;
-                            for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                                Item item = postSnapshot.getValue(Item.class);
-                                cartedItem.add(item);
-                                cartedItemName.add(item.getName());
-                                cartedItemPrice.add(String.valueOf(item.getPrice()));
-                                cartedItemQty.add(String.valueOf(item.getQuantity()));
-                                price_total += item.getPrice() * item.getQuantity();
-                            }
-
-                            if (cartedItem.isEmpty()) {
-                                //cart is empty
-                                cart_status.setText("Cart is empty");
-                                btn_empty_cart.setVisibility(View.GONE);
-                                calculation_layout.setVisibility(View.INVISIBLE);
-                                cart_status.setVisibility(View.VISIBLE);
-                            } else {
-                                //cart is not empty
-                                btn_empty_cart.setVisibility(View.VISIBLE);
-                                calculation_layout.setVisibility(View.VISIBLE);
-                                cart_status.setVisibility(View.GONE);
-                            }
-                            listAdapterItem.notifyDataSetChanged();
-                            totalTextView.setText(String.valueOf(price_total));
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Log.w("item value event listener", "loadPost:onCancelled", error.toException());
-                        }
-                    });
-                } else {
-                    Log.d(TAG, "User is null");
-                }
-            } else {
-                Log.e(TAG, "Error getting data", task.getException());
-            }
-        });
     }
 
     public void clearArrays() {
@@ -304,19 +356,17 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
         cartedItemQty.clear();
     }
 
-
-
-    @Override
+    /*@Override
     public void onItemClick(int position, String productName, String productPrice, String productQty) {
         createCartPopupWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
-    }
+    }*/
 
     @Override
     public void onItemClick(int position, Item item) {
-
+        createCartPopupWindow(item);
     }
 
-    private void createCartPopupWindow(String item_name, Double item_price, int item_quantity) {
+    private void createCartPopupWindow(Item item) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_cart, null);
 
@@ -327,6 +377,14 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
 
         cart_activity_layout.post(() -> popupWindow.showAtLocation(cart_activity_layout, Gravity.TOP, 0, 0));
+
+        String item_name;
+        double item_price;
+        int item_quantity;
+
+        item_name = item.getName();
+        item_price = item.getPrice();
+        item_quantity = item.getQuantity();
 
         TextView tv_item_name, tv_item_price;
         NumberPicker np_item_quantity;
