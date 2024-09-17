@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 
-public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterItemFirebase.myViewHolder> {
+public class ListAdapterCartFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterCartFirebase.myViewHolder> {
 
     /**
      * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
@@ -27,7 +27,7 @@ public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListA
     private FirebaseDatabaseHelper firebaseDatabaseHelper;
     private User user;
     private Context context;
-    public ListAdapterItemFirebase(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, User user) {
+    public ListAdapterCartFirebase(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, User user) {
         super(options);
         this.listener = listener;
         firebaseDatabaseHelper = new FirebaseDatabaseHelper();
@@ -39,7 +39,7 @@ public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListA
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull ListAdapterItemFirebase.myViewHolder holder, int position, @NonNull Item model) {
+    protected void onBindViewHolder(@NonNull ListAdapterCartFirebase.myViewHolder holder, int position, @NonNull Item model) {
         holder.productNameText.setText(model.getName());
         holder.productPriceText.setText("₱" + model.getPrice());
         holder.productQtyText.setText("Stock: " + model.getQuantity());
@@ -52,7 +52,7 @@ public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListA
 
     @NonNull
     @Override
-    public ListAdapterItemFirebase.myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ListAdapterCartFirebase.myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.list_layout_item, parent, false);

@@ -1,9 +1,12 @@
 package com.example.sarithmetics;
 
 import android.content.Context;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -16,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+
+import org.w3c.dom.Text;
 
 public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterRestockFirebase.myViewHolder> {
 
@@ -39,20 +44,91 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
 
     public interface OnItemClickListener {
         void onRestockItemClick(int position, Item model);
-        void onRestockMinusButtonClick(int position, Item model);
-        void onRestockPlusButtonClick(int position, Item model);
     }
 
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterRestockFirebase.myViewHolder holder, int position, @NonNull Item model) {
+        int initial_delay = 500;
+        int repeat_delay = 100;
+
         holder.bindData(model);
 
+        Handler handler = new Handler();
 
-        holder.button_plus.setOnClickListener(view -> {
+        Runnable incrementRunnable = new Runnable() {
+            @Override
+            public void run() {
+                holder.incrementRestock(model);
+                handler.postDelayed(this, repeat_delay);
+            }
+        };
+
+        Runnable decrementRunnable = new Runnable() {
+            @Override
+            public void run() {
+                holder.decrementRestock(model);
+                handler.postDelayed(this, repeat_delay);
+            }
+        };
+
+        holder.button_plus.setOnTouchListener((view, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: // When button is pressed
+                    holder.incrementRestock(model);
+                    handler.postDelayed(incrementRunnable, initial_delay);
+                    return true;
+
+                case MotionEvent.ACTION_UP: // When button is released
+                case MotionEvent.ACTION_CANCEL:
+                    handler.removeCallbacks(incrementRunnable);
+                    return true;
+            }
+            return false;
+        });
+
+        holder.button_minus.setOnTouchListener((view, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: // When button is pressed
+                    holder.decrementRestock(model);
+                    handler.postDelayed(decrementRunnable, initial_delay);
+                    return true;
+
+                case MotionEvent.ACTION_UP: // When button is released
+                case MotionEvent.ACTION_CANCEL:
+                    handler.removeCallbacks(decrementRunnable);
+                    return true;
+            }
+            return false;
+        });
+
+        holder.list_layout_restock.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onRestockItemClick(position, model);
+            }
+        });
+
+        /*holder.button_plus.setOnClickListener(view -> {
+            holder.current_set_stock++;
+            holder.item_total_cost.setText("₱" + (model.getPrice() * holder.current_set_stock));
+            holder.restock_number.setText(String.valueOf(holder.current_set_stock));
+        });
+
+        holder.button_minus.setOnClickListener(view -> {
+            holder.current_set_stock--;
+
+            if (holder.current_set_stock <= -1) {
+                holder.current_set_stock = 0;
+            }
+
+            holder.item_total_cost.setText("₱" + (model.getPrice() * holder.current_set_stock));
+            holder.restock_number.setText(String.valueOf(holder.current_set_stock));
+        });*/
+
+        /*holder.button_plus.setOnClickListener(view -> {
             if (listener != null) {
                 listener.onRestockPlusButtonClick(position, model);
             }
-        });
+        });*/
     }
 
     @NonNull
@@ -66,7 +142,7 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
 
     class myViewHolder extends RecyclerView.ViewHolder {
         TextView item_name, item_quantity, item_selling_price, item_cost_price, item_total_cost;
-        EditText restock_number;
+        TextView restock_number;
         ImageButton button_minus, button_plus;
         LinearLayout list_layout_restock;
         int current_set_stock = 0;
@@ -82,54 +158,36 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
             button_minus = itemView.findViewById(R.id.imgBtnRestockMinus);
             button_plus = itemView.findViewById(R.id.imgBtnRestockPlus);
             list_layout_restock = itemView.findViewById(R.id.listLayoutRestock);
-
-            restock_number.setText(current_set_stock);
-
-            button_plus.setOnClickListener(view -> {
-                current_set_stock++;
-
-                restock_number.setText(current_set_stock);
-            });
-
-            button_minus.setOnClickListener(view -> {
-                current_set_stock--;
-
-                if (current_set_stock <= -1) {
-                    current_set_stock = 0;
-                }
-
-                restock_number.setText(current_set_stock);
-            });
-
-            restock_number.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    current_set_stock = Integer.parseInt(s.toString());
-                    restock_number.setText(current_set_stock);
-                }
-            });
         }
 
         public void bindData(Item item) {
             item_name.setText(item.getName());
             item_quantity.setText("Stock: " + item.getQuantity());
             item_selling_price.setText("₱" + item.getPrice());
+            item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
 
             if (item.getCostPrice() == 0.0) {
-                item_cost_price.setText("CLICK TO SET");
+                item_cost_price.setText("Cost Price: CLICK TO SET");
             } else {
-                item_cost_price.setText("₱" + item.getCostPrice());
+                item_cost_price.setText("Cost: ₱" +  + item.getCostPrice());
             }
+        }
+
+        public void incrementRestock(Item item) {
+            current_set_stock++;
+            item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
+            restock_number.setText(String.valueOf(current_set_stock));
+        }
+
+        public void decrementRestock(Item item) {
+            current_set_stock--;
+
+            if (current_set_stock <= -1) {
+                current_set_stock = 0;
+            }
+
+            item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
+            restock_number.setText(String.valueOf(current_set_stock));
         }
     }
 }

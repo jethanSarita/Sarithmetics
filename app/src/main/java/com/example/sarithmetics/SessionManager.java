@@ -29,7 +29,9 @@ public class SessionManager {
     public void setMainStatus(int status){
         //0 - Home
         //1 - Items
-        //2 - Insights
+        //2 - Restock
+        //3 - History
+        //4 - Insights
         editor.putInt("key_mainstatus", status);
         editor.commit();
     }

@@ -71,16 +71,16 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItem.OnItemClickListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
-    FloatingActionButton add_button;
+    FloatingActionButton add_button, update_button;
     String punch_in_code;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     ImageView settings, homeIcon, cart_button, eye_open_button, eye_close_button;
-    RelativeLayout home_layout, items_layout, insights_layout;
+    RelativeLayout home_layout, items_layout, insights_layout, restock_layout;
     MyDatabaseHelper database;
     ArrayList<String> listItemID;
     ArrayList<String> listItemName;
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> insight_item_list, insight_context_list;
     ArrayAdapter<String> insight_item_adapter, insight_context_adapter;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
-    androidx.appcompat.widget.SearchView itemSearchBar;
+    androidx.appcompat.widget.SearchView itemSearchBar, restockingSearchBar;
     EditText etBusinessCode, etPunchInCode;
     Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
     ScrollView maSvItems;
@@ -213,12 +213,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         etBusinessCode = findViewById(R.id.etBusinessCode);
         btnEnterBusinessCode = findViewById(R.id.btnEnterBusinessCode);
 
-        /*items page hooks*/
-        items_layout = findViewById(R.id.layoutItems);
+        /*items layout*/
+        items_layout = findViewById(R.id.layout_items);
         itemSearchBar = findViewById(R.id.itemSearchBar);
         cart_button = findViewById(R.id.ivCart);
         add_button = findViewById(R.id.ivAddItem);
         maSvItems = findViewById(R.id.maSvItems);
+
+        /*restock layout*/
+        restock_layout = findViewById(R.id.layout_restock);
+        restockingSearchBar = findViewById(R.id.restockingSearchBar);
+        update_button = findViewById(R.id.fabUpdate);
 
         /*insights layout*/
         insights_layout = findViewById(R.id.layout_insight);
@@ -292,8 +297,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             openCart();
         });
         add_button.setOnClickListener(view -> {
-            OpenAddItemPopup();
+            openAddItemPopup();
         });
+        update_button.setOnClickListener(view -> {
+            restockItems();
+        });
+    }
+
+    private void restockItems() {
+        for (int i = 0; i < listAdapterRestockFirebase.getItemCount(); i++) {
+            Item item = listAdapterRestockFirebase.getItem(i);
+            ListAdapterRestockFirebase.myViewHolder holder = (ListAdapterRestockFirebase.myViewHolder) rvRestocking.findViewHolderForAdapterPosition(i);
+
+            if (holder != null) {
+                int newStock = item.getQuantity() + holder.current_set_stock;
+
+                firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()).child(item.getName()).child("quantity").setValue(newStock);
+
+                holder.current_set_stock = 0;
+                holder.restock_number.setText(String.valueOf(holder.current_set_stock));
+                holder.item_total_cost.setText("₱" + (item.getPrice() * holder.current_set_stock));
+            }
+        }
     }
 
     private void initializePieChart() {
@@ -512,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void processBusinessOwnerUser() {
         //Set home layout to business owner version
-        home_layout = findViewById(R.id.layoutHomeBusinessOwner);
+        home_layout = findViewById(R.id.layout_home_business_owner);
         //Set business code text
         tv_business_code.setText(cUser.getBusiness_code());
         //Set username text view
@@ -538,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void processEmployeeUser() {
         //Set home layout to employee version
-        home_layout = findViewById(R.id.layoutHomeEmployee);
+        home_layout = findViewById(R.id.layout_home_employee);
         //Set username text view
         profileFnLNameEmployee.setText(sessionManager.getUsername());
         //Remove access to insights
@@ -1103,25 +1128,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         if (item.getItemId() == R.id.nav_home) {
-            items_layout.setVisibility(View.GONE);
-            insights_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.VISIBLE);
+            items_layout.setVisibility(View.GONE);
+            restock_layout.setVisibility(View.GONE);
+            //history layout
+            insights_layout.setVisibility(View.GONE);
             sessionManager.setMainStatus(0);
             resetInsight();
         } else if(item.getItemId() == R.id.nav_items) {
             home_layout.setVisibility(View.GONE);
-            insights_layout.setVisibility(View.GONE);
             items_layout.setVisibility(View.VISIBLE);
+            restock_layout.setVisibility(View.GONE);
+            //history layout
+            insights_layout.setVisibility(View.GONE);
             sessionManager.setMainStatus(1);
             resetInsight();
-        } else if(item.getItemId() == R.id.nav_insights) {
+        } else if (item.getItemId() == R.id.nav_restock) {
+            home_layout.setVisibility(View.GONE);
+            items_layout.setVisibility(View.GONE);
+            restock_layout.setVisibility(View.VISIBLE);
+            //history layout
+            insights_layout.setVisibility(View.GONE);
+            sessionManager.setMainStatus(2);
+        } else if (false) {
+            //Under construction
+            //Under construction
+            //Under construction
+            //Under construction
+            //Under construction
+            sessionManager.setMainStatus(3);
+            //For transaction history
+        } else if (item.getItemId() == R.id.nav_insights) {
             items_layout.setVisibility(View.GONE);
             home_layout.setVisibility(View.GONE);
+            restock_layout.setVisibility(View.GONE);
+            //history layout
             insights_layout.setVisibility(View.VISIBLE);
-            sessionManager.setMainStatus(2);
-        } else if (item.getItemId() == R.id.nav_restock) {
-
-        } else if(item.getItemId() == R.id.nav_logout) {
+            sessionManager.setMainStatus(4);
+        } else if (item.getItemId() == R.id.nav_logout) {
             logout();
         } else if (item.getItemId() == R.id.nav_share) {
 
@@ -1150,7 +1194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         pieChart.clear();
     }
 
-    private void OpenAddItemPopup() {
+    private void openAddItemPopup() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_add, null);
 
@@ -1216,7 +1260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
     /*Popup when editing an item*/
-    private void CreateEditPopUpWindow(String currProductName, double currProductPrice, int currProductQty) {
+    private void CreateEditPopUpWindow(Item item) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_edit, null);
 
@@ -1225,6 +1269,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        String current_item_name = item.getName();
+        Double current_item_price = item.getPrice();
+        Double current_item_cost_price = item.getCostPrice();
+        int current_item_quantity = item.getQuantity();
 
         /*title*/
         TextView epp_title;
@@ -1242,12 +1291,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*edit*/
         LinearLayout epp_ll_edit;
         Button button_edit, button_close, button_delete;
-        EditText productName, productPrice, productQuantity;
+        EditText edit_item_name, edit_item_price;
+        TextView edit_display_item_quantity;
 
         epp_ll_edit = popupView.findViewById(R.id.epp_ll_edit);
-        productName = popupView.findViewById(R.id.productNameEdit);
-        productPrice = popupView.findViewById(R.id.productPriceEdit);
-        productQuantity = popupView.findViewById(R.id.productQuantityEdit);
+        edit_item_name = popupView.findViewById(R.id.productNameEdit);
+        edit_item_price = popupView.findViewById(R.id.productPriceEdit);
+        edit_display_item_quantity = popupView.findViewById(R.id.productQuantityEdit);
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
         button_close = popupView.findViewById(R.id.btnEditPopupClose);
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
@@ -1267,17 +1317,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Set number picker
         editPopupNumberPicker.setMinValue(0);
-        editPopupNumberPicker.setMaxValue(currProductQty);
+        editPopupNumberPicker.setMaxValue(item.getQuantity());
 
         //Set edit text fields
-        productName.setText(currProductName);
-        productPrice.setText(String.valueOf(currProductPrice));
-        productQuantity.setText(String.valueOf(currProductQty));
+        edit_item_name.setText(current_item_name);
+        edit_item_price.setText(String.valueOf(current_item_price));
+        edit_display_item_quantity.setText(String.valueOf(current_item_quantity));
 
         //Set text view fields
-        epp_tv_item_name.setText(currProductName);
-        epp_tv_item_price.setText(String.valueOf(currProductPrice));
-        epp_tv_item_quantity.setText(String.valueOf(currProductQty));
+        epp_tv_item_name.setText(current_item_name);
+        epp_tv_item_price.setText(String.valueOf(String.valueOf(current_item_price)));
+        epp_tv_item_quantity.setText(String.valueOf(String.valueOf(current_item_quantity)));
 
         //Check user type
         if (cUser.getUser_type() == 0) {
@@ -1305,33 +1355,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Edit button
         button_edit.setOnClickListener(view -> {
 
-            //set default values
-            String pName = "NULL";
-            double pPrice = 0;
-            int pQty = 0;
-            String tempPName, tempPPrice, tempPQty;
-            //take inputted values
-            tempPName =  productName.getText().toString().trim();
-            tempPPrice = productPrice.getText().toString().trim();
-            tempPQty = productQuantity.getText().toString().trim();
-            //commit values
-            if(!isEmpty(tempPName)){
-                pName = tempPName;
+            //set input variables
+            String input_item_name, input_item_price;
+
+            //set object variables
+            String obj_item_name;
+            double obj_item_price;
+
+            //store editText data
+            input_item_name = edit_item_name.getText().toString().trim();
+            input_item_price = edit_item_price.getText().toString().trim();
+
+            //check values
+            if(isEmpty(input_item_name)){
+                obj_item_name = current_item_name;
+            } else {
+                obj_item_name = input_item_name;
             }
-            if(!isEmpty(tempPPrice)){
-                pPrice = Double.parseDouble(tempPPrice);
-            }
-            if(!isEmpty(tempPQty)){
-                pQty = Integer.parseInt(tempPQty);
+            if(isEmpty(input_item_price)){
+                obj_item_price = current_item_price;
+            } else {
+                obj_item_price = Double.parseDouble(input_item_price);
             }
 
-            //myDB.editItem(currProductID, pName, pPrice, pQty);
-
-            if(!(currProductName.equals(pName))){
-                items_ref.child(currProductName).removeValue();
+            if(!(current_item_name.equals(input_item_name))){
+                items_ref.child(current_item_name).removeValue();
             }
 
-            items_ref.child(pName).setValue(new Item(pName, pPrice, pQty));
+            items_ref.child(obj_item_name).setValue(new Item(obj_item_name, obj_item_price, current_item_cost_price, current_item_quantity));
+
             //refreshItems();
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
@@ -1342,7 +1394,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //myDB.deleteItem(currProductID);
 
-            items_ref.child(currProductName).removeValue();
+            items_ref.child(current_item_name).removeValue();
             //refreshItems();
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
@@ -1350,31 +1402,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Add to cart button
         button_add_to_cart.setOnClickListener(view -> {
-            int selected_product_quantity = editPopupNumberPicker.getValue();
+            int selected_item_quantity = editPopupNumberPicker.getValue();
 
-            if (selected_product_quantity == 0) {
+            if (selected_item_quantity == 0) {
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             } else {
                 //cartedItem.add(new Item(currProductName, currProductPrice, selected_product_quantity));
-                cart_ref.child(currProductName).get().addOnCompleteListener(task -> {
+                cart_ref.child(current_item_name).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DataSnapshot dataSnapshot = task.getResult();
                         if (dataSnapshot.exists()) {
-                            Item item = dataSnapshot.getValue(Item.class);
-                            if (item != null) {
-                                int added_qty_result = selected_product_quantity + item.getQuantity();
-                                cart_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, added_qty_result));
+                            Item snapshot_item = dataSnapshot.getValue(Item.class);
+                            if (snapshot_item != null) {
+                                int added_qty_result = selected_item_quantity + snapshot_item.getQuantity();
+                                cart_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, added_qty_result));
                             } else {
                                 Log.e(TAG, "add to cart is null 557");
                             }
                         } else {
-                            cart_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                            cart_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, selected_item_quantity));
                         }
                     } else {
                         Log.e(TAG, "cart item unsuccessful");
                     }
                 });
-                items_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
+                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - selected_item_quantity));
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
             }
@@ -1412,9 +1464,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
                         .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
                         .child(time_format.format(Calendar.getInstance().getTime()))
-                        .child(currProductName).setValue(new Item(currProductName, currProductPrice, selected_product_quantity));
+                        .child(current_item_name).setValue(new Item(current_item_name, current_item_price, selected_product_quantity));
 
-                items_ref.child(currProductName).setValue(new Item(currProductName, currProductPrice, currProductQty - selected_product_quantity));
+                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - selected_product_quantity));
 
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
@@ -1461,10 +1513,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     //Item List OnClick Listener
-
     @Override
-    public void onItemClick(int position, String productName, String productPrice, String productQty) {
-        CreateEditPopUpWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
+    public void onItemClick(int position, Item item) {
+        CreateEditPopUpWindow(item);
     }
 
     //Employee List OnClick Listener
@@ -1481,16 +1532,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //Restock List OnClick Listeners
 
     @Override
-    public void onRestockPlusButtonClick(int position, Item model) {
-
-    }
-
-    @Override
-    public void onRestockMinusButtonClick(int position, Item model) {
-
-    }
-
-    @Override
     public void onRestockItemClick(int position, Item model) {
         createRestockPopupWindow(model);
     }
@@ -1505,22 +1546,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
 
-        TextView Text_Cost_Price;
-        EditText EditText_New_Cost_Price;
-        Button Button_Set;
+        TextView text_cost_price;
+        EditText editText_new_cost_price;
+        Button button_set;
+        DatabaseReference current_item_ref;
 
-        Text_Cost_Price = findViewById(R.id.restockPopupCostPrice);
-        EditText_New_Cost_Price = findViewById(R.id.restockPopupNewCostPrice);
-        Button_Set = findViewById(R.id.restockPopupBtnSet);
+        text_cost_price = popupView.findViewById(R.id.restockPopupCostPrice);
+        editText_new_cost_price = popupView.findViewById(R.id.restockPopupNewCostPrice);
+        button_set = popupView.findViewById(R.id.restockPopupBtnSet);
+        current_item_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()).child(item.getName());
 
-        Text_Cost_Price.setText(String.valueOf(item.getCostPrice()));
+        if (item.getCostPrice() == 0.0) {
+            text_cost_price.setText("NOT SET");
+        } else {
+            text_cost_price.setText(String.valueOf(item.getCostPrice()));
+        }
 
-        Button_Set.setOnClickListener(view -> {
-            Double New_Cost_Price = Double.parseDouble(EditText_New_Cost_Price.getText().toString());
+        button_set.setOnClickListener(view -> {
+            Double New_Cost_Price = Double.parseDouble(editText_new_cost_price.getText().toString());
             item.setCostPrice(New_Cost_Price);
 
-            firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()).setValue(item);
+            current_item_ref.setValue(item);
+
             popupWindow.dismiss();
+            restockingSearchBar.clearFocus();
         });
     }
 

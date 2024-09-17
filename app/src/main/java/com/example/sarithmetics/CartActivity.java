@@ -27,19 +27,21 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CartActivity extends AppCompatActivity implements ListAdapterItem.OnItemClickListener {
+public class CartActivity extends AppCompatActivity implements ListAdapterItem.OnItemClickListener, ListAdapterCartFirebase.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
     LinearLayout cart_activity_layout, calculation_layout;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
@@ -56,7 +58,9 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
     /*database*/
     FirebaseDatabaseHelper firebaseDatabaseHelper;
     User cUser;
-    DatabaseReference cartRef, itemsRef;
+    DatabaseReference cart_ref, items_ref;
+    Query cart_query;
+    ListAdapterCartFirebase listAdapterCartFirebase;
 
     //ads
     AdView mAdView;
@@ -157,6 +161,18 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
 
     }
 
+    private void setUpCartList() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
+        cart_query = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+        FirebaseRecyclerOptions<Item> options1 =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(cart_query, Item.class)
+                        .build();
+        listAdapterCartFirebase = new ListAdapterCartFirebase(options1, this, cUser);
+        recyclerView.setAdapter(listAdapterCartFirebase);
+        listAdapterCartFirebase.startListening();
+    }
+
     private void initializeAds() {
         MobileAds.initialize(this, initializationStatus -> {
 
@@ -169,21 +185,21 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
 
     private void emptyCart() {
         for (Item curr_item : cartedItem) {
-            itemsRef.child(curr_item.getName()).get().addOnCompleteListener(task -> {
+            items_ref.child(curr_item.getName()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DataSnapshot dataSnapshot = task.getResult();
                     if (dataSnapshot.exists()) {
                         Item item = dataSnapshot.getValue(Item.class);
                         if (item != null) {
                             int added_qty_result = curr_item.getQuantity() + item.getQuantity();
-                            itemsRef.child(curr_item.getName()).setValue(new Item(curr_item.getName(), curr_item.getPrice(), added_qty_result));
+                            items_ref.child(curr_item.getName()).setValue(new Item(curr_item.getName(), curr_item.getPrice(), added_qty_result));
                         } else {
                             Log.e(TAG, "add to cart is null 158");
                         }
                     } else {
-                        itemsRef.child(curr_item.getName()).setValue(curr_item);
+                        items_ref.child(curr_item.getName()).setValue(curr_item);
                     }
-                    cartRef.removeValue();
+                    cart_ref.removeValue();
                 } else {
                     Log.e(TAG, "empty cart unsuccessful");
                 }
@@ -207,7 +223,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
                     .child(item.getName()).setValue(item);
         }
         clearArrays();
-        cartRef.removeValue();
+        cart_ref.removeValue();
         finish();
     }
 
@@ -235,9 +251,9 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
                 cUser = task.getResult().getValue(User.class);
                 if (cUser != null) {
                     /*Set refs*/
-                    cartRef = firebaseDatabaseHelper.getCartRef(cUser.getUid());
-                    itemsRef = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
-                    cartRef.addValueEventListener(new ValueEventListener() {
+                    cart_ref = firebaseDatabaseHelper.getCartRef(cUser.getUid());
+                    items_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code());
+                    cart_ref.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             clearArrays();
@@ -295,6 +311,11 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
         createCartPopupWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
     }
 
+    @Override
+    public void onItemClick(int position, Item item) {
+
+    }
+
     private void createCartPopupWindow(String item_name, Double item_price, int item_quantity) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_cart, null);
@@ -322,7 +343,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
         tv_item_name.setText(item_name);
         tv_item_price.setText(String.valueOf(item_price));
 
-        itemsRef.child(item_name).get().addOnCompleteListener(task -> {
+        items_ref.child(item_name).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot snapshot = task.getResult();
                 if (snapshot.exists()) {
@@ -338,19 +359,19 @@ public class CartActivity extends AppCompatActivity implements ListAdapterItem.O
             int new_qty_value = np_item_quantity.getValue();
             if (new_qty_value != item_quantity) {
                 if (new_qty_value == 0) {
-                    itemsRef.child(item_name).child("quantity").setValue(current_item[0].getQuantity() + item_quantity);
-                    cartRef.child(item_name).removeValue();
+                    items_ref.child(item_name).child("quantity").setValue(current_item[0].getQuantity() + item_quantity);
+                    cart_ref.child(item_name).removeValue();
                 } else {
-                    itemsRef.child(item_name).child("quantity").setValue((current_item[0].getQuantity() + item_quantity) - new_qty_value);
-                    cartRef.child(item_name).child("quantity").setValue(new_qty_value);
+                    items_ref.child(item_name).child("quantity").setValue((current_item[0].getQuantity() + item_quantity) - new_qty_value);
+                    cart_ref.child(item_name).child("quantity").setValue(new_qty_value);
                 }
                 popupWindow.dismiss();
             }
         });
 
         btn_delete.setOnClickListener(view -> {
-            cartRef.child(item_name).removeValue();
-            itemsRef.child(item_name).child("quantity").setValue(current_item[0].getQuantity() + item_quantity);
+            cart_ref.child(item_name).removeValue();
+            items_ref.child(item_name).child("quantity").setValue(current_item[0].getQuantity() + item_quantity);
             popupWindow.dismiss();
         });
 

@@ -39,7 +39,7 @@
             <!--Layout Home (Employee)-->
 
             <RelativeLayout
-                android:id="@+id/layoutHomeEmployee"
+                android:id="@+id/layout_home_employee"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
@@ -270,7 +270,7 @@
 
             <!--Layout Home (Business Owner)-->
             <RelativeLayout
-                android:id="@+id/layoutHomeBusinessOwner"
+                android:id="@+id/layout_home_business_owner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
@@ -457,7 +457,7 @@
 
             <!--Layout Items-->
             <RelativeLayout
-                android:id="@+id/layoutItems"
+                android:id="@+id/layout_items"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
@@ -879,14 +879,14 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/layoutRestocking"
+                android:id="@+id/layout_restock"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
                 tools:visibility="visible">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/faUpdate"
+                    android:id="@+id/fabUpdate"
                     android:layout_width="119dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"

@@ -27,14 +27,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
                 android:text="Current Cost Price"
                 android:textColor="@color/colorTextPrimary"
                 android:textStyle="bold" />
@@ -43,7 +40,6 @@
                 android:id="@+id/restockPopupCostPrice"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_weight="0"
                 android:ems="10"
                 android:text="Place holder"
                 android:textSize="34sp" />
@@ -62,13 +58,13 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:hint="New Cost Price"
-                android:textSize="24sp" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/restockPopupBtnSet"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_gravity="bottom"
                 android:backgroundTint="@color/colorTextPrimary"
                 android:text="Set" />
         </LinearLayout>
