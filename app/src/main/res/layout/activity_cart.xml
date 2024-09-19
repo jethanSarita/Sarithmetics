@@ -13,132 +13,361 @@
         layout="@layout/toolbar3" />
 
     <LinearLayout
-        android:id="@+id/calculation_layout"
+        android:id="@+id/checkout_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:foregroundGravity="bottom"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView9"
+            android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:text="Total:"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvCartTotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="0.00"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/textView11"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Customer Payment:"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/varela_round"
+            android:gravity="center_horizontal"
+            android:text="Check Out"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.025" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/etnCustomerPayment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="20"
-                android:hint="₱0.00"
-                android:inputType="number" />
-
-            <Button
-                android:id="@+id/btnCartCalculate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/colorTextPrimary"
-                android:text="Calculate" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textView13"
+            android:id="@+id/calculation_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change:"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_gravity="bottom"
+            android:foregroundGravity="bottom"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvCartChange"
+                android:id="@+id/textView9"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:text=""
-                android:textSize="24sp" />
+                android:fontFamily="sans-serif"
+                android:text="Total:"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnCartCheckOut"
+            <TextView
+                android:id="@+id/tvCartTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/colorTextPrimary"
-                android:text="Check out"
-                android:visibility="invisible"
-                tools:visibility="visible" />
+                android:text="0.00"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/textView11"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Customer Payment:"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etnCustomerPayment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="20"
+                    android:hint="₱0.00"
+                    android:inputType="number" />
+
+                <Button
+                    android:id="@+id/btnCartCalculate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/colorTextPrimary"
+                    android:text="Calculate" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Change:"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCartChange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/btnCartCheckOut"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/colorTextPrimary"
+                    android:text="Check out"
+                    android:visibility="invisible"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@color/colorTextSecondary" />
+
         </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/cart_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Cart is empty"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewCart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/adbanner"
+            layout="@layout/adbanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/receipt_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/varela_round"
+            android:gravity="center_horizontal"
+            android:text="Receipt"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="34sp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="5dp"
             android:background="@color/colorTextSecondary" />
 
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/receipt_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:fontFamily="@font/varela_round"
+            android:gravity="center_horizontal"
+            android:text="[date] [time] [id]"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/cart_status"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/colorTextSecondary" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Cart is empty"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewCart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </LinearLayout>
-    </ScrollView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/receipt_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
-    <include
-        android:id="@+id/adbanner"
-        layout="@layout/adbanner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/colorTextSecondary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/receipt_tq"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="[TQ] Item(s)"
+                        android:textAlignment="textStart"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/receipt_subtotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="Subtotal []"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="Total Due"
+                        android:textAlignment="textStart"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/receipt_total"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="[Total]"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="CASH"
+                        android:textAlignment="textStart"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/receipt_customer_payment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="[CustPaym]"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="CHANGE"
+                        android:textAlignment="textStart"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/receipt_customer_change"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/varela_round"
+                        android:text="[Change]"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/receipt_btn_ok"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/colorTextPrimary"
+                    android:text="OK" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
 
 </LinearLayout>

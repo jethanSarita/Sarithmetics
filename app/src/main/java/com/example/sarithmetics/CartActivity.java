@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -18,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -40,28 +42,33 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class CartActivity extends AppCompatActivity implements ListAdapterCartFirebase.OnItemClickListener {
     private static final String TAG = "firebaseDatabase CartAct";
-    LinearLayout cart_activity_layout, calculation_layout;
+    LinearLayout cart_activity_layout, calculation_layout, checkout_view, receipt_view;
     ArrayList<String> cartedItemName, cartedItemPrice, cartedItemQty;
     ArrayList<Item> cartedItem, items;
     ListAdapterItem listAdapterItem;
-    RecyclerView recyclerView;
+    RecyclerView cart_rv, receipt_rv;
     ImageView back, btn_empty_cart;
-    TextView totalTextView, changeTextView;
+    TextView totalTextView, changeTextView, receipt_tq, receipt_subtotal, receipt_total, receipt_customer_payment, receipt_customer_change;
     Button btn_calculate, btn_checkout;
     EditText customerPayment;
-    TextView cart_status;
+    TextView cart_status, receipt_info;
+    Button receipt_btn_ok;
     double price_total;
 
     /*database*/
     FirebaseDatabaseHelper firebaseDatabaseHelper;
     User cUser;
     DatabaseReference cart_ref, items_ref;
-    Query cart_query;
+    Query cart_query, receipt_query;
     ListAdapterCartFirebase listAdapterCartFirebase;
+    ListAdapterReceiptFirebase listAdapterReceiptFirebase;
 
     //ads
     AdView mAdView;
@@ -114,7 +121,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*id hook*/
-        recyclerView = findViewById(R.id.recyclerViewCart);
+        cart_rv = findViewById(R.id.recyclerViewCart);
         totalTextView = findViewById(R.id.tvCartTotal);
         changeTextView = findViewById(R.id.tvCartChange);
         btn_calculate = findViewById(R.id.btnCartCalculate);
@@ -127,6 +134,20 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         cart_status = findViewById(R.id.cart_status);
 
         price_total = 0;
+
+        /*Views*/
+        checkout_view = findViewById(R.id.checkout_view);
+        receipt_view = findViewById(R.id.receipt_view);
+
+        /*Receipt view*/
+        receipt_info = findViewById(R.id.receipt_info);
+        receipt_tq = findViewById(R.id.receipt_tq);
+        receipt_subtotal = findViewById(R.id.receipt_subtotal);
+        receipt_total = findViewById(R.id.receipt_total);
+        receipt_customer_payment = findViewById(R.id.receipt_customer_payment);
+        receipt_customer_change = findViewById(R.id.receipt_customer_change);
+        receipt_btn_ok = findViewById(R.id.receipt_btn_ok);
+        receipt_rv = findViewById(R.id.receipt_rv);
 
         /*ArrayList hook*/
         items = new ArrayList<>();
@@ -151,6 +172,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         });
 
         btn_checkout.setOnClickListener(view -> {
+            hideKeyboard(view);
             checkOut();
         });
 
@@ -160,6 +182,11 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
             emptyCart();
         });
 
+    }
+
+    public void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void getCurrentUserInformation() {
@@ -183,7 +210,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
     }
 
     private void setUpCartList() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));
+        cart_rv.setLayoutManager(new LinearLayoutManager(CartActivity.this));
         cart_query = firebaseDatabaseHelper.getCartRef(cUser.getUid());
         FirebaseRecyclerOptions<Item> options1 =
                 new FirebaseRecyclerOptions.Builder<Item>()
@@ -196,8 +223,20 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
                 updateView();
             }
         };
-        recyclerView.setAdapter(listAdapterCartFirebase);
+        cart_rv.setAdapter(listAdapterCartFirebase);
         listAdapterCartFirebase.startListening();
+    }
+
+    private void setUpReceiptList(String key) {
+        receipt_rv.setLayoutManager(new LinearLayoutManager(CartActivity.this));
+        receipt_query = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).child("out").child(key).child("items");
+        FirebaseRecyclerOptions<Item> options2 =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(receipt_query, Item.class)
+                        .build();
+        listAdapterReceiptFirebase = new ListAdapterReceiptFirebase(options2, cUser);
+        receipt_rv.setAdapter(listAdapterReceiptFirebase);
+        listAdapterReceiptFirebase.startListening();
     }
 
     private void updateView() {
@@ -212,6 +251,8 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
             btn_empty_cart.setVisibility(View.VISIBLE);
             calculation_layout.setVisibility(View.VISIBLE);
             cart_status.setVisibility(View.GONE);
+
+            price_total = 0;
 
             for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
                 Item item = listAdapterCartFirebase.getItem(i);
@@ -280,57 +321,116 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
     }
 
     private void checkOut() {
-        SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
+
+        String key;
+        int item_count = 0;
+        Object current_date = ServerValue.TIMESTAMP;
+        double subtotal = 0.0;
+
+        DatabaseReference ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).child("out").push();
+        key = ref.getKey();
+
+        Map<String, Object> item_data_parent = new HashMap<>();
+        Map<String, Object> temp = new HashMap<>();
+
+        item_data_parent.put("transactionDate", current_date);
+        item_data_parent.put("customerPayment", Double.parseDouble(customerPayment.getText().toString().trim()));
+        item_data_parent.put("customerChange", Double.parseDouble(changeTextView.getText().toString().trim().replaceAll("[^\\d.]", "")));
 
         for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
             Item item = listAdapterCartFirebase.getItem(i);
 
-            firebaseDatabaseHelper
-                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                    .child(time_format.format(Calendar.getInstance().getTime()))
-                    .child(item.getName()).setValue(item).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            firebaseDatabaseHelper
-                                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
-                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                                    .child(time_format.format(Calendar.getInstance().getTime()))
-                                    .child(item.getName()).child("transactionDate").setValue(ServerValue.TIMESTAMP);
-                        }
-                    });
-            //revamp database structure for transaction history
+            Map<String, Object> item_data = new HashMap<>();
+
+            item_data.put("costPrice", item.getCostPrice());
+            item_data.put("name", item.getName());
+            item_data.put("price", item.getPrice());
+            item_data.put("quantity", item.getQuantity());
+
+            temp.put(item.getName(), item_data);
+
+            subtotal += item.getPrice() * item.getQuantity();
+            item_count += item.getQuantity();
         }
 
-        /*for (Item item: cartedItem) {
-            firebaseDatabaseHelper
-                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                    .child(time_format.format(Calendar.getInstance().getTime()))
-                    .child(item.getName()).setValue(item);
+        item_data_parent.put("subtotal", subtotal);
+        item_data_parent.put("itemCount", item_count);
+        item_data_parent.put("items", temp);
 
-            firebaseDatabaseHelper
-                    .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                    .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                    .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                    .child(time_format.format(Calendar.getInstance().getTime()))
-                    .child(item.getName()).child("transactionDate").setValue(ServerValue.TIMESTAMP);
-        }*/
-        /*clearArrays();*/
+        ref.updateChildren(item_data_parent);
+
+        displayReceipt(key);
 
         cart_ref.removeValue();
-        finish();
+        //finish();
     }
+
+    private void displayReceipt(String key) {
+        /*Switch views*/
+        checkout_view.setVisibility(View.GONE);
+        receipt_view.setVisibility(View.VISIBLE);
+
+        /*Populate data*/
+        DatabaseReference ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).child("out");
+
+        ref
+                .child(key)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        double customer_change = snapshot.child("customerChange").getValue(Double.class);
+                        double customer_payment = snapshot.child("customerPayment").getValue(Double.class);
+                        double subtotal = snapshot.child("subtotal").getValue(Double.class);
+                        long transaction_date = snapshot.child("transactionDate").getValue(Long.class);
+                        int item_count = snapshot.child("itemCount").getValue(Integer.class);
+
+                        Date date = new Date(transaction_date);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        String formatted_date = sdf.format(date);
+
+                        setUpReceiptList(key);
+
+                        receipt_tq.setText(item_count + "Item(s)");
+                        receipt_subtotal.setText("₱" + subtotal);
+                        receipt_total.setText("₱" + subtotal);
+                        receipt_customer_payment.setText("₱" + customer_payment);
+                        receipt_customer_change.setText("₱" + customer_change);
+                        receipt_info.setText(formatted_date + " " + key);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+        receipt_btn_ok.setOnClickListener(view -> {
+            finish();
+        });
+    }
+
+    /*{
+        key: {
+            "customerChange": 44,
+            "customerPayment": 200,
+            "items": {
+                "Bean": {
+                    "costPrice": 0,
+                    "name": "Bean",
+                    "price": 60,
+                    "quantity": 2
+                },
+                "Coke": {
+                    "costPrice": 0,
+                    "name": "Coke",
+                    "price": 12,
+                    "quantity": 3
+                }
+            },
+            "subtotal": 156,
+            "transactionDate": 1726745914518
+        }
+    }*/
 
     private void calculate() {
         double customer_payment = 0;
