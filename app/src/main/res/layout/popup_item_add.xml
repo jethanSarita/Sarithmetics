@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainpopupLayout"
+    android:id="@+id/popup_item_add_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="100dp">
@@ -31,7 +31,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/productName"
+            android:id="@+id/popup_item_add_name"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_weight="0"
@@ -48,7 +48,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/productPrice"
+            android:id="@+id/popup_item_add_price"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_weight="0"
@@ -60,17 +60,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Item Quantity"
+            android:text="Item Cost Price"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/productQuantity"
+            android:id="@+id/popup_item_add_cost_price"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_weight="0"
             android:ems="10"
-            android:hint="0"
+            android:hint="₱0.00"
             android:inputType="number" />
 
         <Spinner

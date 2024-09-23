@@ -39,7 +39,7 @@
             <!--Layout Home (Employee)-->
 
             <RelativeLayout
-                android:id="@+id/layout_home_employee"
+                android:id="@+id/layout_home_employee_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
@@ -51,7 +51,7 @@
                     android:paddingTop="25dp">
 
                     <TextView
-                        android:id="@+id/profileFnLNameEmployee"
+                        android:id="@+id/home_employee_name_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/varela_round"
@@ -62,7 +62,7 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/profileFnLUserType"
+                        android:id="@+id/home_employee_user_type_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/varela_round"
@@ -85,7 +85,7 @@
 
                     <!--Employee Layout No Sync-->
                     <LinearLayout
-                        android:id="@+id/llEmployeeLayoutNoSync"
+                        android:id="@+id/home_employee_no_sync_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -120,7 +120,7 @@
                             android:orientation="horizontal">
 
                             <EditText
-                                android:id="@+id/etBusinessCode"
+                                android:id="@+id/home_employee_no_sync_business_code_et"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ems="10"
@@ -129,7 +129,7 @@
                                 android:inputType="text" />
 
                             <Button
-                                android:id="@+id/btnEnterBusinessCode"
+                                android:id="@+id/home_employee_no_sync_business_code_btn"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="10dp"
@@ -143,7 +143,7 @@
 
                     <!--Employee Layout Yes Sync-->
                     <LinearLayout
-                        android:id="@+id/llEmployeeLayoutYesSync"
+                        android:id="@+id/main_employee_yes_sync_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -162,7 +162,7 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/employeeStatus"
+                            android:id="@+id/main_employee_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
@@ -187,7 +187,7 @@
                         </RelativeLayout>
 
                         <TextView
-                            android:id="@+id/tvPunchIn"
+                            android:id="@+id/home_employee_punch_in"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/varela_round"
@@ -204,7 +204,7 @@
                             android:orientation="horizontal">
 
                             <EditText
-                                android:id="@+id/etPunchInCode"
+                                android:id="@+id/home_employee_punch_in_code_et"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ems="10"
@@ -213,7 +213,7 @@
                                 android:inputType="text" />
 
                             <Button
-                                android:id="@+id/btnEnterPunchInCode"
+                                android:id="@+id/home_employee_punch_in_code_enter_btn"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="10dp"
@@ -227,7 +227,7 @@
 
                     <!--Employee Layout Pending Sync-->
                     <LinearLayout
-                        android:id="@+id/llEmployeeLayoutPendingSync"
+                        android:id="@+id/home_employee_pending_sync_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -270,7 +270,7 @@
 
             <!--Layout Home (Business Owner)-->
             <RelativeLayout
-                android:id="@+id/layout_home_business_owner"
+                android:id="@+id/layout_home_business_owner_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
@@ -282,7 +282,7 @@
                     android:paddingTop="25dp">
 
                     <TextView
-                        android:id="@+id/profileFnLNameBusinessOwner"
+                        android:id="@+id/home_owner_profile_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/varela_round"
@@ -328,14 +328,14 @@
                             android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/boxBusinessCode"
+                                android:id="@+id/home_owner_business_code_box_ll"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@color/colorTextPrimary"
                                 android:orientation="horizontal">
 
                                 <TextView
-                                    android:id="@+id/tvBusinessCode"
+                                    android:id="@+id/home_owner_business_code_tv"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/varela_round"
@@ -348,14 +348,14 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:id="@+id/ivEyeCloseIcon"
+                                android:id="@+id/home_owner_eye_close_icon_iv"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="15dp"
                                 android:src="@drawable/icon_eye_close" />
 
                             <ImageView
-                                android:id="@+id/ivEyeOpenIcon"
+                                android:id="@+id/home_owner_eye_open_icon_iv"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="15dp"
@@ -387,7 +387,7 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/amTvCurrentPunchInCode"
+                            android:id="@+id/home_employee_current_punch_in_code_tv"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/varela_round"
@@ -410,7 +410,7 @@
                         </RelativeLayout>
 
                         <Button
-                            android:id="@+id/amBtnGeneratePunchInCode"
+                            android:id="@+id/home_owner_punch_in_code_generate_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
@@ -445,7 +445,7 @@
                             android:layout_height="match_parent">
 
                             <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/rvEmployees"
+                                android:id="@+id/home_owner_employees_rv"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
                         </ScrollView>
@@ -457,13 +457,13 @@
 
             <!--Layout Items-->
             <RelativeLayout
-                android:id="@+id/layout_items"
+                android:id="@+id/layout_items_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/ivAddItem"
+                    android:id="@+id/items_add_button_fab"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -489,7 +489,7 @@
                         android:paddingRight="15dp">
 
                         <ImageView
-                            android:id="@+id/ivCart"
+                            android:id="@+id/items_cart_iv"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_alignParentRight="true"
@@ -548,7 +548,7 @@
                         android:paddingRight="30dp">
 
                         <androidx.appcompat.widget.SearchView
-                            android:id="@+id/itemSearchBar"
+                            android:id="@+id/items_search_bar_serv"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_search"
@@ -573,7 +573,7 @@
                     </RelativeLayout>
 
                     <TextView
-                        android:id="@+id/maTvStatusNotSync"
+                        android:id="@+id/items_not_sync_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
@@ -586,7 +586,7 @@
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/maTvStatusPending"
+                        android:id="@+id/items_pending_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
@@ -599,7 +599,7 @@
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/maTvNotPunchedIn"
+                        android:id="@+id/items_not_punched_in_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
@@ -612,13 +612,13 @@
                         android:visibility="gone" />
 
                     <ScrollView
-                        android:id="@+id/maSvItems"
+                        android:id="@+id/items_sv"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1">
 
                         <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/recyclerViewItem"
+                            android:id="@+id/items_rv"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     </ScrollView>
@@ -633,7 +633,7 @@
 
             <!--Layout Insight-->
             <RelativeLayout
-                android:id="@+id/layout_insight"
+                android:id="@+id/layout_insight_rl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone">
@@ -645,7 +645,7 @@
                     android:paddingTop="25dp">
 
                     <TextView
-                        android:id="@+id/li_tv_title"
+                        android:id="@+id/insight_title_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/varela_round"
@@ -745,7 +745,7 @@
                                             android:textStyle="bold" />
 
                                         <TextView
-                                            android:id="@+id/item_total_sales_vol_tv"
+                                            android:id="@+id/insight_item_total_sales_vol_tv"
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:fontFamily="@font/varela_round"
@@ -770,7 +770,7 @@
                                             android:textStyle="bold" />
 
                                         <TextView
-                                            android:id="@+id/item_revenue_tv"
+                                            android:id="@+id/insight_item_revenue_tv"
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:fontFamily="@font/varela_round"
@@ -835,7 +835,7 @@
                                         android:visibility="gone">
 
                                         <TextView
-                                            android:id="@+id/top1_tv"
+                                            android:id="@+id/insight_top1_tv"
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:fontFamily="@font/varela_round"
@@ -844,7 +844,7 @@
                                             android:textSize="20sp" />
 
                                         <TextView
-                                            android:id="@+id/top2_tv"
+                                            android:id="@+id/insight_top2_tv"
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:fontFamily="@font/varela_round"
@@ -853,7 +853,7 @@
                                             android:textSize="20sp" />
 
                                         <TextView
-                                            android:id="@+id/top3_tv"
+                                            android:id="@+id/insight_top3_tv"
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:fontFamily="@font/varela_round"
@@ -879,11 +879,10 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/layout_restock"
+                android:id="@+id/layout_restock_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fabUpdate"
@@ -895,7 +894,7 @@
                     android:layout_marginBottom="32dp"
                     android:src="@drawable/icon_save"
                     app:backgroundTint="@color/colorTextPrimary"
-                    app:tint="@android:color/white"/>
+                    app:tint="@android:color/white" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1030,6 +1029,166 @@
                             android:id="@+id/recyclerViewRestocking"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
+                    </ScrollView>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/layout_history_rl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center_horizontal"
+                            android:text="History"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="34sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.498"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.025" />
+                    </RelativeLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="30dp"
+                        android:paddingRight="30dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp" />
+
+                    <!--<RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="30dp"
+                        android:paddingRight="30dp">
+
+                        <androidx.appcompat.widget.SearchView
+                            android:id="@+id/history_filter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_search"
+                            app:iconifiedByDefault="false"
+                            app:queryHint="Search" />
+                    </RelativeLayout>-->
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <!--<TextView
+                        android:id="@+id/maTvStatusNotSyncRestocking"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:fontFamily="@font/varela_round"
+                        android:text="Not synced to any business"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/maTvStatusPendingRestocking"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:fontFamily="@font/varela_round"
+                        android:text="Pending sync approval by owner"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/maTvNotPunchedInRestocking"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:fontFamily="@font/varela_round"
+                        android:text="You are currently not punched in"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textSize="34sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />-->
+
+                    <ScrollView
+                        android:id="@+id/history_out_sv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/history_out_rv"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </ScrollView>
+
+                    <ScrollView
+                        android:id="@+id/history_in_sv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:visibility="gone">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/history_in_rv"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
                     </ScrollView>
 
                 </LinearLayout>

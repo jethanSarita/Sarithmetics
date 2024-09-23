@@ -15,6 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterRestockFirebase.myViewHolder> {
 
@@ -37,15 +42,35 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
     }
 
     public interface OnItemClickListener {
-        void onRestockItemClick(int position, Item model);
+        void onRestockItemClick(int position, int type, Item model);
     }
 
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterRestockFirebase.myViewHolder holder, int position, @NonNull Item model) {
-        int initial_delay = 500;
-        int repeat_delay = 100;
-
         holder.bindData(model);
+
+        holder.item_cost_price.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onRestockItemClick(position, 0, model);
+            }
+        });
+
+        holder.restock_number.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onRestockItemClick(position, 1, model);
+            }
+        });
+
+        holder.button_plus.setOnClickListener(view -> {
+            holder.incrementRestock(model);
+        });
+
+        holder.button_minus.setOnClickListener(view -> {
+            holder.decrementRestock(model);
+        });
+
+        /*int initial_delay = 500;
+        int repeat_delay = 100;
 
         Handler handler = new Handler();
 
@@ -93,35 +118,6 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
                     return true;
             }
             return false;
-        });
-
-        holder.list_layout_restock.setOnClickListener(view -> {
-            if (listener != null) {
-                listener.onRestockItemClick(position, model);
-            }
-        });
-
-        /*holder.button_plus.setOnClickListener(view -> {
-            holder.current_set_stock++;
-            holder.item_total_cost.setText("₱" + (model.getPrice() * holder.current_set_stock));
-            holder.restock_number.setText(String.valueOf(holder.current_set_stock));
-        });
-
-        holder.button_minus.setOnClickListener(view -> {
-            holder.current_set_stock--;
-
-            if (holder.current_set_stock <= -1) {
-                holder.current_set_stock = 0;
-            }
-
-            holder.item_total_cost.setText("₱" + (model.getPrice() * holder.current_set_stock));
-            holder.restock_number.setText(String.valueOf(holder.current_set_stock));
-        });*/
-
-        /*holder.button_plus.setOnClickListener(view -> {
-            if (listener != null) {
-                listener.onRestockPlusButtonClick(position, model);
-            }
         });*/
     }
 
@@ -140,6 +136,7 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
         ImageButton button_minus, button_plus;
         LinearLayout list_layout_restock;
         int current_set_stock = 0;
+        DatabaseReference items_ref = firebaseDatabaseHelper.getItemsRef(user.getBusiness_code());
 
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -158,30 +155,48 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
             item_name.setText(item.getName());
             item_quantity.setText("Stock: " + item.getQuantity());
             item_selling_price.setText("₱" + item.getPrice());
-            item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
+            item_total_cost.setText("₱" + (item.getCost_price() * item.getRestock_quantity()));
+            restock_number.setText(String.valueOf(item.getRestock_quantity()));
 
-            if (item.getCostPrice() == 0.0) {
-                item_cost_price.setText("Cost Price: CLICK TO SET");
+            if (item.getCost_price() == 0.0) {
+                item_cost_price.setText("CLICK TO SET");
             } else {
-                item_cost_price.setText("Cost: ₱" +  + item.getCostPrice());
+                item_cost_price.setText(String.valueOf(item.getCost_price()));
             }
         }
 
         public void incrementRestock(Item item) {
-            current_set_stock++;
-            item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
-            restock_number.setText(String.valueOf(current_set_stock));
+            items_ref.child(item.getName()).child("restock_quantity").setValue(ServerValue.increment(1));
+            /*current_set_stock++;
+            item_total_cost.setText("₱" + (item.getPrice() * item.getCost_price()));
+            restock_number.setText(String.valueOf(current_set_stock));*/
         }
 
         public void decrementRestock(Item item) {
-            current_set_stock--;
+            items_ref.child(item.getName()).child("restock_quantity").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        int current_quantity = snapshot.getValue(Integer.class);
+                        if (current_quantity > 0) {
+                            items_ref.child(item.getName()).child("restock_quantity").setValue(ServerValue.increment(-1));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+           /* current_set_stock--;
 
             if (current_set_stock <= -1) {
                 current_set_stock = 0;
             }
 
             item_total_cost.setText("₱" + (item.getPrice() * current_set_stock));
-            restock_number.setText(String.valueOf(current_set_stock));
+            restock_number.setText(String.valueOf(current_set_stock));*/
         }
     }
 }

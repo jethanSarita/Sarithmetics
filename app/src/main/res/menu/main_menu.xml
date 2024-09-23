@@ -15,6 +15,10 @@
             android:icon="@drawable/icon_restock"
             android:title="Restock" />
         <item
+            android:id="@+id/nav_history"
+            android:icon="@drawable/icon_history"
+            android:title="History" />
+        <item
             android:id="@+id/nav_insights"
             android:icon="@drawable/icon_insights"
             android:title="Insights" />
