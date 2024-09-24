@@ -44,7 +44,7 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
     }
 
     public interface OnItemClickListener {
-        void onHistoryItemClick(int position, MyTransaction model);
+        void onHistoryItemClick(int position, String key);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
 
         holder.listLayoutHistory.setOnClickListener(view ->{
             if (listener != null) {
-                listener.onHistoryItemClick(position, model);
+                listener.onHistoryItemClick(position, getRef(position).getKey());
             }
         });
     }

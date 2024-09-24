@@ -20,6 +20,9 @@
         android:windowSoftInputMode="adjustResize"
         tools:targetApi="31">
         <activity
+            android:name=".ReceiptActivity"
+            android:exported="false" />
+        <activity
             android:name=".NoConnectionActivity"
             android:exported="false" />
         <activity
@@ -45,7 +48,7 @@
             android:resource="@array/preloaded_fonts" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8524862471390434~2218360106"/>
+            android:value="ca-app-pub-8524862471390434~2218360106" />
     </application>
 
 </manifest>

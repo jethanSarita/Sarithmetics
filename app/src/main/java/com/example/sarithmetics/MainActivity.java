@@ -66,6 +66,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
@@ -1595,9 +1596,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         button_yes.setOnClickListener(view -> {
-            int selected_product_quantity = editPopupNumberPicker.getValue();
 
-            if (selected_product_quantity == 0) {
+            //int selected_product_quantity = editPopupNumberPicker.getValue();
+
+            double customer_change;
+            double customer_payment;
+            double subtotal;
+            int item_count;
+            Object transaction_date;
+            List<Item> items;
+            MyTransaction transaction;
+            DatabaseReference ref;
+
+            customer_change = 0.0;
+            customer_payment = item.getPrice();
+            subtotal = item.getPrice() * editPopupNumberPicker.getValue();
+            item_count = editPopupNumberPicker.getValue();
+            transaction_date = ServerValue.TIMESTAMP;
+            items = new ArrayList<>();
+            items.add(new Item(item.getName(), item.getPrice(), item_count));
+            transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items);
+            ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).push();
+
+            ref.setValue(transaction);
+
+            popupWindow.dismiss();
+            itemSearchBar.clearFocus();
+            hideKeyboard(view);
+
+            /*if (selected_product_quantity == 0) {
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             } else {
                 SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
@@ -1616,7 +1643,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
                 hideKeyboard(view);
-            }
+            }*/
         });
 
         button_no.setOnClickListener(view ->{
@@ -1864,9 +1891,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onHistoryItemClick(int position, MyTransaction model) {
-        Intent intent = new Intent(MainActivity.this, CartActivity.class);
-        //intent.putExtra
+    public void onHistoryItemClick(int position, String key) {
+        Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
+        intent.putExtra("key", key);
         startActivity(intent);
     }
 }
