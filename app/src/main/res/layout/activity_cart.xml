@@ -121,8 +121,7 @@
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorTextPrimary"
                     android:text="Check out"
-                    android:visibility="invisible"
-                    tools:visibility="visible" />
+                    android:visibility="invisible" />
             </LinearLayout>
 
             <View
@@ -354,6 +353,13 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/receipt_qr_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="fitCenter" />
 
                 <Button
                     android:id="@+id/receipt_btn_ok"

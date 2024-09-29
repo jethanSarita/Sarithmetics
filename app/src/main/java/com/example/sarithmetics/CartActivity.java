@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -40,6 +41,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +62,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
     ArrayList<Item> cartedItem, items;
     ListAdapterItem listAdapterItem;
     RecyclerView cart_rv, receipt_rv;
-    ImageView back, btn_empty_cart;
+    ImageView back, btn_empty_cart, qr_code;
     TextView totalTextView, changeTextView, receipt_tq, receipt_subtotal, receipt_total, receipt_customer_payment, receipt_customer_change;
     Button btn_calculate, btn_checkout;
     EditText customerPayment;
@@ -137,6 +143,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         cart_activity_layout = findViewById(R.id.cart_activity_layout);
         calculation_layout = findViewById(R.id.calculation_layout);
         cart_status = findViewById(R.id.cart_status);
+        qr_code = findViewById(R.id.receipt_qr_code);
 
         price_total = 0;
 
@@ -422,6 +429,20 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
                     receipt_customer_payment.setText("₱" + transaction.getCustomer_payment());
                     receipt_customer_change.setText("₱" + transaction.getCustomer_change());
                     receipt_info.setText(formatted_date + " " + key);
+
+                    MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+                    String link = "https://sarithmetics-receipt.vercel.app/" + key + "/" + cUser.getBusiness_code();
+
+                    try {
+                        BitMatrix bitMatrix = multiFormatWriter.encode(link, BarcodeFormat.QR_CODE, 300, 300);
+
+                        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+                        Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+
+                        qr_code.setImageBitmap(bitmap);
+                    } catch (WriterException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     Log.e(FUNCTION_TAG, "snapshot doesn't exist\n" + snapshot);
                 }

@@ -33,6 +33,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class ReceiptActivity extends AppCompatActivity {
 
     private static final String TAG = "Receipt Activity";
@@ -175,16 +179,18 @@ public class ReceiptActivity extends AppCompatActivity {
         firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //qr_code
-
                 MyTransaction transaction = snapshot.getValue(MyTransaction.class);
+
+                Date date = new Date(((Number)transaction.getTransaction_date()).longValue());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                String formatted_date = sdf.format(date);
 
                 receipt_tq.setText(transaction.getItem_count() + " Item(s)");
                 receipt_subtotal.setText("₱" + transaction.getSubtotal());
                 receipt_total.setText("₱" + transaction.getSubtotal());
                 receipt_customer_payment.setText("₱" + transaction.getCustomer_payment());
                 receipt_customer_change.setText("₱" + transaction.getCustomer_change());
-                receipt_info.setText(transaction.getTransaction_date() + " " + key);
+                receipt_info.setText(formatted_date + " " + key);
 
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
                 String link = "https://sarithmetics-receipt.vercel.app/" + key + "/" + cUser.getBusiness_code();
