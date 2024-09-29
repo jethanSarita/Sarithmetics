@@ -103,7 +103,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:fontFamily="@font/varela_round"
-                        android:text="Subtotal []"
+                        android:text="[Subtotal]"
                         android:textAlignment="textEnd"
                         android:textColor="@color/colorTextPrimary"
                         android:textSize="24sp"
@@ -197,6 +197,14 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/receipt_main_qr_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:scaleType="fitCenter"
+                    android:layout_marginTop="5dp"/>
+
 
                 <Button
                     android:id="@+id/receipt_main_btn_ok"
