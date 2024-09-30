@@ -18,10 +18,11 @@ public class MyTransaction {
     private boolean is_out;
     private Object transaction_date;
     private List<Item> items;
+    private String employee_name;
 
     public MyTransaction() {}
 
-    public MyTransaction(double customer_change, double customer_payment, double subtotal, int item_count, boolean is_out, Object transaction_date, List<Item> items) {
+    public MyTransaction(double customer_change, double customer_payment, double subtotal, int item_count, boolean is_out, Object transaction_date, List<Item> items, String employee_name) {
         this.customer_change = customer_change;
         this.customer_payment = customer_payment;
         this.subtotal = subtotal;
@@ -29,6 +30,7 @@ public class MyTransaction {
         this.is_out = is_out;
         this.transaction_date = transaction_date;
         this.items = items;
+        this.employee_name = employee_name;
     }
 
     public double getCustomer_change() {
@@ -85,5 +87,13 @@ public class MyTransaction {
 
     public void setIs_out(boolean is_out) {
         this.is_out = is_out;
+    }
+
+    public String getEmployee_name() {
+        return employee_name;
+    }
+
+    public void setEmployee_name(String employee_name) {
+        this.employee_name = employee_name;
     }
 }

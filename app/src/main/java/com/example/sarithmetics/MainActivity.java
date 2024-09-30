@@ -9,14 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -35,10 +33,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
@@ -73,7 +71,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -110,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
     androidx.appcompat.widget.SearchView itemSearchBar, restockingSearchBar;
     EditText etBusinessCode, etPunchInCode;
-    Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
+    Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode, history_filter_button;
     ScrollView maSvItems;
     RandomHelper randomHelper;
     MenuItem nav_insights, nav_restock;
@@ -171,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
 
         initializeAds();
 
@@ -243,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*History Layout*/
         history_layout = findViewById(R.id.layout_history_rl);
         rvHistory = findViewById(R.id.history_out_rv);
+        history_filter_button = findViewById(R.id.history_filter_btn);
 
         /*insights layout*/
         insights_layout = findViewById(R.id.layout_insight_rl);
@@ -307,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         eye_close_button.setOnClickListener(view -> {
             eyeClose();
         });
+
         eye_open_button.setOnClickListener(view -> {
             eyeOpen();
         });
@@ -314,34 +312,96 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         settings.setOnClickListener(view -> {
             openSettings();
         });
+
         homeIcon.setOnClickListener(view -> {
 
         });
+
         cart_button.setOnClickListener(view -> {
             openCart();
         });
+
         add_button.setOnClickListener(view -> {
             openAddItemPopup();
         });
+
         update_button.setOnClickListener(view -> {
             restockItems();
         });
+
+        history_filter_button.setOnClickListener(view ->{
+            openDatePickerDialog();
+        });
+    }
+
+    private void openDatePickerDialog() {
+        DatePickerDialog dialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                Calendar calendar = Calendar.getInstance();
+
+                calendar.set(year, month, dayOfMonth, 0, 0, 0);
+                long start = calendar.getTimeInMillis();
+
+                calendar.set(year, month, dayOfMonth, 23, 59, 59);
+                long end = calendar.getTimeInMillis();
+
+                long[] date = new long[] {start, end};
+
+                TextView history_selected_date = findViewById(R.id.history_selected_date);
+
+                history_selected_date.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
+
+                transactionDateFilter(date);
+            }
+        }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+
+        dialog.show();
     }
 
     private void restockItems() {
         String FUNCTION_TAG = "restockItems";
+
+        String key;
+
+        MyTransaction transaction;
+
+        /*double customer_change;
+        double customer_payment;*/
+        double subtotal;
+        int item_count;
+        Object transaction_date;
+        List<Item> items;
+
+        DatabaseReference ref = history_ref.push();
+        key = ref.getKey();
+
+        subtotal = 0.0;
+        item_count = 0;
+        transaction_date = ServerValue.TIMESTAMP;
+        items = new ArrayList<>();
+
+        /*Get data for each item in adapter*/
         for (int i = 0; i < listAdapterRestockFirebase.getItemCount(); i++) {
+
             Item item = listAdapterRestockFirebase.getItem(i);
             int new_stock_quantity ;
             int new_restock_quantity;
 
+            /*Check if current item is being restocked*/
             if (item.getRestock_quantity() != 0) {
                 new_stock_quantity = item.getRestock_quantity() + item.getQuantity();
                 new_restock_quantity = 0;
 
+                items.add(new Item(item.getName(), item.getCost_price(), item.getRestock_quantity()));
+
+                subtotal += item.getCost_price() * item.getRestock_quantity();
+                item_count += item.getRestock_quantity();
+
                 item.setQuantity(new_stock_quantity);
                 item.setRestock_quantity(new_restock_quantity);
 
+                /*Update item's stock*/
                 items_ref.child(item.getName()).setValue(item).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Log.e(FUNCTION_TAG, item.getName() + " has been restocked");
@@ -352,21 +412,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Log.e(FUNCTION_TAG, item.getName() + "'s restock_quantity is empty");
             }
-
-
-
-            /*ListAdapterRestockFirebase.myViewHolder holder = (ListAdapterRestockFirebase.myViewHolder) rvRestocking.findViewHolderForAdapterPosition(i);
-
-            if (holder != null) {
-                int newStock = item.getQuantity() + holder.current_set_stock;
-
-                firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()).child(item.getName()).child("quantity").setValue(newStock);
-
-                holder.current_set_stock = 0;
-                holder.restock_number.setText(String.valueOf(holder.current_set_stock));
-                holder.item_total_cost.setText("₱" + (item.getPrice() * holder.current_set_stock));
-            }*/
         }
+
+        transaction = new MyTransaction(0.0, 0.0, subtotal, item_count, false, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
+
+        ref.setValue(transaction);
+
+        openReceipt(key);
     }
 
     private void initializePieChart() {
@@ -1256,6 +1308,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rvRestocking.setAdapter(listAdapterRestockFirebase);
     }
 
+    private void transactionDateFilter(long[] date) {
+        FirebaseRecyclerOptions<MyTransaction> options =
+                new FirebaseRecyclerOptions.Builder<MyTransaction>()
+                        .setQuery(history_ref.orderByChild("transaction_date").startAt(date[0]).endAt(date[1]), MyTransaction.class)
+                        .build();
+
+        listAdapterHistoryFirebase = new ListAdapterHistoryFirebase(options, this, cUser);
+        listAdapterHistoryFirebase.startListening();
+        rvHistory.setAdapter(listAdapterHistoryFirebase);
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -1621,7 +1684,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             transaction_date = ServerValue.TIMESTAMP;
             items = new ArrayList<>();
             items.add(new Item(item.getName(), item.getPrice(), item_count));
-            transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items);
+            transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
             ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).push();
 
             ref.setValue(transaction);
@@ -1898,6 +1961,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onHistoryItemClick(int position, String key) {
+        openReceipt(key);
+    }
+
+    private void openReceipt(String key) {
         Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
         intent.putExtra("key", key);
         startActivity(intent);

@@ -8,8 +8,10 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -46,6 +48,7 @@ public class ReceiptActivity extends AppCompatActivity {
     Button receipt_btn_ok;
     RecyclerView receipt_rv;
     ImageView back_btn, qr_code;
+    LinearLayout receipt_cash_change_layout;
 
     /*Firebase*/
     FirebaseDatabaseHelper firebaseDatabaseHelper;
@@ -110,6 +113,9 @@ public class ReceiptActivity extends AppCompatActivity {
         receipt_customer_payment = findViewById(R.id.receipt_main_customer_payment);
         receipt_customer_change = findViewById(R.id.receipt_main_customer_change);
         receipt_tq = findViewById(R.id.receipt_tq);
+
+        /*Layout Views*/
+        receipt_cash_change_layout = findViewById(R.id.receipt_main_cash_change_view);
 
         /*Buttons*/
         receipt_btn_ok = findViewById(R.id.receipt_main_btn_ok);
@@ -191,6 +197,10 @@ public class ReceiptActivity extends AppCompatActivity {
                 receipt_customer_payment.setText("₱" + transaction.getCustomer_payment());
                 receipt_customer_change.setText("₱" + transaction.getCustomer_change());
                 receipt_info.setText(formatted_date + " " + key);
+
+                if (!transaction.isIs_out()) {
+                    receipt_cash_change_layout.setVisibility(View.GONE);
+                }
 
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
                 String link = "https://sarithmetics-receipt.vercel.app/" + key + "/" + cUser.getBusiness_code();

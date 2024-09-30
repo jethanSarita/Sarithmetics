@@ -1039,7 +1039,8 @@
                 android:id="@+id/layout_history_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1093,6 +1094,35 @@
                     <Space
                         android:layout_width="match_parent"
                         android:layout_height="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/history_selected_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center"
+                            android:text="All"
+                            android:textAlignment="center"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="30sp" />
+
+                        <Button
+                            android:id="@+id/history_filter_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="10dp"
+                            android:backgroundTint="@color/colorTextPrimary"
+                            android:text="Filter" />
+                    </LinearLayout>
 
                     <!--<RelativeLayout
                         android:layout_width="match_parent"

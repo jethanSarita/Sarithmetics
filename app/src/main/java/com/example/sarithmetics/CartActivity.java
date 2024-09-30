@@ -34,6 +34,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -361,43 +362,23 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         transaction_date = ServerValue.TIMESTAMP;
         items = new ArrayList<>();
 
-        /*Map<String, Object> transaction = new HashMap<>();
-        Map<String, Object> items = new HashMap<>();*/
-
         for (int i = 0; i < listAdapterCartFirebase.getItemCount(); i++) {
             Item item = listAdapterCartFirebase.getItem(i);
 
             items.add(new Item(item.getName(), item.getPrice(), item.getQuantity()));
 
-            /*Map<String, Object> item_data = new HashMap<>();*/
-
-            /*item_data.put("name", item.getName());
-            item_data.put("price", item.getPrice());
-            item_data.put("quantity", item.getQuantity());
-
-            items.put(item.getName(), item_data);*/
-
             subtotal += item.getPrice() * item.getQuantity();
             item_count += item.getQuantity();
         }
 
-        /*transaction.put("transaction_date", transaction_date);
-        transaction.put("customer_payment", Double.parseDouble(customerPayment.getText().toString().trim()));
-        transaction.put("customer_change", Double.parseDouble(changeTextView.getText().toString().trim().replaceAll("[^\\d.]", "")));
-
-        transaction.put("subtotal", subtotal);
-        transaction.put("item_count", item_count);
-        transaction.put("items", items);*/
-
-        transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items);
-
-        //ref.updateChildren(transaction);
-        ref.setValue(transaction);
-
-        displayReceipt(key);
+        transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
 
         cart_ref.removeValue();
-        //finish();
+
+        ref.setValue(transaction);
+
+        openReceipt(key);
+        /*displayReceipt(key);*/
     }
 
     private void displayReceipt(String key) {
@@ -615,5 +596,12 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         });
 
         btn_close.setOnClickListener(view -> popupWindow.dismiss());
+    }
+
+    private void openReceipt(String key) {
+        Intent intent = new Intent(CartActivity.this, ReceiptActivity.class);
+        intent.putExtra("key", key);
+        startActivity(intent);
+        finish();
     }
 }

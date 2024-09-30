@@ -59,7 +59,7 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
         holder.tvHistoryDate.setText(date);
         holder.tvHistoryTime.setText(time);
         holder.tvHistoryID.setText(getRef(position).getKey());
-        //employee name here
+        holder.tvHistoryEmployeeName.setText(model.getEmployee_name());
         holder.tvHistoryTotal.setText(String.valueOf(model.getSubtotal()));
         holder.tvHistoryType.setText(model.isIs_out() ? "Out" : "In");
 
