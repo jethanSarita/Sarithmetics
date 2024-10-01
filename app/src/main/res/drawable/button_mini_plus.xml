@@ -6,7 +6,7 @@
 
     <!-- Rounded square background -->
     <path
-        android:fillColor="@color/colorTextPrimary"
+        android:fillColor="@color/button"
         android:pathData="M4,0 h40 a4,4 0 0,1 4,4 v40 a4,4 0 0,1 -4,4 h-40 a4,4 0 0,1 -4,-4 v-40 a4,4 0 0,1 4,-4 z"
         android:strokeWidth="0"/>
 

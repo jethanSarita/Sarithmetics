@@ -44,7 +44,7 @@ public class ReceiptActivity extends AppCompatActivity {
     private static final String TAG = "Receipt Activity";
 
     /*Components*/
-    TextView receipt_info, receipt_subtotal, receipt_total, receipt_customer_payment, receipt_customer_change, receipt_tq;
+    TextView receipt_info, receipt_subtotal, receipt_total, receipt_customer_payment, receipt_customer_change, receipt_tq, receipt_title;
     Button receipt_btn_ok;
     RecyclerView receipt_rv;
     ImageView back_btn, qr_code;
@@ -113,6 +113,7 @@ public class ReceiptActivity extends AppCompatActivity {
         receipt_customer_payment = findViewById(R.id.receipt_main_customer_payment);
         receipt_customer_change = findViewById(R.id.receipt_main_customer_change);
         receipt_tq = findViewById(R.id.receipt_tq);
+        receipt_title = findViewById(R.id.receipt_main_title);
 
         /*Layout Views*/
         receipt_cash_change_layout = findViewById(R.id.receipt_main_cash_change_view);
@@ -199,7 +200,10 @@ public class ReceiptActivity extends AppCompatActivity {
                 receipt_info.setText(formatted_date + " " + key);
 
                 if (!transaction.isIs_out()) {
+                    receipt_title.setText("Restock Receipt");
                     receipt_cash_change_layout.setVisibility(View.GONE);
+                } else {
+                    receipt_title.setText("Checkout Receipt");
                 }
 
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();

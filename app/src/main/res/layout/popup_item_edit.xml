@@ -156,7 +156,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Edit" />
 
                         <Button
@@ -164,7 +164,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Delete" />
 
                         <Button
@@ -172,7 +172,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Close" />
 
                     </LinearLayout>
@@ -229,7 +229,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Add to Cart" />
 
                         <Button
@@ -238,7 +238,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Quick Buy" />
 
                         <TextView
@@ -255,7 +255,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Yes"
                             android:visibility="gone" />
                         <Button
@@ -264,7 +264,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="No"
                             android:visibility="gone" />
 

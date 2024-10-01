@@ -79,7 +79,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener, ListAdapterHistoryFirebase.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
-    FloatingActionButton add_button, update_button;
+    FloatingActionButton add_button, restock_button;
     String punch_in_code;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     androidx.appcompat.widget.SearchView itemSearchBar, restockingSearchBar;
     EditText etBusinessCode, etPunchInCode;
     Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode, history_filter_button;
-    ScrollView maSvItems;
+    //ScrollView maSvItems;
     RandomHelper randomHelper;
     MenuItem nav_insights, nav_restock;
 
@@ -229,12 +229,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemSearchBar = findViewById(R.id.items_search_bar_serv);
         cart_button = findViewById(R.id.items_cart_iv);
         add_button = findViewById(R.id.items_add_button_fab);
-        maSvItems = findViewById(R.id.items_sv);
+        //maSvItems = findViewById(R.id.items_sv);
 
         /*restock layout*/
         restock_layout = findViewById(R.id.layout_restock_rl);
         restockingSearchBar = findViewById(R.id.restockingSearchBar);
-        update_button = findViewById(R.id.fabUpdate);
+        restock_button = findViewById(R.id.fabUpdate);
 
         /*History Layout*/
         history_layout = findViewById(R.id.layout_history_rl);
@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             openAddItemPopup();
         });
 
-        update_button.setOnClickListener(view -> {
+        restock_button.setOnClickListener(view -> {
             restockItems();
         });
 
@@ -381,6 +381,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction_date = ServerValue.TIMESTAMP;
         items = new ArrayList<>();
 
+        int restocks_count = 0;
+
         /*Get data for each item in adapter*/
         for (int i = 0; i < listAdapterRestockFirebase.getItemCount(); i++) {
 
@@ -390,6 +392,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             /*Check if current item is being restocked*/
             if (item.getRestock_quantity() != 0) {
+                restocks_count++;
+
                 new_stock_quantity = item.getRestock_quantity() + item.getQuantity();
                 new_restock_quantity = 0;
 
@@ -414,11 +418,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        transaction = new MyTransaction(0.0, 0.0, subtotal, item_count, false, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
+        if (restocks_count > 0) {
+            transaction = new MyTransaction(0.0, 0.0, subtotal, item_count, false, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
 
-        ref.setValue(transaction);
+            ref.setValue(transaction);
 
-        openReceipt(key);
+            openReceipt(key);
+        } else {
+            Toast.makeText(getApplicationContext(), "No items has restock quantity set", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void initializePieChart() {
@@ -772,7 +780,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (cUser.getStatus() == 0) {
                 //Pending approval
                 llEmployeeLayoutPendingSync.setVisibility(View.VISIBLE);
-                maSvItems.setVisibility(View.GONE);
+                //maSvItems.setVisibility(View.GONE);
+                rvItems.setVisibility(View.GONE);
                 maTvStatusPending.setVisibility(View.VISIBLE);
                 user_ref.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -830,7 +839,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 btnEnterPunchInCode.setVisibility(View.VISIBLE);
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.VISIBLE);
                                 add_button.setVisibility(View.GONE);
-                                maSvItems.setVisibility(View.GONE);
+                                //maSvItems.setVisibility(View.GONE);
+                                rvItems.setVisibility(View.GONE);
                                 break;
                             case 2:
                                 //Active
@@ -841,7 +851,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 btnEnterPunchInCode.setVisibility(View.GONE);
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.GONE);
                                 add_button.setVisibility(View.VISIBLE);
-                                maSvItems.setVisibility(View.VISIBLE);
+                                //maSvItems.setVisibility(View.VISIBLE);
+                                rvItems.setVisibility(View.VISIBLE);
                                 break;
                         }
                     }
@@ -886,7 +897,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             add_button.setVisibility(View.GONE);
                         } else if (current_user_type == 2) {
                             profileFnLUserType.setText("Inventory Manager");
-                            add_button.setVisibility(View.VISIBLE);
+                            add_button.setVisibility(View.GONE);
                         }
                     }
 
@@ -1692,27 +1703,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             hideKeyboard(view);
-
-            /*if (selected_product_quantity == 0) {
-                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
-            } else {
-                SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
-
-                firebaseDatabaseHelper
-                        .getBusinessTransactionHistoryRef(cUser.getBusiness_code())
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) + "-" + firebaseDatabaseHelper.getDayOfWeek(0))
-                        .child(time_format.format(Calendar.getInstance().getTime()))
-                        .child(current_item_name).setValue(new Item(current_item_name, current_item_price, selected_product_quantity));
-
-                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - selected_product_quantity));
-
-                popupWindow.dismiss();
-                itemSearchBar.clearFocus();
-                hideKeyboard(view);
-            }*/
         });
 
         button_no.setOnClickListener(view ->{

@@ -161,7 +161,7 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
             if (item.getCost_price() == 0.0) {
                 item_cost_price.setText("CLICK TO SET");
             } else {
-                item_cost_price.setText(String.valueOf(item.getCost_price()));
+                item_cost_price.setText("₱" + item.getCost_price());
             }
         }
 

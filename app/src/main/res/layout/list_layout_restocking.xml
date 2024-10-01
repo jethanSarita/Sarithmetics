@@ -70,7 +70,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="5dp"
                         android:text="Item Cost Price"
-                        android:textColor="@android:color/holo_blue_dark"
+                        android:textColor="@color/clickable_text"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -123,7 +123,7 @@
                         android:inputType="number"
                         android:text="0"
                         android:textAlignment="center"
-                        android:textColor="@android:color/holo_blue_dark"
+                        android:textColor="@color/clickable_text"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 

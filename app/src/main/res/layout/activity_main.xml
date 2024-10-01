@@ -135,7 +135,7 @@
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="@color/colorTextPrimary"
+                                android:backgroundTint="@color/button"
                                 android:text="Enter" />
                         </LinearLayout>
 
@@ -219,7 +219,7 @@
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="@color/colorTextPrimary"
+                                android:backgroundTint="@color/button"
                                 android:text="Enter" />
                         </LinearLayout>
 
@@ -415,7 +415,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Generate" />
 
                         <RelativeLayout
@@ -440,15 +440,10 @@
                             android:textSize="34sp"
                             android:textStyle="bold" />
 
-                        <ScrollView
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/home_owner_employees_rv"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/home_owner_employees_rv"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
-                        </ScrollView>
+                            android:layout_height="match_parent" />
 
                     </LinearLayout>
 
@@ -460,7 +455,8 @@
                 android:id="@+id/layout_items_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/items_add_button_fab"
@@ -471,7 +467,7 @@
                     android:layout_marginRight="32dp"
                     android:layout_marginBottom="32dp"
                     android:src="@drawable/icon_add"
-                    app:backgroundTint="@color/colorTextPrimary" />
+                    app:backgroundTint="@color/button" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -611,17 +607,12 @@
                         android:textStyle="bold"
                         android:visibility="gone" />
 
-                    <ScrollView
-                        android:id="@+id/items_sv"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/items_rv"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/items_rv"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </ScrollView>
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingBottom="100dp" />
 
                     <Space
                         android:layout_width="match_parent"
@@ -893,7 +884,7 @@
                     android:layout_marginRight="32dp"
                     android:layout_marginBottom="32dp"
                     android:src="@drawable/icon_save"
-                    app:backgroundTint="@color/colorTextPrimary"
+                    app:backgroundTint="@color/button"
                     app:tint="@android:color/white" />
 
                 <LinearLayout
@@ -1019,17 +1010,12 @@
                         android:textStyle="bold"
                         android:visibility="gone" />
 
-                    <ScrollView
-                        android:id="@+id/maSvRestockingItems"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewRestocking"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/recyclerViewRestocking"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </ScrollView>
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingBottom="100dp" />
 
                 </LinearLayout>
 
@@ -1039,8 +1025,7 @@
                 android:id="@+id/layout_history_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1120,7 +1105,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
                             android:layout_marginEnd="10dp"
-                            android:backgroundTint="@color/colorTextPrimary"
+                            android:backgroundTint="@color/button"
                             android:text="Filter" />
                     </LinearLayout>
 

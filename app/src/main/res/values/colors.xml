@@ -7,4 +7,7 @@
     <color name="colorTextPrimary">#ED7D31</color>
     <color name="colorTextSecondary">#b87c64</color>
     <color name="colorSpacing">#DA9276</color>
+    <color name="button">#dd7973</color>
+    <color name="color_button2">#7B3F18</color>
+    <color name="clickable_text">#4681f4</color>
 </resources>

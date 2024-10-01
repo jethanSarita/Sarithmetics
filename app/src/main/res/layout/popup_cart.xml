@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="Delete" />
                 <Button
                     android:id="@+id/cart_popup_btn_update"
@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="Update" />
                 <Button
                     android:id="@+id/cart_popup_btn_close"
@@ -104,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="Close" />
             </LinearLayout>
 

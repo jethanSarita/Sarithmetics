@@ -55,6 +55,7 @@
                 android:text="Standard"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
+                android:buttonTint="@color/button"
                 android:textStyle="bold" />
 
             <RadioButton
@@ -64,6 +65,7 @@
                 android:text="Inventory Manager"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
+                android:buttonTint="@color/button"
                 android:textStyle="bold" />
         </RadioGroup>
 
@@ -80,7 +82,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorTextPrimary"
+                android:backgroundTint="@color/button"
                 android:text="Dismiss" />
 
             <Button
@@ -90,7 +92,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorTextPrimary"
+                android:backgroundTint="@color/button"
                 android:text="Update" />
 
             <Button
@@ -100,7 +102,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorTextPrimary"
+                android:backgroundTint="@color/button"
                 android:text="Close" />
         </LinearLayout>
 

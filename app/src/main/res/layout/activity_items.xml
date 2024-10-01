@@ -44,7 +44,7 @@
                 android:paddingRight="15dp">
 
                 <ImageView
-                    android:id="@+id/items_add_button_fab"
+                    android:id="@+id/items_add_button_fab_"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"

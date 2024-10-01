@@ -88,7 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="Calculate" />
             </LinearLayout>
 
@@ -119,7 +119,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="Check out"
                     android:visibility="invisible" />
             </LinearLayout>
@@ -368,7 +368,7 @@
                     android:layout_gravity="end"
                     android:layout_marginTop="10dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/colorTextPrimary"
+                    android:backgroundTint="@color/button"
                     android:text="OK" />
 
             </LinearLayout>
