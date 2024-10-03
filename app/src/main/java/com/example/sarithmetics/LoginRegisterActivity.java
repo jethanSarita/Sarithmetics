@@ -51,6 +51,9 @@ public class LoginRegisterActivity extends AppCompatActivity {
     FirebaseDatabase database;
     DatabaseReference myRef;
 
+    /*Loading System*/
+    SystemLoading systemLoading;
+
     //Network update reactions
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
@@ -120,6 +123,9 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance(DB);
 
+        /*Loading System*/
+        systemLoading = new SystemLoading(LoginRegisterActivity.this);
+
         tvRegister.setOnClickListener(view -> {
             /*Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "tvRegister");
@@ -168,6 +174,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         if (isEmpty(email) || isEmpty(password)){
             Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
         } else {
+            systemLoading.startLoadingDialog();
             signIn(email, password);
         }
     }
@@ -194,6 +201,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
     private void createAccount(String first_name, String last_name, String email, String password, int user_type) {
         // [START create_user_with_email]
+        systemLoading.startLoadingDialog();
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -226,6 +234,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                                             myRef = database.getReference("Users");
                                             myRef.child(cUser.getUid()).setValue(cUser);
                                             database.getReference("businesses").child(cUser.getBusiness_code()).child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+                                            systemLoading.dismissDialog();
                                             updateUI(user);
                                         } else {
                                             Log.d(TAG, "User profile update error.", task.getException());
@@ -237,6 +246,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                             }
                         } else {
                             // If sign in fails, display a message to the user.
+                            systemLoading.dismissDialog();
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(LoginRegisterActivity.this, "Register failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -257,15 +267,16 @@ public class LoginRegisterActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null){
                                 Log.d(TAG, "User: " + user.getDisplayName() + "\nHas been logged in");
+                                systemLoading.dismissDialog();
                                 updateUI(user);
                             } else {
                                 Log.d(TAG, "Log in error, user null");
                             }
                         } else {
                             // If sign in fails, display a message to the user.
+                            systemLoading.dismissDialog();
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginRegisterActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginRegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
                     }

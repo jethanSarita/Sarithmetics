@@ -89,7 +89,7 @@ public class ReceiptActivity extends AppCompatActivity {
             .build();
 
     /*Loading System*/
-    LoadingSystem loadingSystem;
+    SystemLoading systemLoading;
 
     /*Previous Data*/
     Bundle bundle;
@@ -136,8 +136,8 @@ public class ReceiptActivity extends AppCompatActivity {
         connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*Loading system*/
-        loadingSystem = new LoadingSystem(ReceiptActivity.this);
-        loadingSystem.startLoadingDialog();
+        systemLoading = new SystemLoading(ReceiptActivity.this);
+        systemLoading.startLoadingDialog();
 
         /*Previous Data*/
         bundle = getIntent().getExtras();
@@ -169,7 +169,7 @@ public class ReceiptActivity extends AppCompatActivity {
                     populateViewData();
 
                     /*Dismiss loading*/
-                    loadingSystem.dismissDialog();
+                    systemLoading.dismissDialog();
                 } else {
                     Log.e(TAG, "Snapshot doesn't exist: " + snapshot);
                 }

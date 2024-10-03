@@ -42,7 +42,6 @@ import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -93,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<String> listItemQty;
     SessionManager sessionManager;
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
-    ListAdapterItem listAdapterItem;
+    //ListAdapterItem listAdapterItem;
     ListAdapterItemFirebase listAdapterItemFirebase;
     ListAdapterEmployeeFirebase listAdapterEmployeeFirebase;
     ListAdapterRestockFirebase listAdapterRestockFirebase;
@@ -132,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     PieData pieData;
 
     /*Loading system*/
-    LoadingSystem loadingSystem;
+    SystemLoading systemLoading;
 
     /*Internet monitoring*/
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
@@ -271,9 +270,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listItemQty = new ArrayList<>();
 
         /*Loading system*/
-        loadingSystem = new LoadingSystem(MainActivity.this);
+        systemLoading = new SystemLoading(MainActivity.this);
         //Initiate login
-        loadingSystem.startLoadingDialog();
+        systemLoading.startLoadingDialog();
 
         //Clear cart
         cartedItem.clear();
@@ -541,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setUpRestockSearchBar();
 
             //Dismiss loading popup
-            loadingSystem.dismissDialog();
+            systemLoading.dismissDialog();
         });
     }
 
@@ -1730,7 +1729,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    void filterList(String newText){
+    /*void filterList(String newText){
         ArrayList<Product> filteredList = new ArrayList<>();
         for(Product p : currProduct){
             if(p.getProductName().toLowerCase().contains(newText.toLowerCase())) {
@@ -1742,7 +1741,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             listAdapterItem.setFilteredList(filteredList);
         }
-    }
+    }*/
 
     //Item List OnClick Listener
     @Override
