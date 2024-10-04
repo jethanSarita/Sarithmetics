@@ -35,6 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
@@ -94,10 +95,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
     //ListAdapterItem listAdapterItem;
     ListAdapterItemFirebase listAdapterItemFirebase;
+    ListAdapterCategoryFirebase listAdapterCategoryFirebase;
     ListAdapterEmployeeFirebase listAdapterEmployeeFirebase;
     ListAdapterRestockFirebase listAdapterRestockFirebase;
     ListAdapterHistoryFirebase listAdapterHistoryFirebase;
-    RecyclerView rvItems, rvEmployees, rvRestocking, rvHistory;
+    RecyclerView rvItems, rvEmployees, rvRestocking, rvHistory, rvCategory;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
     Spinner insight_item_spinner, insight_context_spinner;
@@ -110,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //ScrollView maSvItems;
     RandomHelper randomHelper;
     MenuItem nav_insights, nav_restock;
+    ImageButton category_plus_btn;
 
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
@@ -117,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref;
-    Query item_query, employee_query, restock_query, history_query;
+    Query item_query, employee_query, restock_query, history_query, category_query;
 
     ArrayAdapter<String> adp;
 
@@ -229,6 +232,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cart_button = findViewById(R.id.items_cart_iv);
         add_button = findViewById(R.id.items_add_button_fab);
         //maSvItems = findViewById(R.id.items_sv);
+        /*Category*/
+        category_plus_btn = findViewById(R.id.items_category_plus_btn);
+        rvCategory = findViewById(R.id.items_category_rv);
 
         /*restock layout*/
         restock_layout = findViewById(R.id.layout_restock_rl);
@@ -330,6 +336,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         history_filter_button.setOnClickListener(view ->{
             openDatePickerDialog();
+        });
+
+        category_plus_btn.setOnClickListener(view -> {
+            business_code_ref.child("categories").push().setValue("Test");
+            //openAddCategoryPopup();
         });
     }
 
@@ -524,6 +535,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //List of Items
             setUpItemList();
 
+            //List of Categories
+            setUpCategoryList();
+
             //List of Employees
             setUpEmployeeList();
 
@@ -627,22 +641,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterHistoryFirebase.startListening();
     }
 
-    /*{
-        "history": {
-            "-O7CbWBmJLYnJPSkmoTd": {
-                "customerChange": 68,
-                "customerPayment": 200,
-                "itemCount": 3,
-                "subtotal": 132,
-                "transactionDate": 1726806493706,
-                "items": {
-                    "Bean": {
-
-                    }
-                }
-            }
-        }
-    }*/
+    private void setUpCategoryList() {
+        rvCategory.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+        category_query = business_code_ref.child("categories");
+        FirebaseRecyclerOptions<String> options =
+                new FirebaseRecyclerOptions.Builder<String>()
+                        .setQuery(category_query, String.class)
+                        .build();
+        listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options);
+        rvCategory.setAdapter(listAdapterCategoryFirebase);
+        listAdapterCategoryFirebase.startListening();
+    }
 
     private void sidebarContinuity() {
         switch (sessionManager.getMainStatus()) {

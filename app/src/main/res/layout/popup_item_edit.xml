@@ -151,37 +151,49 @@
                         android:layout_weight="0"
                         android:orientation="horizontal">
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnEditPopupEdit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/button"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Edit" />
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnEditPopupDelete"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/button"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Delete" />
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnEditPopupClose"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/button"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Close" />
 
                     </LinearLayout>
                 </LinearLayout>
 
+                <View
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:background="@color/colorTextSecondary" />
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
                     android:layout_weight="0"
                     android:text="Add Product to Cart"
                     android:textAlignment="center"
@@ -223,22 +235,22 @@
                         android:gravity="center"
                         android:orientation="vertical">
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnAddToCart"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/button"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Add to Cart" />
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnQuickBuy"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/button"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Quick Buy" />
 
                         <TextView
@@ -249,22 +261,22 @@
                             android:textAlignment="center"
                             android:visibility="gone" />
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnYesBuy"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/button"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="Yes"
                             android:visibility="gone" />
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/btnNoBuy"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:backgroundTint="@color/button"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white"
                             android:text="No"
                             android:visibility="gone" />
 

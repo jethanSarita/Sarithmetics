@@ -75,34 +75,34 @@
             android:layout_weight="0"
             android:orientation="horizontal">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnDismiss"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Dismiss" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnUpdate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Update" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Close" />
         </LinearLayout>
 
