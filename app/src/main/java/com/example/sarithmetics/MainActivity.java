@@ -650,6 +650,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .build();
         listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options);
         rvCategory.setAdapter(listAdapterCategoryFirebase);
+        rvCategory.setItemAnimator(null);
         listAdapterCategoryFirebase.startListening();
     }
 
