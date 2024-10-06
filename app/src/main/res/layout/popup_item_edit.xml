@@ -145,6 +145,11 @@
                         android:text="Place holder"
                         android:textSize="34sp"/>
 
+                    <Spinner
+                        android:id="@+id/productCategoryEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

@@ -74,7 +74,7 @@
             android:inputType="number" />
 
         <Spinner
-            android:id="@+id/main_popup_category_spinner"
+            android:id="@+id/popup_item_category_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

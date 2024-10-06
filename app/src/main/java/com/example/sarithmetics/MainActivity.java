@@ -76,7 +76,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener, ListAdapterHistoryFirebase.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener, ListAdapterHistoryFirebase.OnItemClickListener, ListAdapterCategoryFirebase.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
     FloatingActionButton add_button, restock_button;
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView rvItems, rvEmployees, rvRestocking, rvHistory, rvCategory;
     ArrayList<Product> cartedProduct, currProduct;
     ArrayList<Item> cartedItem;
-    Spinner insight_item_spinner, insight_context_spinner;
+    Spinner insight_item_spinner, insight_context_spinner, category_spinner;
     ArrayList<String> insight_item_list, insight_context_list;
     ArrayAdapter<String> insight_item_adapter, insight_context_adapter;
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     User cUser, lUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref;
+    DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref, category_ref;
     Query item_query, employee_query, restock_query, history_query, category_query;
 
     ArrayAdapter<String> adp;
@@ -339,8 +339,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         category_plus_btn.setOnClickListener(view -> {
-            business_code_ref.child("categories").push().setValue("Test");
-            //openAddCategoryPopup();
+            //business_code_ref.child("categories").push().setValue("Test");
+            openAddCategoryPopup();
         });
     }
 
@@ -644,11 +644,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setUpCategoryList() {
         rvCategory.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
         category_query = business_code_ref.child("categories");
-        FirebaseRecyclerOptions<String> options =
-                new FirebaseRecyclerOptions.Builder<String>()
-                        .setQuery(category_query, String.class)
+        FirebaseRecyclerOptions<Category> options =
+                new FirebaseRecyclerOptions.Builder<Category>()
+                        .setQuery(category_query, Category.class)
                         .build();
-        listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options);
+        listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options, this);
         rvCategory.setAdapter(listAdapterCategoryFirebase);
         rvCategory.setItemAnimator(null);
         listAdapterCategoryFirebase.startListening();
@@ -953,6 +953,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         business_ref = firebaseDatabaseHelper.getBusinessRef();
         business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
         history_ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code());
+        category_ref = firebaseDatabaseHelper.getItemsCategories(cUser.getBusiness_code());
     }
 
     private void checkSession() {
@@ -1328,6 +1329,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rvRestocking.setAdapter(listAdapterRestockFirebase);
     }
 
+    private void filterByCategory(Category model) {
+        FirebaseRecyclerOptions<Item> options =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(items_ref.orderByChild("category").equalTo(model.getName()), Item.class)
+                        .build();
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        listAdapterItemFirebase.startListening();
+        rvItems.setAdapter(listAdapterItemFirebase);
+    }
+
     private void transactionDateFilter(long[] date) {
         FirebaseRecyclerOptions<MyTransaction> options =
                 new FirebaseRecyclerOptions.Builder<MyTransaction>()
@@ -1408,6 +1419,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         pieChart.clear();
     }
 
+    private void openAddCategoryPopup() {
+        String FUNC_TAG = "openAddCategoryPopup";
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_category_add, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        Button button_set;
+        EditText field_category_name;
+
+        button_set = popupView.findViewById(R.id.category_add_set_btn);
+        field_category_name = popupView.findViewById(R.id.category_add_field);
+
+        button_set.setOnClickListener(view -> {
+            String category_name = field_category_name.getText().toString().trim();
+
+            category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    int next_prio = 0;
+                    if (snapshot.exists()) {
+
+                        for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                            Category curr_cat = curr_snap.getValue(Category.class);
+
+                            if (curr_cat != null) {
+                                next_prio = curr_cat.getPriority() + 1;
+                            }
+
+                        }
+                    }
+                    category_ref.push().setValue(new Category(category_name, next_prio));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            popupWindow.dismiss();
+        });
+    }
+
+    /*{
+        "categories": {
+            "unique_key1": {
+                "name": "Food",
+                "prio": 1
+            },
+            "unique_key2": {
+                "name": "Water",
+                "prio": 2
+            }
+        }
+    }*/
+
     private void openAddItemPopup() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_add, null);
@@ -1423,14 +1496,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        List<String> categories;
         Button add_btn, close_btn;
         EditText name_field, price_field, cost_price_field;
+        Spinner category_spinner;
 
         name_field = popupView.findViewById(R.id.popup_item_add_name);
         price_field = popupView.findViewById(R.id.popup_item_add_price);
         cost_price_field = popupView.findViewById(R.id.popup_item_add_cost_price);
         add_btn = popupView.findViewById(R.id.btnPopupAdd);
         close_btn = popupView.findViewById(R.id.btnPopupClose);
+        category_spinner = popupView.findViewById(R.id.popup_item_category_spinner);
+        categories = new ArrayList<>();
+        categories.add("Select Category");
+
+        category_ref.addValueEventListener(new ValueEventListener() {
+            ArrayAdapter<String> adapter;
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                        Category curr_cat = curr_snap.getValue(Category.class);
+                        categories.add(curr_cat.getName());
+                    }
+                }
+                adapter = new ArrayAdapter<String>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, categories);
+                category_spinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         close_btn.setOnClickListener(view -> {
             popupWindow.dismiss();
@@ -1440,18 +1538,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         add_btn.setOnClickListener(view -> {
 
-            //Initialize data (In case of empty fields)
-            /*String pName = "NULL";
-            double pPrice = 0;
-            int pQty = 0;*/
-
             boolean condition = false;
 
             //Store field data in temp variables
-            String name, price, cost_price;
+            String name, price, cost_price, category;
             name =  name_field.getText().toString().trim();
             price = price_field.getText().toString().trim();
             cost_price = cost_price_field.getText().toString().trim();
+            category = category_spinner.getSelectedItem().toString();
 
             //To check if fields were empty. No point storing in official data if they are empty
             if (!isEmpty(name)) {
@@ -1468,6 +1562,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     item.setCost_price(Double.parseDouble(cost_price));
                 }
 
+                if (!category.equals("Select Category")) {
+                    item.setCategory(category);
+                }
+
                 items_ref.child(name).setValue(item);
 
                 popupWindow.dismiss();
@@ -1476,18 +1574,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 Toast.makeText(MainActivity.this, "Item should at least have a name", Toast.LENGTH_SHORT).show();
             }
-
-            /*if (!isEmpty(price)) {
-                //pPrice = Double.parseDouble(price);
-            } else {
-
-            }
-
-            if (!isEmpty(cost_price)) {
-                //pQty = Integer.parseInt(cost_price);
-            } else {
-
-            }*/
         });
     }
     /*Popup when editing an item*/
@@ -1505,6 +1591,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Double current_item_price = item.getPrice();
         Double current_item_cost_price = item.getCost_price();
         int current_item_quantity = item.getQuantity();
+        String current_item_category;
+        if (item.getCategory() == null) {
+            current_item_category = null;
+        } else {
+            current_item_category = item.getCategory();
+        }
 
         /*title*/
         TextView epp_title;
@@ -1524,6 +1616,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Button button_edit, button_close, button_delete;
         EditText edit_item_name, edit_item_price;
         TextView edit_display_item_quantity;
+        Spinner category_spinner;
+        List<String> categories;
 
         epp_ll_edit = popupView.findViewById(R.id.epp_ll_edit);
         edit_item_name = popupView.findViewById(R.id.productNameEdit);
@@ -1532,12 +1626,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
         button_close = popupView.findViewById(R.id.btnEditPopupClose);
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
+        category_spinner = popupView.findViewById(R.id.productCategoryEdit);
+        categories = new ArrayList<String>();
 
         /*Both*/
         TextView tvAreYouSure;
         Button button_add_to_cart, button_quick_buy, button_yes, button_no;
         NumberPicker editPopupNumberPicker;
-
 
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
@@ -1559,6 +1654,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         epp_tv_item_name.setText(current_item_name);
         epp_tv_item_price.setText(String.valueOf(String.valueOf(current_item_price)));
         epp_tv_item_quantity.setText(String.valueOf(String.valueOf(current_item_quantity)));
+
+        //Spinner
+        categories.add("Select Category");
+        category_ref.addValueEventListener(new ValueEventListener() {
+            ArrayAdapter<String> adapter;
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                        Category curr_cat = curr_snap.getValue(Category.class);
+                        categories.add(curr_cat.getName());
+                    }
+                }
+                adapter = new ArrayAdapter<String>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, categories);
+                category_spinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         //Check user type
         if (cUser.getUser_type() == 0) {
@@ -1587,36 +1704,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Edit button
         button_edit.setOnClickListener(view -> {
 
-            //set input variables
-            String input_item_name, input_item_price;
+            //Set input variables
+            String input_item_name, input_item_price, input_item_category;
 
-            //set object variables
+            //Set Item class
+            Item new_item = new Item();
+
+            /*//set object variables
             String obj_item_name;
             double obj_item_price;
+            String obj_item_category;*/
 
             //store editText data
             input_item_name = edit_item_name.getText().toString().trim();
             input_item_price = edit_item_price.getText().toString().trim();
+            input_item_category = category_spinner.getSelectedItem().toString().trim();
 
             //check values
-            if(isEmpty(input_item_name)){
-                obj_item_name = current_item_name;
+            if (!isEmpty(input_item_name)) {
+                new_item.setName(input_item_name);
             } else {
-                obj_item_name = input_item_name;
+                new_item.setName(current_item_name);
             }
-            if(isEmpty(input_item_price)){
-                obj_item_price = current_item_price;
+
+            if (!isEmpty(input_item_price)) {
+                new_item.setPrice(Double.parseDouble(input_item_price));
             } else {
-                obj_item_price = Double.parseDouble(input_item_price);
+                new_item.setPrice(current_item_price);
             }
 
-            if(!(current_item_name.equals(input_item_name))){
-                items_ref.child(current_item_name).removeValue();
+            if (!input_item_category.equals("Select Category")) {
+                new_item.setCategory(input_item_category);
+            } else {
+                new_item.setCategory(current_item_category);
             }
 
-            items_ref.child(obj_item_name).setValue(new Item(obj_item_name, obj_item_price, current_item_cost_price, current_item_quantity));
+            new_item.setQuantity(current_item_quantity);
 
-            //refreshItems();
+            items_ref.child(new_item.getName()).setValue(new_item);
+
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             hideKeyboard(view);
@@ -1624,11 +1750,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Delete button
         button_delete.setOnClickListener(view -> {
-
-            //myDB.deleteItem(currProductID);
-
             items_ref.child(current_item_name).removeValue();
-            //refreshItems();
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             hideKeyboard(view);
@@ -1967,5 +2089,128 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
         intent.putExtra("key", key);
         startActivity(intent);
+    }
+
+    @Override
+    public void onItemClick(int position, Category model, DatabaseReference ref, int type) {
+        switch (type) {
+            case 0:
+                filterByCategory(model);
+                break;
+            case 1:
+                openCategorySettingPopup(position, model, ref);
+                break;
+            case 2:
+                resetItemList();
+                break;
+        }
+    }
+
+    private void resetItemList() {
+        FirebaseRecyclerOptions<Item> options =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(item_query, Item.class)
+                        .build();
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        rvItems.setAdapter(listAdapterItemFirebase);
+        listAdapterItemFirebase.startListening();
+    }
+
+    private void openCategorySettingPopup(int position, Category model, DatabaseReference ref) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_category_edit, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+
+        EditText name_field;
+        Button edit_button, delete_button;
+
+        name_field = popupView.findViewById(R.id.category_edit_field);
+        edit_button = popupView.findViewById(R.id.category_edit_edit_btn);
+        delete_button = popupView.findViewById(R.id.category_edit_delete_btn);
+
+        name_field.setText(model.getName());
+
+        edit_button.setOnClickListener(view -> {
+            String inputted_name = name_field.getText().toString().trim();
+
+            if (!inputted_name.isEmpty()) {
+                cascadeEditCategory(ref, model.getName(), inputted_name);
+                popupWindow.dismiss();
+            } else {
+                cascadeDeleteCategory(ref, model.getName());
+                popupWindow.dismiss();
+            }
+        });
+
+        delete_button.setOnClickListener(view -> {
+            cascadeDeleteCategory(ref, model.getName());
+            popupWindow.dismiss();
+        });
+    }
+
+    private void cascadeEditCategory(DatabaseReference ref, String new_name, String old_name) {
+        items_ref.orderByChild("category").equalTo(old_name).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                        curr_snap.getRef().child("category").setValue(new_name);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        ref.child("name").setValue(new_name);
+    }
+
+    private void cascadeDeleteCategory(DatabaseReference ref, String name) {
+        /*Delete instances in items*/
+        items_ref.orderByChild("category").equalTo(name).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                        curr_snap.getRef().child("category").removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        /*Renew priority numbering*/
+        category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int count = 0;
+                if (snapshot.exists()) {
+                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                        if (!(curr_snap.getKey().equals(ref.getKey()))) {
+                            category_ref.child(curr_snap.getKey()).child("priority").setValue(count);
+                            count++;
+                        }
+                    }
+                }
+                ref.removeValue();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

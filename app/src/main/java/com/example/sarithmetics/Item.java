@@ -48,8 +48,23 @@ public class Item {
         this.category = category;
     }
 
+    public Item(String name, double price, double cost_price, String category) {
+        this.name = name;
+        this.price = price;
+        this.cost_price = cost_price;
+        this.category = category;
+    }
+
     public Item() {
 
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public int getRestock_quantity() {

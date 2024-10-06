@@ -562,7 +562,8 @@
                                 android:id="@+id/items_category_plus_btn"
                                 android:layout_width="27dp"
                                 android:layout_height="27dp"
-
+                                android:layout_gravity="bottom"
+                                android:layout_marginBottom="5dp"
                                 android:background="@drawable/button_mini_plus" />
 
                         </LinearLayout>
