@@ -1429,7 +1429,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         Button button_set;
         EditText field_category_name;
@@ -1520,7 +1520,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         categories.add(curr_cat.getName());
                     }
                 }
-                adapter = new ArrayAdapter<String>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, categories);
+                adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
                 category_spinner.setAdapter(adapter);
             }
 
@@ -1588,8 +1588,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
 
         String current_item_name = item.getName();
-        Double current_item_price = item.getPrice();
-        Double current_item_cost_price = item.getCost_price();
+        double current_item_price = item.getPrice();
+        double current_item_cost_price = item.getCost_price();
         int current_item_quantity = item.getQuantity();
         String current_item_category;
         if (item.getCategory() == null) {
@@ -1659,16 +1659,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         categories.add("Select Category");
         category_ref.addValueEventListener(new ValueEventListener() {
             ArrayAdapter<String> adapter;
+            int position = 0;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     for (DataSnapshot curr_snap : snapshot.getChildren()) {
                         Category curr_cat = curr_snap.getValue(Category.class);
                         categories.add(curr_cat.getName());
+                        if (item.getCategory() != null && item.getCategory().equals(curr_cat.getName())) {
+                            position = curr_cat.getPriority();
+                        }
                     }
                 }
-                adapter = new ArrayAdapter<String>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, categories);
+                adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
                 category_spinner.setAdapter(adapter);
+                category_spinner.setSelection(position);
             }
 
             @Override
@@ -1738,6 +1743,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 new_item.setCategory(current_item_category);
             }
+
+            new_item.setCost_price(current_item_cost_price);
 
             new_item.setQuantity(current_item_quantity);
 
@@ -2124,7 +2131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         EditText name_field;
         Button edit_button, delete_button;
