@@ -533,8 +533,8 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         boolean focusable = true;
 
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        cart_activity_layout.post(() -> popupWindow.showAtLocation(cart_activity_layout, Gravity.TOP, 0, 0));
+        popupWindow.setElevation(10);
+        cart_activity_layout.post(() -> popupWindow.showAtLocation(cart_activity_layout, Gravity.CENTER, 0, 0));
 
         String item_name;
         double item_price;

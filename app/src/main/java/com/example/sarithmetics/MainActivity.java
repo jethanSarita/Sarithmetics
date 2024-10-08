@@ -18,11 +18,13 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -135,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /*Loading system*/
     SystemLoading systemLoading;
+    long TIMEOUT_DURATION;
+    Handler time_out_handler;
+    Runnable time_out_runnable;
 
     /*Internet monitoring*/
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
@@ -279,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         systemLoading = new SystemLoading(MainActivity.this);
         //Initiate login
         systemLoading.startLoadingDialog();
+
 
         //Clear cart
         cartedItem.clear();
@@ -1429,6 +1435,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         Button button_set;
@@ -1489,12 +1496,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0);
-            }
-        });
+        popupWindow.setElevation(10);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         List<String> categories;
         Button add_btn, close_btn;
@@ -1585,7 +1588,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
+        //popupWindow.setBackgroundDrawable(getDrawable(R.drawable.bg_pop_up));
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
+
 
         String current_item_name = item.getName();
         double current_item_price = item.getPrice();
@@ -1926,6 +1932,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
 
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView item_name_tv;
@@ -1954,6 +1961,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView text_cost_price;
@@ -1992,6 +2000,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name;
@@ -2024,6 +2033,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name, employee_status;
@@ -2131,6 +2141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         EditText name_field;

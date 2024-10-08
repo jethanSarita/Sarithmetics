@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/employee_popup"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pop_up">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_pop_up"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -54,7 +55,7 @@
                 android:text="Standard"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
-                android:buttonTint="@color/button"
+                app:buttonTint="@color/button"
                 android:textStyle="bold" />
 
             <RadioButton
@@ -64,7 +65,7 @@
                 android:text="Inventory Manager"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
-                android:buttonTint="@color/button"
+                app:buttonTint="@color/button"
                 android:textStyle="bold" />
         </RadioGroup>
 
