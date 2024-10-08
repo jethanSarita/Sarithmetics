@@ -1492,7 +1492,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.post(new Runnable() {
             @Override
             public void run() {
-                popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0);
+                popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0);
             }
         });
 
@@ -1585,7 +1585,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         String current_item_name = item.getName();
         double current_item_price = item.getPrice();
@@ -1926,7 +1926,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
 
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView item_name_tv;
         EditText restock_quantity_et;
@@ -1954,7 +1954,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView text_cost_price;
         EditText editText_new_cost_price;
@@ -1992,7 +1992,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name;
         Button yes, no;
@@ -2024,7 +2024,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.TOP, 0, 0));
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name, employee_status;
         RadioButton employee_standard, employee_inv_manager;
