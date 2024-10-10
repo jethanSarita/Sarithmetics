@@ -18,11 +18,6 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -350,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         add_button.setOnClickListener(view -> {
-            openAddItemPopup();
+            itemAddOpenPopup();
         });
 
         restock_button.setOnClickListener(view -> {
@@ -363,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         category_plus_btn.setOnClickListener(view -> {
             //business_code_ref.child("categories").push().setValue("Test");
-            openAddCategoryPopup();
+            categoryAddOpenPopup();
         });
     }
 
@@ -1444,7 +1439,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         pieChart.clear();
     }
 
-    private void openAddCategoryPopup() {
+    private void categoryAddOpenPopup() {
         String FUNC_TAG = "openAddCategoryPopup";
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -1494,20 +1489,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    /*{
-        "categories": {
-            "unique_key1": {
-                "name": "Food",
-                "prio": 1
-            },
-            "unique_key2": {
-                "name": "Water",
-                "prio": 2
-            }
-        }
-    }*/
-
-    private void openAddItemPopup() {
+    private void itemAddOpenPopup() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_add, null);
 
@@ -1599,7 +1581,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
     /*Popup when editing an item*/
-    private void createEditPopUpWindow(Item item) {
+    private void itemEditOpenPopup(Item item) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_edit, null);
 
@@ -1879,67 +1861,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    void refreshItems(){
-        //customAdapter.notifyDataSetChanged();
-        itemSearchBar.clearFocus();
-    }
-
-    void storeProductDataInCurrProduct(){
-        currProduct.clear();
-        Product temp;
-        for(int i = 0; i < listItemID.size(); i++){
-            temp = new Product(Integer.parseInt(listItemPrice.get(i)), listItemName.get(i), Float.parseFloat(listItemPrice.get(i)), Integer.parseInt(listItemQty.get(i)));
-            currProduct.add(temp);
-        }
-    }
-
-    /*void filterList(String newText){
-        ArrayList<Product> filteredList = new ArrayList<>();
-        for(Product p : currProduct){
-            if(p.getProductName().toLowerCase().contains(newText.toLowerCase())) {
-                filteredList.add(p);
-            }
-        }
-        if(filteredList.isEmpty()){
-            Toast.makeText(MainActivity.this, "No data found", Toast.LENGTH_SHORT).show();
-        }else{
-            listAdapterItem.setFilteredList(filteredList);
-        }
-    }*/
-
-    //Item List OnClick Listener
-    @Override
-    public void onItemClick(int position, Item item) {
-        createEditPopUpWindow(item);
-    }
-
-    //Employee List OnClick Listener
-
-    @Override
-    public void onEmployeeClick(int position, User emp_user, boolean pending_approval) {
-        if (pending_approval) {
-            createEmployeeApprovalPopupWindow(emp_user);
-        } else {
-            createEmployeePopupWindow(emp_user);
-        }
-    }
-
-    //Restock List OnClick Listeners
-
-    @Override
-    public void onRestockItemClick(int position, int type,Item model) {
-        switch (type) {
-            case 0:
-                createRestockCostPriceEditPopupWindow(model);
-                break;
-            case 1:
-                createRestockQuantityEditPopupWindow(model);
-                break;
-        }
-
-    }
-
-    private void createRestockQuantityEditPopupWindow(Item item) {
+    private void restockQuantityEditOpenPopup(Item item) {
         /*Toast.makeText(getApplicationContext(), "Works", Toast.LENGTH_SHORT).show();*/
         String FUNCTION_TAG = "createRestockQuantityEditPopupWindow";
 
@@ -1972,7 +1894,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void createRestockCostPriceEditPopupWindow(Item item) {
+    private void restockCostPriceEditOpenPopup(Item item) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_restock, null);
 
@@ -2011,7 +1933,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void createEmployeeApprovalPopupWindow(User emp_user) {
+    private void employeeApprovalOpenPopup(User emp_user) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_employee_approval, null);
 
@@ -2044,7 +1966,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void createEmployeePopupWindow(User emp_user) {
+    private void employeeInfoOpenPopup(User emp_user) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_employee, null);
 
@@ -2111,48 +2033,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    public void hideKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    @Override
-    public void onHistoryItemClick(int position, String key) {
-        openReceipt(key);
-    }
-
-    private void openReceipt(String key) {
-        Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
-        intent.putExtra("key", key);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onItemClick(int position, Category model, DatabaseReference ref, int type) {
-        switch (type) {
-            case 0:
-                filterByCategory(model);
-                break;
-            case 1:
-                openCategorySettingPopup(position, model, ref);
-                break;
-            case 2:
-                resetItemList();
-                break;
-        }
-    }
-
-    private void resetItemList() {
-        FirebaseRecyclerOptions<Item> options =
-                new FirebaseRecyclerOptions.Builder<Item>()
-                        .setQuery(item_query, Item.class)
-                        .build();
-        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
-        rvItems.setAdapter(listAdapterItemFirebase);
-        listAdapterItemFirebase.startListening();
-    }
-
-    private void openCategorySettingPopup(int position, Category model, DatabaseReference ref) {
+    private void categorySettingOpenPopup(int position, Category model, DatabaseReference ref) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_category_edit, null);
 
@@ -2251,12 +2132,80 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    /*public boolean checkConnection() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo == null) {
-            return false;
+    public void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onHistoryItemClick(int position, String key) {
+        openReceipt(key);
+    }
+
+    //Item List OnClick Listener
+    @Override
+    public void onItemClick(int position, Item item) {
+        itemEditOpenPopup(item);
+    }
+
+    //Employee List OnClick Listener
+
+    @Override
+    public void onEmployeeClick(int position, User emp_user, boolean pending_approval) {
+        if (pending_approval) {
+            employeeApprovalOpenPopup(emp_user);
+        } else {
+            employeeInfoOpenPopup(emp_user);
         }
-        return networkInfo.isConnectedOrConnecting();
-    }*/
+    }
+
+    //Restock List OnClick Listeners
+    @Override
+    public void onRestockItemClick(int position, int type,Item model) {
+        switch (type) {
+            case 0:
+                restockCostPriceEditOpenPopup(model);
+                break;
+            case 1:
+                restockQuantityEditOpenPopup(model);
+                break;
+        }
+
+    }
+
+    @Override
+    public void onItemClick(int position, Category model, DatabaseReference ref, int type) {
+        switch (type) {
+            case 0:
+                filterByCategory(model);
+                break;
+            case 1:
+                categorySettingOpenPopup(position, model, ref);
+                break;
+            case 2:
+                resetItemList();
+                break;
+        }
+    }
+
+    void refreshItems(){
+        //customAdapter.notifyDataSetChanged();
+        itemSearchBar.clearFocus();
+    }
+
+    private void openReceipt(String key) {
+        Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
+        intent.putExtra("key", key);
+        startActivity(intent);
+    }
+
+    private void resetItemList() {
+        FirebaseRecyclerOptions<Item> options =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(item_query, Item.class)
+                        .build();
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        rvItems.setAdapter(listAdapterItemFirebase);
+        listAdapterItemFirebase.startListening();
+    }
 }
