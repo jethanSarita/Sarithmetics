@@ -37,6 +37,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
@@ -81,7 +82,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
     /*Loading system*/
     SystemLoading systemLoading;
 
-    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+    /*private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
             super.onAvailable(network);
@@ -107,7 +108,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build();
+            .build();*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,12 +122,33 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
 
         initializeAds();
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
+
         //*database*/
         firebaseDatabaseHelper = new FirebaseDatabaseHelper();
 
         /*Sets up internet monitoring*/
-        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        /*ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);*/
+        FirebaseDatabase.getInstance().getReference(".info/connected").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected) {
+                    //connected
+                    //startNoConnectionActivity();
+                    startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+                    finish();
+                } else {
+                    // not connected
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         /*id hook*/
         cart_rv = findViewById(R.id.recyclerViewCart);

@@ -66,8 +66,10 @@ public class LoginRegisterActivity extends AppCompatActivity {
         public void onLost(@NonNull Network network) {
             super.onLost(network);
             //Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-            finish();
+            Log.e("MyNetTest", "LogRegActivity - OnLost");
+            Intent intent = new Intent(getApplicationContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
 
         @Override
@@ -90,10 +92,6 @@ public class LoginRegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login_register);
 
         //checkInternet();
-
-        //Register for network updates
-        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*firebase*/
         //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -146,19 +144,32 @@ public class LoginRegisterActivity extends AppCompatActivity {
             loginUser();
         });
 
-        checkSession();
+        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        //connectivityManager
 
+
+
+        if (!checkConnection()) {
+            Intent intent = new Intent(getApplicationContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            checkSession();
+        }
     }
 
-    private void checkInternet() {
+    /*private boolean checkInternet() {
         if (checkConnection()) {
             Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
+            return true;
         } else {
             Toast.makeText(getApplicationContext(), "Not connected to internet", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
             finish();
+            return false;
         }
-    }
+    }*/
 
     private void checkSession() {
         if(sessionManager.getLogin()){
@@ -330,6 +341,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         if (networkInfo == null) {
             return false;
         }
+
         return networkInfo.isConnectedOrConnecting();
     }
 }

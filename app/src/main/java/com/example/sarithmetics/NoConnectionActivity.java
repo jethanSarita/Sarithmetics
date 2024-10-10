@@ -14,6 +14,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+
+
 public class NoConnectionActivity extends AppCompatActivity {
 
     Button btn_check_connection;
@@ -33,7 +35,7 @@ public class NoConnectionActivity extends AppCompatActivity {
 
         btn_check_connection.setOnClickListener(view -> {
             if (checkConnection()) {
-                Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getApplicationContext(), LoginRegisterActivity.class));
                 finish();
             } else {

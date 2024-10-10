@@ -18,10 +18,10 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.os.Handler;
@@ -142,19 +142,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Runnable time_out_runnable;
 
     /*Internet monitoring*/
-    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+    /*private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
             super.onAvailable(network);
-            //Toast.makeText(getApplicationContext(), "Connected to the internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Available", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onLost(@NonNull Network network) {
             super.onLost(network);
-            //Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-            finish();
+            Toast.makeText(getApplicationContext(), "Lost", Toast.LENGTH_SHORT).show();
+            Log.e("MyNetTest", "MainActivity - OnLost");
+            startNoConnectionActivity();
         }
 
         @Override
@@ -162,13 +162,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onCapabilitiesChanged(network, networkCapabilities);
             final boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         }
-    };
+    };*/
 
-    NetworkRequest networkRequest = new NetworkRequest.Builder()
+    /*NetworkRequest networkRequest = new NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build();
+            .build();*/
+
+    private void startNoConnectionActivity() {
+        startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,13 +183,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initializeAds();
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
+
         randomHelper = new RandomHelper();
 
         punch_in_code = null;
 
         /*Sets up internet monitoring*/
-        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        /*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);*/
 
         /*firebase*/
         firebaseDatabase = FirebaseDatabase.getInstance(DB);
@@ -282,6 +289,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*Loading system*/
         systemLoading = new SystemLoading(MainActivity.this);
+        TIMEOUT_DURATION = 10000;
+        time_out_handler = new Handler();
+        time_out_runnable = new Runnable() {
+            @Override
+            public void run() {
+                //startNoConnectionActivity();
+                Toast.makeText(getApplicationContext(), "Not online", Toast.LENGTH_SHORT).show();
+            }
+        };
+        time_out_handler.postDelayed(time_out_runnable, TIMEOUT_DURATION);
         //Initiate login
         systemLoading.startLoadingDialog();
 
@@ -511,6 +528,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.e(TAG, "Error getting data", task.getException());
             } else {
                 Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
+
+                time_out_handler.removeCallbacks(time_out_runnable);
                 
                 cUser = task.getResult().getValue(User.class);
                 
@@ -2231,4 +2250,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+    /*public boolean checkConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return false;
+        }
+        return networkInfo.isConnectedOrConnecting();
+    }*/
 }
