@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -672,7 +673,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rvCategory.setAdapter(listAdapterCategoryFirebase);
         rvCategory.setItemAnimator(null);
         listAdapterCategoryFirebase.startListening();
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(rvCategory);
     }
+
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            int from_position = viewHolder.getBindingAdapterPosition();
+            int to_position = target.getBindingAdapterPosition();
+
+            
+
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
+    };
 
     private void sidebarContinuity() {
         switch (sessionManager.getMainStatus()) {
@@ -1590,7 +1611,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
-        //popupWindow.setBackgroundDrawable(getDrawable(R.drawable.bg_pop_up));
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
 
@@ -1670,17 +1690,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
-                        Category curr_cat = curr_snap.getValue(Category.class);
-                        categories.add(curr_cat.getName());
-                        if (item.getCategory() != null && item.getCategory().equals(curr_cat.getName())) {
-                            position = curr_cat.getPriority();
+                    for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                        Category current_category = current_snapshot.getValue(Category.class);
+                        categories.add(current_category.getName());
+                        if (item.getCategory() != null && item.getCategory().equals(current_category.getName())) {
+                            position = current_category.getPriority();
                         }
                     }
                 }
                 adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
                 category_spinner.setAdapter(adapter);
-                category_spinner.setSelection(position);
+                category_spinner.setSelection(position + 1);
             }
 
             @Override
