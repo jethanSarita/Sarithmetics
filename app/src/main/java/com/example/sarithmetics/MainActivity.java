@@ -678,15 +678,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemTouchHelper.attachToRecyclerView(rvCategory);
     }
 
-    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             int from_position = viewHolder.getBindingAdapterPosition();
             int to_position = target.getBindingAdapterPosition();
 
-            
+            DatabaseReference fromRef = listAdapterCategoryFirebase.getRef(from_position);
+            DatabaseReference toRef = listAdapterCategoryFirebase.getRef(to_position);
 
-            return false;
+            fromRef.get().addOnSuccessListener(fromSnapshot -> {
+                toRef.get().addOnSuccessListener(toSnapshot -> {
+                    fromRef.setValue(toSnapshot.getValue());
+                    toRef.setValue(fromSnapshot.getValue());
+                });
+            });
+
+            listAdapterCategoryFirebase.notifyItemMoved(from_position, to_position);
+
+            return true;
         }
 
         @Override
@@ -1679,14 +1689,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Set text view fields
         epp_tv_item_name.setText(current_item_name);
-        epp_tv_item_price.setText(String.valueOf(String.valueOf(current_item_price)));
-        epp_tv_item_quantity.setText(String.valueOf(String.valueOf(current_item_quantity)));
+        epp_tv_item_price.setText(String.valueOf(current_item_price));
+        epp_tv_item_quantity.setText(String.valueOf(current_item_quantity));
 
         //Spinner
         categories.add("Select Category");
         category_ref.addValueEventListener(new ValueEventListener() {
             ArrayAdapter<String> adapter;
             int position = 0;
+            int count = 0;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -1694,8 +1705,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Category current_category = current_snapshot.getValue(Category.class);
                         categories.add(current_category.getName());
                         if (item.getCategory() != null && item.getCategory().equals(current_category.getName())) {
-                            position = current_category.getPriority();
+                            position = count;
                         }
+                        count++;
                     }
                 }
                 adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
@@ -2130,7 +2142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         /*Renew priority numbering*/
-        category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        /*category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int count = 0;
@@ -2149,7 +2161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        });*/
     }
 
     public void hideKeyboard(View view) {
