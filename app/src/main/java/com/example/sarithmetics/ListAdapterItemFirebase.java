@@ -62,14 +62,12 @@ public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListA
     class myViewHolder extends RecyclerView.ViewHolder {
         TextView productNameText, productPriceText, productQtyText;
         LinearLayout rowListLayout;
-        Spinner categories_spinner;
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
             productNameText = itemView.findViewById(R.id.tvItemName);
             productPriceText = itemView.findViewById(R.id.tvItemPrice);
             productQtyText = itemView.findViewById(R.id.tvItemQuantity);
             rowListLayout = itemView.findViewById(R.id.listLayoutItem);
-            categories_spinner = itemView.findViewById(R.id.main_popup_category_spinner);
         }
     }
 }

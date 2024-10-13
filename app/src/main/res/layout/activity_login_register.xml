@@ -1,253 +1,277 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="50dp"
-    android:paddingTop="50dp"
-    android:paddingRight="50dp"
     android:background="@color/colorBackground"
+    android:orientation="vertical"
     tools:context=".LoginRegisterActivity">
 
-    <LinearLayout
-        android:id="@+id/loginLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            app:srcCompat="@drawable/logosarithmetic" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Who's working?"
-            android:textSize="20sp" />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Email" />
+            android:layout_margin="50dp"
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/etLoginEmail"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Email"
-            android:inputType="text" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Password" />
-
-        <EditText
-            android:id="@+id/etLoginPassword"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Password"
-            android:inputType="textPassword" />
-
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/loginBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/shape_button"
-            android:fontFamily="@font/varela_round"
-            android:text="Login"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/tvRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/varela_round"
-            android:text="No account? Register here!"
-            android:textColor="@color/button"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/registerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            app:srcCompat="@drawable/logosarithmetic" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Welcome to the team!"
-            android:textSize="20sp" />
-
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:fontFamily="@font/varela_round"
-            android:text="First name" />
-
-        <EditText
-            android:id="@+id/etRegisterFirstName"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  First name"
-            android:inputType="text" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Last name" />
-
-        <EditText
-            android:id="@+id/etRegisterLastName"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Last name"
-            android:inputType="text" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Email" />
-
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Email"
-            android:inputType="text" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Password" />
-
-        <EditText
-            android:id="@+id/etRegisterPassword"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Password"
-            android:inputType="textPassword" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/varela_round"
-            android:text="Confirm Password" />
-
-        <EditText
-            android:id="@+id/etRegisterConfirmPassword"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_search"
-            android:ems="10"
-            android:fontFamily="@font/varela_round"
-            android:hint="  Confirm Password"
-            android:inputType="textPassword" />
-
-        <RadioGroup
-            android:id="@+id/radioGroupUserType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:checkedButton="@id/rbEmployee"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/rbEmployee"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/loginLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/varela_round"
-                android:paddingRight="10dp"
-                android:text="Employee"
-                app:buttonTint="@color/button" />
+                android:orientation="vertical"
+                android:visibility="visible">
 
-            <RadioButton
-                android:id="@+id/rbBusinessOwner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/button"
-                android:fontFamily="@font/varela_round"
-                android:text="Business owner"
-                app:backgroundTint="@color/colorTextPrimary" />
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/logosarithmetic" />
 
-        </RadioGroup>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Who's working?"
+                    android:textSize="20sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/registerBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/shape_button"
-            android:fontFamily="@font/varela_round"
-            android:text="Register"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Email" />
 
-        <TextView
-            android:id="@+id/tvLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/varela_round"
-            android:text="Already have an account? Log in here!"
-            android:textColor="@color/button"
-            android:textStyle="bold" />
+                <EditText
+                    android:id="@+id/etLoginEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Email"
+                    android:inputType="text"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Password" />
 
-</RelativeLayout>
+                <EditText
+                    android:id="@+id/etLoginPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/loginBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@drawable/shape_button"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Login"
+                    android:textColor="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/tvRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/varela_round"
+                    android:text="No account? Register here!"
+                    android:textColor="@color/button"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/registerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/logosarithmetic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Welcome to the team!"
+                    android:textSize="20sp" />
+
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="First name" />
+
+                <EditText
+                    android:id="@+id/etRegisterFirstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="First name"
+                    android:inputType="text"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Last name" />
+
+                <EditText
+                    android:id="@+id/etRegisterLastName"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Last name"
+                    android:inputType="text"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Email" />
+
+                <EditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Email"
+                    android:inputType="text"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Password" />
+
+                <EditText
+                    android:id="@+id/etRegisterPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Confirm Password" />
+
+                <EditText
+                    android:id="@+id/etRegisterConfirmPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_search"
+                    android:baselineAligned="false"
+                    android:ems="10"
+                    android:fontFamily="@font/varela_round"
+                    android:hint="Confirm Password"
+                    android:inputType="textPassword"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupUserType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:checkedButton="@id/rbEmployee"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/rbEmployee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/varela_round"
+                        android:paddingRight="10dp"
+                        android:text="Employee"
+                        app:buttonTint="@color/button" />
+
+                    <RadioButton
+                        android:id="@+id/rbBusinessOwner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/varela_round"
+                        android:text="Business owner"
+                        app:buttonTint="@color/button" />
+
+                </RadioGroup>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/registerBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@drawable/shape_button"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Register"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/varela_round"
+                    android:text="Already have an account? Log in here!"
+                    android:textColor="@color/button"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

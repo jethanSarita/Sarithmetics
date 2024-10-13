@@ -61,7 +61,7 @@ public class FirebaseDatabaseHelper {
     }
 
     public DatabaseReference getItemsCategories(String business_code) {
-        return firebaseDatabase.getReference("businesses").child("categories");
+        return firebaseDatabase.getReference("businesses").child(business_code).child("categories");
     }
 
     public Query getEmployeesQuery(String business_code) {

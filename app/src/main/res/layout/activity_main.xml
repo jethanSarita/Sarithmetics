@@ -128,15 +128,15 @@
                                 android:hint="Business Code"
                                 android:inputType="text" />
 
-                            <Button
+                            <androidx.appcompat.widget.AppCompatButton
                                 android:id="@+id/home_employee_no_sync_business_code_btn"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="10dp"
-                                android:layout_marginRight="10dp"
+                                android:layout_margin="10dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="@color/button"
-                                android:text="Enter" />
+                                android:text="Enter"
+                                android:background="@drawable/shape_button"
+                                android:textColor="@color/white" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -146,6 +146,7 @@
                         android:id="@+id/main_employee_yes_sync_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:visibility="gone"
@@ -212,15 +213,15 @@
                                 android:hint="Punch In Code"
                                 android:inputType="text" />
 
-                            <Button
+                            <androidx.appcompat.widget.AppCompatButton
                                 android:id="@+id/home_employee_punch_in_code_enter_btn"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="10dp"
-                                android:layout_marginRight="10dp"
+                                android:layout_margin="10dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="@color/button"
-                                android:text="Enter" />
+                                android:text="Enter"
+                                android:background="@drawable/shape_button"
+                                android:textColor="@color/white" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -409,14 +410,16 @@
                                 android:background="@color/colorTextSecondary" />
                         </RelativeLayout>
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/home_owner_punch_in_code_generate_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
                             android:layout_gravity="center_horizontal"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/button"
-                            android:text="Generate" />
+                            android:text="Generate"
+                            android:background="@drawable/shape_button"
+                            android:textColor="@color/white" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -474,10 +477,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp" />
-
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -517,10 +516,6 @@
                             app:layout_constraintVertical_bias="0.025" />
                     </RelativeLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp" />
-
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -533,13 +528,11 @@
                             android:background="@color/colorTextSecondary" />
                     </RelativeLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp" />
-
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical"
                         android:paddingLeft="30dp"
                         android:paddingRight="30dp">
 
@@ -550,11 +543,32 @@
                             android:background="@drawable/bg_search"
                             app:iconifiedByDefault="false"
                             app:queryHint="Search" />
-                    </RelativeLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/items_category_rv"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="horizontal"
+                                android:scrollbars="horizontal"/>
+
+                            <androidx.appcompat.widget.AppCompatImageButton
+                                android:id="@+id/items_category_plus_btn"
+                                android:layout_width="27dp"
+                                android:layout_height="27dp"
+                                android:layout_gravity="bottom"
+                                android:layout_marginBottom="5dp"
+                                android:background="@drawable/button_mini_plus" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -1099,14 +1113,15 @@
                             android:textColor="@color/colorTextPrimary"
                             android:textSize="30sp" />
 
-                        <Button
+                        <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/history_filter_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
+                            android:layout_margin="10dp"
                             android:layout_marginEnd="10dp"
-                            android:backgroundTint="@color/button"
-                            android:text="Filter" />
+                            android:background="@drawable/shape_button"
+                            android:text="Filter"
+                            android:textColor="@color/white" />
                     </LinearLayout>
 
                     <!--<RelativeLayout

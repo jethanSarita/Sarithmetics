@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/employee_popup"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="100dp">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pop_up">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_pop_up"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -55,7 +55,7 @@
                 android:text="Standard"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
-                android:buttonTint="@color/button"
+                app:buttonTint="@color/button"
                 android:textStyle="bold" />
 
             <RadioButton
@@ -65,7 +65,7 @@
                 android:text="Inventory Manager"
                 android:textColor="@color/colorTextPrimary"
                 android:textColorLink="@color/colorTextPrimary"
-                android:buttonTint="@color/button"
+                app:buttonTint="@color/button"
                 android:textStyle="bold" />
         </RadioGroup>
 
@@ -75,34 +75,34 @@
             android:layout_weight="0"
             android:orientation="horizontal">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnDismiss"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Dismiss" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnUpdate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Update" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/epBtnClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Close" />
         </LinearLayout>
 

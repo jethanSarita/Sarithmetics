@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/restockPopupLayout"
+    android:id="@+id/category_edit_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_pop_up">
@@ -17,58 +17,55 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Edit Cost Price"
+            android:text="Edit Category"
             android:textAlignment="center"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Name"
+            android:textColor="@color/colorTextPrimary"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/category_edit_field"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:orientation="vertical">
+            android:ems="10"
+            android:hint="Category Name"
+            android:inputType="text"
+            android:textSize="14sp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Current Cost Price"
-                android:textColor="@color/colorTextPrimary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/restockPopupCostPrice"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:ems="10"
-                android:text="Place holder"
-                android:textSize="34sp" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/restockPopupNewCostPrice"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="New Cost Price"
-                android:inputType="number"
-                android:textSize="14sp" />
-
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/restockPopupBtnSet"
+                android:id="@+id/category_edit_edit_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="bottom"
                 android:layout_margin="10dp"
                 android:background="@drawable/shape_button"
-                android:textColor="@color/white"
-                android:text="Set" />
+                android:text="Edit"
+                android:textColor="@color/white" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/category_edit_delete_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_margin="10dp"
+                android:background="@drawable/shape_button"
+                android:text="Delete"
+                android:textColor="@color/white" />
+
         </LinearLayout>
 
     </LinearLayout>

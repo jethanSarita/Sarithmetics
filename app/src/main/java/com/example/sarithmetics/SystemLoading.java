@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.view.LayoutInflater;
 
-public class LoadingSystem {
+public class SystemLoading {
 
     private Activity activity;
     private AlertDialog dialog;
 
-    LoadingSystem(Activity activity) {
+    SystemLoading(Activity activity) {
         this.activity = activity;
     }
 

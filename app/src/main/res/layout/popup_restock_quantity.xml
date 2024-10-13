@@ -3,14 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/restockQuantityPopupLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="100dp">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pop_up">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_pop_up"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -62,16 +61,21 @@
                 android:id="@+id/restockQuantityPopupQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:ems="10"
+                android:hint="Set Value"
                 android:inputType="number" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/restockQuantityPopupSetBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:backgroundTint="@color/button"
+                android:background="@drawable/shape_button"
+                android:textColor="@color/white"
                 android:text="Set" />
         </LinearLayout>
 

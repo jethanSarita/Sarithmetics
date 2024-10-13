@@ -87,3 +87,9 @@ dependencies {
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}

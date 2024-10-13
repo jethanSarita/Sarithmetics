@@ -51,6 +51,9 @@ public class LoginRegisterActivity extends AppCompatActivity {
     FirebaseDatabase database;
     DatabaseReference myRef;
 
+    /*Loading System*/
+    SystemLoading systemLoading;
+
     //Network update reactions
     private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
@@ -63,8 +66,10 @@ public class LoginRegisterActivity extends AppCompatActivity {
         public void onLost(@NonNull Network network) {
             super.onLost(network);
             //Toast.makeText(getApplicationContext(), "Not connected to the internet", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-            finish();
+            Log.e("MyNetTest", "LogRegActivity - OnLost");
+            Intent intent = new Intent(getApplicationContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
 
         @Override
@@ -87,10 +92,6 @@ public class LoginRegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login_register);
 
         //checkInternet();
-
-        //Register for network updates
-        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
 
         /*firebase*/
         //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -120,6 +121,9 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance(DB);
 
+        /*Loading System*/
+        systemLoading = new SystemLoading(LoginRegisterActivity.this);
+
         tvRegister.setOnClickListener(view -> {
             /*Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "tvRegister");
@@ -140,19 +144,32 @@ public class LoginRegisterActivity extends AppCompatActivity {
             loginUser();
         });
 
-        checkSession();
+        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        //connectivityManager
 
+
+
+        if (!checkConnection()) {
+            Intent intent = new Intent(getApplicationContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            checkSession();
+        }
     }
 
-    private void checkInternet() {
+    /*private boolean checkInternet() {
         if (checkConnection()) {
             Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
+            return true;
         } else {
             Toast.makeText(getApplicationContext(), "Not connected to internet", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
             finish();
+            return false;
         }
-    }
+    }*/
 
     private void checkSession() {
         if(sessionManager.getLogin()){
@@ -168,6 +185,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         if (isEmpty(email) || isEmpty(password)){
             Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
         } else {
+            systemLoading.startLoadingDialog();
             signIn(email, password);
         }
     }
@@ -194,6 +212,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
     private void createAccount(String first_name, String last_name, String email, String password, int user_type) {
         // [START create_user_with_email]
+        systemLoading.startLoadingDialog();
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -226,6 +245,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                                             myRef = database.getReference("Users");
                                             myRef.child(cUser.getUid()).setValue(cUser);
                                             database.getReference("businesses").child(cUser.getBusiness_code()).child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+                                            systemLoading.dismissDialog();
                                             updateUI(user);
                                         } else {
                                             Log.d(TAG, "User profile update error.", task.getException());
@@ -237,6 +257,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                             }
                         } else {
                             // If sign in fails, display a message to the user.
+                            systemLoading.dismissDialog();
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(LoginRegisterActivity.this, "Register failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -257,15 +278,16 @@ public class LoginRegisterActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null){
                                 Log.d(TAG, "User: " + user.getDisplayName() + "\nHas been logged in");
+                                systemLoading.dismissDialog();
                                 updateUI(user);
                             } else {
                                 Log.d(TAG, "Log in error, user null");
                             }
                         } else {
                             // If sign in fails, display a message to the user.
+                            systemLoading.dismissDialog();
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginRegisterActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginRegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
                     }
@@ -319,6 +341,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
         if (networkInfo == null) {
             return false;
         }
+
         return networkInfo.isConnectedOrConnecting();
     }
 }
