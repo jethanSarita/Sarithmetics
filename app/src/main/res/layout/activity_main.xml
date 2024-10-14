@@ -1097,14 +1097,16 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="24dp"
+                        android:layout_marginRight="24dp"
                         android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/history_selected_date"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"
                             android:layout_weight="1"
                             android:fontFamily="@font/varela_round"
                             android:gravity="center"
@@ -1113,15 +1115,12 @@
                             android:textColor="@color/colorTextPrimary"
                             android:textSize="30sp" />
 
-                        <androidx.appcompat.widget.AppCompatButton
+                        <androidx.appcompat.widget.AppCompatImageButton
                             android:id="@+id/history_filter_btn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:background="@drawable/shape_button"
-                            android:text="Filter"
-                            android:textColor="@color/white" />
+                            android:layout_width="27dp"
+                            android:layout_height="27dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/icon_filter" />
                     </LinearLayout>
 
                     <!--<RelativeLayout
@@ -1194,35 +1193,12 @@
                         android:textStyle="bold"
                         android:visibility="gone" />-->
 
-                    <ScrollView
-                        android:id="@+id/history_out_sv"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/history_out_rv"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-                        <!--Get rid of scroll view-->
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/history_out_rv"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingBottom="25dp"/>
-
-                    </ScrollView>
-
-                    <ScrollView
-                        android:id="@+id/history_in_sv"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:visibility="gone">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/history_in_rv"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </ScrollView>
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingBottom="25dp" />
 
                 </LinearLayout>
 
