@@ -469,6 +469,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         pieChart.getLegend().setTextSize(15f);
         pieChart.getDescription().setEnabled(false);
         pieChart.animateY(1000);
+        pieChart.getLegend().setEnabled(false);
     }
 
     private void initializeAds() {
@@ -1037,7 +1038,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         top_list_item = new ArrayList<>();
 
         if (!(insight_selected_item.equals("Choose Item") || insight_selected_context.equals("Choose Context"))) {
-            displayPerformance();
+            getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                        MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+                        List<Item> items = current_transaction.getItems();
+                        if (items != null) {
+                            for (Item current_item : items) {
+                                if (current_item.getName().equals(insight_selected_item)) {
+                                    total_sales_vol += current_item.getQuantity();
+                                    total_rev += current_item.getPrice() * current_item.getQuantity();
+                                }
+                            }
+                        }
+                    }
+                    item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
+                    item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+            //displayPerformance();
         }
 
         if (insight_selected_item.equals("Choose Item")) {
@@ -1046,28 +1071,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (!(insight_selected_context.equals("Choose Context"))) {
-            switch (insight_selected_context) {
+            getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                        MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+                        List<Item> items = current_transaction.getItems();
+                        if (items != null) {
+                            top_list_item.addAll(items);
+                        }
+                    }
+
+                    if (!top_list_item.isEmpty()) {
+                        displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                    } else {
+                        pieChart.clear();
+                        pieChart.setNoDataText("No Data for " + insight_selected_context);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+            /*switch (insight_selected_context) {
                 case "Today":
                 case "Yesterday":
-                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DataSnapshot day = task.getResult();
-                            for (DataSnapshot time : day.getChildren()) {
-                                for (DataSnapshot cItem : time.getChildren()) {
-                                    Item item = cItem.getValue(Item.class);
-                                    if (item != null) {
-                                        top_list_item.add(item);
-                                    } else {
-                                        Log.e("Insight Error", "Today/Yesterday - item is null");
-                                    }
+                    getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                                MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+                                List<Item> items = current_transaction.getItems();
+                                for (Item current_item : items) {
+                                    top_list_item.add(current_item);
                                 }
                             }
+
                             if (!top_list_item.isEmpty()) {
                                 displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
                             } else {
                                 pieChart.clear();
                                 pieChart.setNoDataText("No Data for " + insight_selected_context);
                             }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
                         }
                     });
                     break;
@@ -1123,7 +1175,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
                     break;
-            }
+            }*/
         } else {
             pieChart.clear();
         }
@@ -1197,25 +1249,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void displayPerformanceTodayOrYesterday() {
-        getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DataSnapshot day = task.getResult();
-                for (DataSnapshot time : day.getChildren()) {
-                    for (DataSnapshot cItem : time.getChildren()) {
-                        Item item = cItem .getValue(Item.class);
-                        if (item != null) {
-                            if (item.getName().equals(insight_selected_item)) {
-                                total_sales_vol += item.getQuantity();
-                                total_rev += item.getPrice() * item.getQuantity();
-                            }
-                        } else {
-                            Log.e("Insight Error", "Today/Yesterday - item is null");
+        getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                    MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+                    List<Item> items = current_transaction.getItems();
+                    for (Item current_item : items) {
+                        if (current_item.getName().equals(insight_selected_item)) {
+                            total_sales_vol += current_item.getQuantity();
+                            total_rev += current_item.getPrice() * current_item.getQuantity();
                         }
                     }
                 }
+                item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
+                item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
             }
-            item_total_sales_vol_tv.setText(total_sales_vol + " Sold");
-            item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
         });
     }
 
@@ -1330,32 +1384,105 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    public DatabaseReference getInsightReference(String context) {
+    public Query getInsightReference(String context) {
+
+        long[] timestamps;
+
         switch (context) {
             case "Today":
-                return history_ref
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                        .child(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "-" + firebaseDatabaseHelper.getDayOfWeek(0));
+                timestamps = getTimeStampsForToday();
+                return history_ref.orderByChild("transaction_date").startAt(timestamps[0]).endAt(timestamps[1]);
             case "Yesterday":
-                return history_ref
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)))
-                        .child((Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1) + "-" + firebaseDatabaseHelper.getDayOfWeek(1));
+                timestamps = getTimeStampsForYesterday();
+                return history_ref.orderByChild("transaction_date").startAt(timestamps[0]).endAt(timestamps[1]);
             case "This Week":
-                return history_ref
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_MONTH)));
+                timestamps = getTimeStampsForWeek();
+                return history_ref.orderByChild("transaction_date").startAt(timestamps[0]).endAt(timestamps[1]);
             case "This Month":
-                return history_ref
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.YEAR)))
-                        .child(Integer.toString(Calendar.getInstance().get(Calendar.MONTH) + 1));
+                timestamps = getTimeStampsForMonth();
+                return history_ref.orderByChild("transaction_date").startAt(timestamps[0]).endAt(timestamps[1]);
             default:
                 return null;
         }
+    }
+
+    private long[] getTimeStampsForWeek() {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long start_of_week = calendar.getTimeInMillis();
+
+        calendar.set(Calendar.DAY_OF_WEEK, 6);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        long end_of_week = calendar.getTimeInMillis();
+
+        return new long[] {start_of_week, end_of_week};
+    }
+
+    private long[] getTimeStampsForMonth() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+
+        calendar.set(year, month, 1, 0 ,0,0);
+        long start_of_month = calendar.getTimeInMillis();
+
+        calendar.set(year, month, calendar.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        long end_of_month = calendar.getTimeInMillis();
+
+        return new long[] {start_of_month, end_of_month};
+    }
+
+    private long[] getTimeStampsForToday() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        calendar.set(year, month, day, 0, 0, 0);
+        long start_of_day = calendar.getTimeInMillis();
+
+        calendar.set(year, month, day, 23, 59, 59);
+        long end_of_day = calendar.getTimeInMillis();
+
+        return new long[] {start_of_day, end_of_day};
+    }
+
+    private long[] getTimeStampsForYesterday() {
+        Calendar calendar = Calendar.getInstance();
+        Calendar temp = Calendar.getInstance();
+
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        day -= 1;
+
+        if (day == 0 && month != 0) {
+            month -= 1;
+            temp.set(Calendar.MONTH, month);
+            day = temp.getActualMaximum(Calendar.DAY_OF_MONTH);
+        } else if (day == 0 && month == 0) {
+            month = 11;
+            temp.set(Calendar.MONTH, month);
+            day = temp.getActualMaximum(Calendar.DAY_OF_MONTH);
+            year -= 1;
+        }
+
+        calendar.set(year, month, day, 0, 0, 0);
+        long start_of_day = calendar.getTimeInMillis();
+
+        calendar.set(year, month, day, 23, 59, 59);
+        long end_of_day = calendar.getTimeInMillis();
+
+        return new long[] {start_of_day, end_of_day};
     }
 
     private void txtItemSearch(String str) {

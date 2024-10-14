@@ -8,9 +8,6 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 public class MyTransaction {
-
-    //Implement parcelable later sleepy night night time
-
     private double customer_change;
     private double customer_payment;
     private double subtotal;
