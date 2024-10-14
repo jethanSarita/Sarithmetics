@@ -458,8 +458,7 @@
                 android:id="@+id/layout_items_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/items_add_button_fab"
@@ -556,7 +555,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:orientation="horizontal"
-                                android:scrollbars="horizontal"/>
+                                android:scrollbars="horizontal" />
 
                             <androidx.appcompat.widget.AppCompatImageButton
                                 android:id="@+id/items_category_plus_btn"
@@ -1039,7 +1038,8 @@
                 android:id="@+id/layout_history_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1108,7 +1108,7 @@
                             android:layout_weight="1"
                             android:fontFamily="@font/varela_round"
                             android:gravity="center"
-                            android:text="All"
+                            android:text="All Transactions"
                             android:textAlignment="center"
                             android:textColor="@color/colorTextPrimary"
                             android:textSize="30sp" />
@@ -1200,10 +1200,13 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1">
 
+                        <!--Get rid of scroll view-->
+
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/history_out_rv"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="25dp"/>
 
                     </ScrollView>
 

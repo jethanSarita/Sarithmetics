@@ -179,8 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initializeAds();
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
-
         randomHelper = new RandomHelper();
 
         punch_in_code = null;

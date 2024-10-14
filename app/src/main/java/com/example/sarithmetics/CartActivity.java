@@ -112,17 +112,10 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        //You're probably wondering why this one is using customerAdapter rather than MainAdapter.
-        //Mainly because I've made too much commitments to the code so the changes would be too
-        //difficult for now. It's not broken, but it can be improved SOME OTHER TIME..
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
         initializeAds();
-
-        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
 
         //*database*/
         firebaseDatabaseHelper = new FirebaseDatabaseHelper();
