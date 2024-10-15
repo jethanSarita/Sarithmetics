@@ -197,7 +197,7 @@ public class ReceiptActivity extends AppCompatActivity {
                 receipt_total.setText("₱" + transaction.getSubtotal());
                 receipt_customer_payment.setText("₱" + transaction.getCustomer_payment());
                 receipt_customer_change.setText("₱" + transaction.getCustomer_change());
-                receipt_info.setText(formatted_date + " " + key);
+                receipt_info.setText(key + "\n" + formatted_date + "\n" + transaction.getEmployee_name());
 
                 if (!transaction.isIs_out()) {
                     receipt_title.setText("Restock Receipt");

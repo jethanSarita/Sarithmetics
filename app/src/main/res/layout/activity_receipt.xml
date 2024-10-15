@@ -213,16 +213,16 @@
                     android:scaleType="fitCenter"
                     android:layout_marginTop="5dp"/>
 
-
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/receipt_main_btn_ok"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/button"
-                    android:text="OK" />
+                    android:background="@drawable/shape_button"
+                    android:textColor="@color/white"
+                    android:text="OK"
+                    android:layout_gravity="end"/>
 
             </LinearLayout>
         </ScrollView>

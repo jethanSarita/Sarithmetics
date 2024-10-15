@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -138,40 +140,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Handler time_out_handler;
     Runnable time_out_runnable;
 
-    /*Internet monitoring*/
-    /*private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-        @Override
-        public void onAvailable(@NonNull Network network) {
-            super.onAvailable(network);
-            Toast.makeText(getApplicationContext(), "Available", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onLost(@NonNull Network network) {
-            super.onLost(network);
-            Toast.makeText(getApplicationContext(), "Lost", Toast.LENGTH_SHORT).show();
-            Log.e("MyNetTest", "MainActivity - OnLost");
-            startNoConnectionActivity();
-        }
-
-        @Override
-        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
-            super.onCapabilitiesChanged(network, networkCapabilities);
-            final boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        }
-    };*/
-
-    /*NetworkRequest networkRequest = new NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build();*/
-
-    private void startNoConnectionActivity() {
-        startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-        finish();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,10 +151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         randomHelper = new RandomHelper();
 
         punch_in_code = null;
-
-        /*Sets up internet monitoring*/
-        /*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);*/
 
         /*firebase*/
         firebaseDatabase = FirebaseDatabase.getInstance(DB);
@@ -289,8 +253,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         time_out_runnable = new Runnable() {
             @Override
             public void run() {
+                //Runs 10 seconds after loading
                 //startNoConnectionActivity();
-                Toast.makeText(getApplicationContext(), "Not online", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Not online", Toast.LENGTH_SHORT).show();
             }
         };
         time_out_handler.postDelayed(time_out_runnable, TIMEOUT_DURATION);
@@ -914,27 +879,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 break;
                             case 1:
                                 //Inactive
+
+                                //Home view
                                 employeeStatus.setText("Inactive");
                                 employeeStatus.setBackgroundColor(Color.GRAY);
                                 findViewById(R.id.home_employee_punch_in).setVisibility(View.VISIBLE);
                                 etPunchInCode.setVisibility(View.VISIBLE);
                                 btnEnterPunchInCode.setVisibility(View.VISIBLE);
+
+                                //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.VISIBLE);
-                                add_button.setVisibility(View.GONE);
-                                //maSvItems.setVisibility(View.GONE);
                                 rvItems.setVisibility(View.GONE);
+
+                                //Restocking View
+                                findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.VISIBLE);
+                                rvRestocking.setVisibility(View.GONE);
+
+                                add_button.setVisibility(View.GONE);
                                 break;
                             case 2:
                                 //Active
+
+                                //Home view
                                 employeeStatus.setText("Active");
                                 employeeStatus.setBackgroundColor(Color.GREEN);
                                 findViewById(R.id.home_employee_punch_in).setVisibility(View.GONE);
                                 etPunchInCode.setVisibility(View.GONE);
                                 btnEnterPunchInCode.setVisibility(View.GONE);
+
+                                //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.GONE);
-                                add_button.setVisibility(View.VISIBLE);
-                                //maSvItems.setVisibility(View.VISIBLE);
                                 rvItems.setVisibility(View.VISIBLE);
+
+                                //Restocking View
+                                findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.GONE);
+                                rvRestocking.setVisibility(View.VISIBLE);
+
+                                add_button.setVisibility(View.GONE);
                                 break;
                         }
                     }
@@ -1002,6 +983,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
 
                 btnEnterPunchInCode.setOnClickListener(view -> {
+                    hideKeyboard(view);
                     punch_in_code = etPunchInCode.getText().toString();
                     business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
@@ -1684,8 +1666,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         List<String> categories;
-        Button add_btn, close_btn;
-        EditText name_field, price_field, cost_price_field;
+        Button add_btn;
+        ImageButton close_btn;
+        EditText name_field, price_field, cost_price_field, markup_field;
         Spinner category_spinner;
 
         name_field = popupView.findViewById(R.id.popup_item_add_name);
@@ -1694,9 +1677,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         add_btn = popupView.findViewById(R.id.btnPopupAdd);
         close_btn = popupView.findViewById(R.id.btnPopupClose);
         category_spinner = popupView.findViewById(R.id.popup_item_category_spinner);
+        markup_field = popupView.findViewById(R.id.popup_item_price_mark_up);
         categories = new ArrayList<>();
         categories.add("Select Category");
 
+        /*Populate Category Choices*/
         category_ref.addValueEventListener(new ValueEventListener() {
             ArrayAdapter<String> adapter;
             @Override
@@ -1717,16 +1702,71 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        /*Close Button*/
         close_btn.setOnClickListener(view -> {
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             hideKeyboard(view);
         });
 
+        /*Cost Field*/
+        cost_price_field.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    double price = Double.parseDouble(s.toString());
+                    String markup_string = markup_field.getText().toString().trim();
+                    if (!markup_string.isEmpty()) {
+                        double markup = Double.parseDouble(markup_string);
+                        double total = price + (price * (markup / 100));
+                        price_field.setText(Double.toString(total));
+                    }
+                } else {
+                    price_field.setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /*Markup Field*/
+        markup_field.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    double markup = Integer.parseInt(s.toString());
+                    String price_string = cost_price_field.getText().toString().trim();
+                    if (!price_string.isEmpty()) {
+                        double price = Double.parseDouble(price_string);
+                        double total = price + (price * (markup / 100));
+                        price_field.setText(Double.toString(total));
+                    }
+                } else {
+                    price_field.setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /*Add Button*/
         add_btn.setOnClickListener(view -> {
-
-            boolean condition = false;
-
             //Store field data in temp variables
             String name, price, cost_price, category;
             name =  name_field.getText().toString().trim();
@@ -1763,6 +1803,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
     /*Popup when editing an item*/
     private void itemEditOpenPopup(Item item) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -1776,7 +1817,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
-
 
         String current_item_name = item.getName();
         double current_item_price = item.getPrice();
@@ -1795,16 +1835,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*info*/
         LinearLayout epp_ll_info;
-        TextView epp_tv_item_name, epp_tv_item_price, epp_tv_item_quantity;
+        TextView epp_tv_item_name, epp_tv_item_price, epp_tv_item_quantity, epp_tv_item_category;
 
         epp_ll_info = popupView.findViewById(R.id.epp_ll_info);
         epp_tv_item_name = popupView.findViewById(R.id.epp_tv_item_name);
         epp_tv_item_price = popupView.findViewById(R.id.epp_tv_item_price);
         epp_tv_item_quantity = popupView.findViewById(R.id.epp_tv_item_quantity);
+        epp_tv_item_category = popupView.findViewById(R.id.epp_tv_item_category);
 
         /*edit*/
         LinearLayout epp_ll_edit;
-        Button button_edit, button_close, button_delete;
+        Button button_edit, button_delete;
         EditText edit_item_name, edit_item_price;
         TextView edit_display_item_quantity;
         Spinner category_spinner;
@@ -1815,7 +1856,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         edit_item_price = popupView.findViewById(R.id.productPriceEdit);
         edit_display_item_quantity = popupView.findViewById(R.id.productQuantityEdit);
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
-        button_close = popupView.findViewById(R.id.btnEditPopupClose);
+
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
         category_spinner = popupView.findViewById(R.id.productCategoryEdit);
         categories = new ArrayList<String>();
@@ -1824,6 +1865,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView tvAreYouSure;
         Button button_add_to_cart, button_quick_buy, button_yes, button_no;
         NumberPicker editPopupNumberPicker;
+        ImageButton button_close;
 
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
@@ -1831,6 +1873,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_yes = popupView.findViewById(R.id.btnYesBuy);
         button_no = popupView.findViewById(R.id.btnNoBuy);
         tvAreYouSure = popupView.findViewById(R.id.tvAreYouSure);
+        button_close = popupView.findViewById(R.id.epp_close_button);
 
         //Set number picker
         editPopupNumberPicker.setMinValue(0);
@@ -1847,26 +1890,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         epp_tv_item_quantity.setText(String.valueOf(current_item_quantity));
 
         //Spinner
-        categories.add("Select Category");
-        category_ref.addValueEventListener(new ValueEventListener() {
+        category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
             ArrayAdapter<String> adapter;
             int position = 0;
             int count = 0;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                categories.clear();
+                categories.add("Select Category");
+                boolean hasData = false;
                 if (snapshot.exists()) {
+                    hasData = true;
                     for (DataSnapshot current_snapshot : snapshot.getChildren()) {
                         Category current_category = current_snapshot.getValue(Category.class);
                         categories.add(current_category.getName());
                         if (item.getCategory() != null && item.getCategory().equals(current_category.getName())) {
+                            epp_tv_item_category.setText(current_category.getName());
                             position = count;
                         }
                         count++;
                     }
+                } else {
+
                 }
                 adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
                 category_spinner.setAdapter(adapter);
-                category_spinner.setSelection(position + 1);
+
+                if (!hasData) {
+                    category_spinner.setSelection(position);
+                } else {
+                    category_spinner.setSelection(position + 1);
+                }
             }
 
             @Override
@@ -2008,8 +2062,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         button_yes.setOnClickListener(view -> {
 
-            //int selected_product_quantity = editPopupNumberPicker.getValue();
-
             double customer_change;
             double customer_payment;
             double subtotal;
@@ -2019,21 +2071,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MyTransaction transaction;
             DatabaseReference ref;
 
-            customer_change = 0.0;
+            customer_change = item.getPrice();
             customer_payment = item.getPrice();
             subtotal = item.getPrice() * editPopupNumberPicker.getValue();
             item_count = editPopupNumberPicker.getValue();
             transaction_date = ServerValue.TIMESTAMP;
             items = new ArrayList<>();
             items.add(new Item(item.getName(), item.getPrice(), item_count));
-            transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
-            ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).push();
 
-            ref.setValue(transaction);
+            if (!(item_count == 0)) {
+                transaction = new MyTransaction(customer_change, customer_payment, subtotal, item_count, true, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
 
-            popupWindow.dismiss();
-            itemSearchBar.clearFocus();
-            hideKeyboard(view);
+                ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code()).push();
+
+                ref.setValue(transaction);
+
+                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - item_count));
+
+                openReceipt(ref.getKey());
+                popupWindow.dismiss();
+                itemSearchBar.clearFocus();
+                hideKeyboard(view);
+            } else {
+                Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
+            }
         });
 
         button_no.setOnClickListener(view ->{
@@ -2174,7 +2235,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView employee_name, employee_status;
         RadioButton employee_standard, employee_inv_manager;
         RadioGroup employee_type;
-        Button dismiss, update, close;
+        Button dismiss, update;
+        ImageButton close;
         DatabaseReference emp_user_type_ref;
 
         employee_name = popupView.findViewById(R.id.epTvEmployeeName);
@@ -2184,7 +2246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         employee_inv_manager = popupView.findViewById(R.id.epRbEmpTypeInv);
         dismiss = popupView.findViewById(R.id.epBtnDismiss);
         update = popupView.findViewById(R.id.epBtnUpdate);
-        close = popupView.findViewById(R.id.epBtnClose);
+        close = popupView.findViewById(R.id.employee_popup_close_button);
         emp_user_type_ref = firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("user_type");
 
         employee_name.setText(String.format("%s %s", emp_user.getFirst_name(), emp_user.getLast_name()));
@@ -2253,7 +2315,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String inputted_name = name_field.getText().toString().trim();
 
             if (!inputted_name.isEmpty()) {
-                cascadeEditCategory(ref, model.getName(), inputted_name);
+                cascadeEditCategory(ref, inputted_name, model.getName());
                 popupWindow.dismiss();
             } else {
                 cascadeDeleteCategory(ref, model.getName());
@@ -2268,6 +2330,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void cascadeEditCategory(DatabaseReference ref, String new_name, String old_name) {
+        /**/
         items_ref.orderByChild("category").equalTo(old_name).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -2305,27 +2368,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        /*Renew priority numbering*/
-        /*category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int count = 0;
-                if (snapshot.exists()) {
-                    for (DataSnapshot curr_snap : snapshot.getChildren()) {
-                        if (!(curr_snap.getKey().equals(ref.getKey()))) {
-                            category_ref.child(curr_snap.getKey()).child("priority").setValue(count);
-                            count++;
-                        }
-                    }
-                }
-                ref.removeValue();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
+        ref.removeValue();
     }
 
     public void hideKeyboard(View view) {

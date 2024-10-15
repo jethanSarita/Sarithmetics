@@ -13,15 +13,35 @@
                 android:orientation="vertical"
                 android:padding="15dp">
 
-                <TextView
-                    android:id="@+id/epp_title"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="Edit Item"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/icon_close"
+                        android:visibility="invisible"/>
+
+                    <TextView
+                        android:id="@+id/epp_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Edit Item"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold"
+                        android:layout_weight="1"/>
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/epp_close_button"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/icon_close" />
+                </LinearLayout>
 
                 <ScrollView
                     android:layout_width="match_parent"
@@ -92,6 +112,23 @@
                                 android:text="Place holder"
                                 android:textSize="34sp" />
 
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Category"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/epp_tv_item_category"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
                         </LinearLayout>
 
                         <LinearLayout
@@ -128,14 +165,27 @@
                                 android:textColor="@color/colorTextPrimary"
                                 android:textStyle="bold" />
 
-                            <EditText
-                                android:id="@+id/productPriceEdit"
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="48dp"
-                                android:layout_weight="0"
-                                android:ems="10"
-                                android:hint="₱0.00"
-                                android:inputType="numberDecimal" />
+                                android:layout_height="match_parent"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:textSize="20dp"
+                                    android:text="₱"/>
+
+                                <EditText
+                                    android:id="@+id/productPriceEdit"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="48dp"
+                                    android:layout_weight="0"
+                                    android:ems="10"
+                                    android:hint="0.00"
+                                    android:inputType="numberDecimal" />
+                            </LinearLayout>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -183,16 +233,6 @@
                                     android:layout_weight="1"
                                     android:background="@drawable/shape_button"
                                     android:text="Delete"
-                                    android:textColor="@color/white" />
-
-                                <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/btnEditPopupClose"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_margin="10dp"
-                                    android:layout_weight="1"
-                                    android:background="@drawable/shape_button"
-                                    android:text="Close"
                                     android:textColor="@color/white" />
 
                             </LinearLayout>

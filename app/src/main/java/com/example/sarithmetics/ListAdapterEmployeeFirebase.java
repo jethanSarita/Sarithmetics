@@ -51,7 +51,7 @@ public class ListAdapterEmployeeFirebase extends FirebaseRecyclerAdapter<User, L
                     holder.tvEmployeeType.setText("Employee");
                     break;
                 case 2:
-                    holder.tvEmployeeType.setText("Inventory Employee");
+                    holder.tvEmployeeType.setText("Inventory Manager");
                     break;
             }
             holder.employee_layout.setOnClickListener(view -> {

@@ -121,6 +121,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance(DB);
 
+        //database.setPersistenceEnabled(false);
+
         /*Loading System*/
         systemLoading = new SystemLoading(LoginRegisterActivity.this);
 
