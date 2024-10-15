@@ -106,11 +106,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     LinearLayout boxBusinessCode, llEmployeeLayoutYesSync, llEmployeeLayoutNoSync, llEmployeeLayoutPendingSync;
     androidx.appcompat.widget.SearchView itemSearchBar, restockingSearchBar;
     EditText etBusinessCode, etPunchInCode;
-    Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode, history_filter_button;
+    Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
     //ScrollView maSvItems;
     RandomHelper randomHelper;
     MenuItem nav_insights, nav_restock;
-    ImageButton category_plus_btn;
+    ImageButton category_plus_btn, history_filter_button;
 
     //Database
     FirebaseDatabaseHelper firebaseDatabaseHelper;
@@ -178,8 +178,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         initializeAds();
-
-        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
 
         randomHelper = new RandomHelper();
 
@@ -363,29 +361,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    boolean isTransactionFilterSet = false;
+
     private void openDatePickerDialog() {
-        DatePickerDialog dialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                Calendar calendar = Calendar.getInstance();
 
-                calendar.set(year, month, dayOfMonth, 0, 0, 0);
-                long start = calendar.getTimeInMillis();
+        if (!isTransactionFilterSet) {
+            DatePickerDialog dialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    Calendar calendar = Calendar.getInstance();
 
-                calendar.set(year, month, dayOfMonth, 23, 59, 59);
-                long end = calendar.getTimeInMillis();
+                    calendar.set(year, month, dayOfMonth, 0, 0, 0);
+                    long start = calendar.getTimeInMillis();
 
-                long[] date = new long[] {start, end};
+                    calendar.set(year, month, dayOfMonth, 23, 59, 59);
+                    long end = calendar.getTimeInMillis();
 
-                TextView history_selected_date = findViewById(R.id.history_selected_date);
+                    long[] date = new long[] {start, end};
 
-                history_selected_date.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
+                    TextView history_selected_date = findViewById(R.id.history_selected_date);
+                    history_selected_date.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
 
-                transactionDateFilter(date);
-            }
-        }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+                    isTransactionFilterSet = true;
+                    history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter_clear));
 
-        dialog.show();
+                    transactionDateFilter(date);
+                }
+            }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+
+            dialog.show();
+        } else {
+            isTransactionFilterSet = false;
+            history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter));
+            TextView history_selected_date = findViewById(R.id.history_selected_date);
+            history_selected_date.setText("All Transactions");
+            setUpHistoryList();
+        }
     }
 
     private void restockItems() {
@@ -411,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         items = new ArrayList<>();
 
         int restocks_count = 0;
+        boolean item_without_cost_price = false;
 
         /*Get data for each item in adapter*/
         for (int i = 0; i < listAdapterRestockFirebase.getItemCount(); i++) {
@@ -421,27 +433,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             /*Check if current item is being restocked*/
             if (item.getRestock_quantity() != 0) {
-                restocks_count++;
 
-                new_stock_quantity = item.getRestock_quantity() + item.getQuantity();
-                new_restock_quantity = 0;
+                if (item.getCost_price() != 0) {
+                    restocks_count++;
 
-                items.add(new Item(item.getName(), item.getCost_price(), item.getRestock_quantity()));
+                    new_stock_quantity = item.getRestock_quantity() + item.getQuantity();
+                    new_restock_quantity = 0;
 
-                subtotal += item.getCost_price() * item.getRestock_quantity();
-                item_count += item.getRestock_quantity();
+                    items.add(new Item(item.getName(), item.getCost_price(), item.getRestock_quantity()));
 
-                item.setQuantity(new_stock_quantity);
-                item.setRestock_quantity(new_restock_quantity);
+                    subtotal += item.getCost_price() * item.getRestock_quantity();
+                    item_count += item.getRestock_quantity();
 
-                /*Update item's stock*/
-                items_ref.child(item.getName()).setValue(item).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.e(FUNCTION_TAG, item.getName() + " has been restocked");
-                    } else {
-                        Log.e(FUNCTION_TAG, item.getName() + " has had an error:\n" + task);
-                    }
-                });
+                    item.setQuantity(new_stock_quantity);
+                    item.setRestock_quantity(new_restock_quantity);
+
+                    /*Update item's stock*/
+                    items_ref.child(item.getName()).setValue(item).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.e(FUNCTION_TAG, item.getName() + " has been restocked");
+                        } else {
+                            Log.e(FUNCTION_TAG, item.getName() + " has had an error:\n" + task);
+                        }
+                    });
+                } else {
+                    item_without_cost_price = true;
+                    Log.e(FUNCTION_TAG, item.getName() + "'s cost_price is empty");
+                }
             } else {
                 Log.e(FUNCTION_TAG, item.getName() + "'s restock_quantity is empty");
             }
@@ -453,8 +471,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ref.setValue(transaction);
 
             openReceipt(key);
+        } else if (item_without_cost_price) {
+            Toast.makeText(getApplicationContext(), "Selected items have no set cost price", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), "No items has restock quantity set", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Please select items to restock", Toast.LENGTH_SHORT).show();
         }
     }
 

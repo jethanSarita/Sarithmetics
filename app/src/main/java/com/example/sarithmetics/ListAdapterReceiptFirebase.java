@@ -45,7 +45,7 @@ public class ListAdapterReceiptFirebase extends FirebaseRecyclerAdapter<Item, Li
 
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterReceiptFirebase.myViewHolder holder, int position, @NonNull Item model) {
-        holder.receipt_list_item_quantity_name.setText("₱" + model.getQuantity() + " " + model.getName());
+        holder.receipt_list_item_quantity_name.setText(model.getQuantity() + " " + model.getName());
         holder.receipt_list_item_total_cost.setText("₱" + (model.getPrice() * model.getQuantity()));
     }
 

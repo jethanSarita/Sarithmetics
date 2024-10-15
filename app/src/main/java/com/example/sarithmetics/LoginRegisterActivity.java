@@ -278,7 +278,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null){
                                 Log.d(TAG, "User: " + user.getDisplayName() + "\nHas been logged in");
-                                systemLoading.dismissDialog();
+                                //systemLoading.dismissDialog();
                                 updateUI(user);
                             } else {
                                 Log.d(TAG, "Log in error, user null");
