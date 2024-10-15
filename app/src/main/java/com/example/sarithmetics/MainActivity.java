@@ -915,27 +915,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 break;
                             case 1:
                                 //Inactive
+
+                                //Home view
                                 employeeStatus.setText("Inactive");
                                 employeeStatus.setBackgroundColor(Color.GRAY);
                                 findViewById(R.id.home_employee_punch_in).setVisibility(View.VISIBLE);
                                 etPunchInCode.setVisibility(View.VISIBLE);
                                 btnEnterPunchInCode.setVisibility(View.VISIBLE);
+
+                                //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.VISIBLE);
-                                add_button.setVisibility(View.GONE);
-                                //maSvItems.setVisibility(View.GONE);
                                 rvItems.setVisibility(View.GONE);
+
+                                //Restocking View
+                                findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.VISIBLE);
+                                rvRestocking.setVisibility(View.GONE);
+
+                                add_button.setVisibility(View.GONE);
                                 break;
                             case 2:
                                 //Active
+
+                                //Home view
                                 employeeStatus.setText("Active");
                                 employeeStatus.setBackgroundColor(Color.GREEN);
                                 findViewById(R.id.home_employee_punch_in).setVisibility(View.GONE);
                                 etPunchInCode.setVisibility(View.GONE);
                                 btnEnterPunchInCode.setVisibility(View.GONE);
+
+                                //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.GONE);
-                                add_button.setVisibility(View.VISIBLE);
-                                //maSvItems.setVisibility(View.VISIBLE);
                                 rvItems.setVisibility(View.VISIBLE);
+
+                                //Restocking View
+                                findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.GONE);
+                                rvRestocking.setVisibility(View.VISIBLE);
+
+                                add_button.setVisibility(View.GONE);
                                 break;
                         }
                     }
@@ -1003,6 +1019,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
 
                 btnEnterPunchInCode.setOnClickListener(view -> {
+                    hideKeyboard(view);
                     punch_in_code = etPunchInCode.getText().toString();
                     business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
