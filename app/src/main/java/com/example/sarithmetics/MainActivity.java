@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -1628,6 +1629,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         Button button_set;
@@ -1676,6 +1679,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         List<String> categories;
@@ -1768,6 +1773,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
 
@@ -2053,6 +2060,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView item_name_tv;
@@ -2082,6 +2091,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView text_cost_price;
@@ -2121,6 +2132,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name;
@@ -2154,6 +2167,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         TextView employee_name, employee_status;
@@ -2221,6 +2236,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean focusable = true;
         PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         EditText name_field;
