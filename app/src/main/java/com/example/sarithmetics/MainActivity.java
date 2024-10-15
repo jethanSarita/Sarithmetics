@@ -289,8 +289,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         time_out_runnable = new Runnable() {
             @Override
             public void run() {
+                //Runs 10 seconds after loading
                 //startNoConnectionActivity();
-                Toast.makeText(getApplicationContext(), "Not online", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Not online", Toast.LENGTH_SHORT).show();
             }
         };
         time_out_handler.postDelayed(time_out_runnable, TIMEOUT_DURATION);
