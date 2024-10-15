@@ -23,270 +23,283 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textStyle="bold" />
 
-                <LinearLayout
-                    android:id="@+id/epp_ll_info"
+                <ScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Name"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/epp_tv_item_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:text="Place holder"
-                        android:textSize="34sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Price"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/epp_tv_item_price"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:text="Place holder"
-                        android:textSize="34sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Quantity"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/epp_tv_item_quantity"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:text="Place holder"
-                        android:textSize="34sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/epp_ll_edit"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Name"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/productNameEdit"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:hint="Item Name"
-                        android:inputType="text" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Price"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/productPriceEdit"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:hint="₱0.00"
-                        android:inputType="numberDecimal" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="Item Quantity"
-                        android:textColor="@color/colorTextPrimary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/productQuantityEdit"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_weight="0"
-                        android:ems="10"
-                        android:text="Place holder"
-                        android:textSize="34sp"/>
-
-                    <Spinner
-                        android:id="@+id/productCategoryEdit"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnEditPopupEdit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Edit" />
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnEditPopupDelete"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Delete" />
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnEditPopupClose"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Close" />
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="5dp"
-                    android:background="@color/colorTextSecondary" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="Add Product to Cart"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:orientation="horizontal">
+                    android:layout_weight="0">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical" >
+
+                        <LinearLayout
+                            android:id="@+id/epp_ll_info"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Name"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/epp_tv_item_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Price"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/epp_tv_item_price"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Quantity"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/epp_tv_item_quantity"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/epp_ll_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0"
+                            android:orientation="vertical"
+                            android:visibility="gone"
+                            tools:visibility="visible">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Name"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <EditText
+                                android:id="@+id/productNameEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:hint="Item Name"
+                                android:inputType="text" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Price"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <EditText
+                                android:id="@+id/productPriceEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:hint="₱0.00"
+                                android:inputType="numberDecimal" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Item Quantity"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/productQuantityEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
+                            <Spinner
+                                android:id="@+id/productCategoryEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0"
+                                android:orientation="horizontal">
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnEditPopupEdit"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Edit"
+                                    android:textColor="@color/white" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnEditPopupDelete"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Delete"
+                                    android:textColor="@color/white" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnEditPopupClose"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Close"
+                                    android:textColor="@color/white" />
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@color/colorTextSecondary" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
-                            android:text="Quantity"
+                            android:text="Add Product to Cart"
                             android:textAlignment="center"
-                            android:textColor="@color/colorTextPrimary" />
+                            android:textColor="@color/colorTextPrimary"
+                            android:textStyle="bold" />
 
-                        <NumberPicker
-                            android:id="@+id/editPopupNumberPicker"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="1" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="0"
+                                    android:text="Quantity"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/colorTextPrimary" />
+
+                                <NumberPicker
+                                    android:id="@+id/editPopupNumberPicker"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="1" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnAddToCart"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Add to Cart"
+                                    android:textColor="@color/white" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnQuickBuy"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Quick Buy"
+                                    android:textColor="@color/white" />
+
+                                <TextView
+                                    android:id="@+id/tvAreYouSure"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Are you sure?"
+                                    android:textAlignment="center"
+                                    android:visibility="gone" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnYesBuy"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:background="@drawable/shape_button"
+                                    android:text="Yes"
+                                    android:textColor="@color/white"
+                                    android:visibility="gone" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnNoBuy"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    android:background="@drawable/shape_button"
+                                    android:text="No"
+                                    android:textColor="@color/white"
+                                    android:visibility="gone" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
                     </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnAddToCart"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Add to Cart" />
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnQuickBuy"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Quick Buy" />
-
-                        <TextView
-                            android:id="@+id/tvAreYouSure"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Are you sure?"
-                            android:textAlignment="center"
-                            android:visibility="gone" />
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnYesBuy"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="Yes"
-                            android:visibility="gone" />
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnNoBuy"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:background="@drawable/shape_button"
-                            android:textColor="@color/white"
-                            android:text="No"
-                            android:visibility="gone" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                </ScrollView>
 
             </LinearLayout>
 

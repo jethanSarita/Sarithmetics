@@ -28,7 +28,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:label="" />
+            android:label=""
+            android:windowSoftInputMode="adjustPan|adjustResize" />
         <activity
             android:name=".CartActivity"
             android:exported="false"
