@@ -140,40 +140,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Handler time_out_handler;
     Runnable time_out_runnable;
 
-    /*Internet monitoring*/
-    /*private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-        @Override
-        public void onAvailable(@NonNull Network network) {
-            super.onAvailable(network);
-            Toast.makeText(getApplicationContext(), "Available", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onLost(@NonNull Network network) {
-            super.onLost(network);
-            Toast.makeText(getApplicationContext(), "Lost", Toast.LENGTH_SHORT).show();
-            Log.e("MyNetTest", "MainActivity - OnLost");
-            startNoConnectionActivity();
-        }
-
-        @Override
-        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
-            super.onCapabilitiesChanged(network, networkCapabilities);
-            final boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        }
-    };*/
-
-    /*NetworkRequest networkRequest = new NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build();*/
-
-    private void startNoConnectionActivity() {
-        startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
-        finish();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,10 +151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         randomHelper = new RandomHelper();
 
         punch_in_code = null;
-
-        /*Sets up internet monitoring*/
-        /*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);*/
 
         /*firebase*/
         firebaseDatabase = FirebaseDatabase.getInstance(DB);
@@ -1704,7 +1666,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         List<String> categories;
-        Button add_btn, close_btn;
+        Button add_btn;
+        ImageButton close_btn;
         EditText name_field, price_field, cost_price_field, markup_field;
         Spinner category_spinner;
 
@@ -1882,7 +1845,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*edit*/
         LinearLayout epp_ll_edit;
-        Button button_edit, button_close, button_delete;
+        Button button_edit, button_delete;
         EditText edit_item_name, edit_item_price;
         TextView edit_display_item_quantity;
         Spinner category_spinner;
@@ -1893,7 +1856,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         edit_item_price = popupView.findViewById(R.id.productPriceEdit);
         edit_display_item_quantity = popupView.findViewById(R.id.productQuantityEdit);
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
-        button_close = popupView.findViewById(R.id.btnEditPopupClose);
+
         button_delete = popupView.findViewById(R.id.btnEditPopupDelete);
         category_spinner = popupView.findViewById(R.id.productCategoryEdit);
         categories = new ArrayList<String>();
@@ -1902,6 +1865,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView tvAreYouSure;
         Button button_add_to_cart, button_quick_buy, button_yes, button_no;
         NumberPicker editPopupNumberPicker;
+        ImageButton button_close;
 
         editPopupNumberPicker = popupView.findViewById(R.id.editPopupNumberPicker);
         button_add_to_cart = popupView.findViewById(R.id.btnAddToCart);
@@ -1909,6 +1873,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_yes = popupView.findViewById(R.id.btnYesBuy);
         button_no = popupView.findViewById(R.id.btnNoBuy);
         tvAreYouSure = popupView.findViewById(R.id.tvAreYouSure);
+        button_close = popupView.findViewById(R.id.epp_close_button);
 
         //Set number picker
         editPopupNumberPicker.setMinValue(0);
@@ -2270,7 +2235,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView employee_name, employee_status;
         RadioButton employee_standard, employee_inv_manager;
         RadioGroup employee_type;
-        Button dismiss, update, close;
+        Button dismiss, update;
+        ImageButton close;
         DatabaseReference emp_user_type_ref;
 
         employee_name = popupView.findViewById(R.id.epTvEmployeeName);
@@ -2280,7 +2246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         employee_inv_manager = popupView.findViewById(R.id.epRbEmpTypeInv);
         dismiss = popupView.findViewById(R.id.epBtnDismiss);
         update = popupView.findViewById(R.id.epBtnUpdate);
-        close = popupView.findViewById(R.id.epBtnClose);
+        close = popupView.findViewById(R.id.employee_popup_close_button);
         emp_user_type_ref = firebaseDatabaseHelper.getUserRef(emp_user.getUid()).child("user_type");
 
         employee_name.setText(String.format("%s %s", emp_user.getFirst_name(), emp_user.getLast_name()));

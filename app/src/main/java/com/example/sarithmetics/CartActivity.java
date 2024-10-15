@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
@@ -561,14 +562,15 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
 
         TextView tv_item_name, tv_item_price;
         NumberPicker np_item_quantity;
-        Button btn_update, btn_close, btn_delete;
+        Button btn_update, btn_delete;
+        ImageButton btn_close;
         final Item[] current_item = new Item[1];
 
         tv_item_name = popupView.findViewById(R.id.cart_popup_item_name_tv);
         tv_item_price = popupView.findViewById(R.id.cart_popup_item_price_tv);
         np_item_quantity = popupView.findViewById(R.id.cart_popup_number_picker);
         btn_update = popupView.findViewById(R.id.cart_popup_btn_update);
-        btn_close = popupView.findViewById(R.id.cart_popup_btn_close);
+        btn_close = popupView.findViewById(R.id.cart_popup_close_button);
         btn_delete = popupView.findViewById(R.id.cart_popup_btn_delete);
 
         tv_item_name.setText(item_name);

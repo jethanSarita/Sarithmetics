@@ -12,14 +12,29 @@
         android:orientation="vertical"
         android:padding="15dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="0"
-            android:text="Add Item"
-            android:textAlignment="center"
-            android:textColor="@color/colorTextPrimary"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add Item"
+                android:textAlignment="center"
+                android:textColor="@color/colorTextPrimary"
+                android:textStyle="bold"
+                android:layout_marginLeft="27dp"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btnPopupClose"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_gravity="end"
+                android:background="@drawable/icon_close" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -147,15 +162,6 @@
                 android:textColor="@color/white"
                 android:text="Add" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnPopupClose"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:background="@drawable/shape_button"
-                android:textColor="@color/white"
-                android:text="Close" />
         </LinearLayout>
 
     </LinearLayout>
