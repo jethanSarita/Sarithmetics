@@ -39,7 +39,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="0"
                             android:orientation="vertical"
-                            android:visibility="gone">
+                            android:visibility="gone"
+                            tools:visibility="visible">
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -92,6 +93,23 @@
                                 android:text="Place holder"
                                 android:textSize="34sp" />
 
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:text="Category"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/epp_tv_item_category"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0"
+                                android:ems="10"
+                                android:text="Place holder"
+                                android:textSize="34sp" />
+
                         </LinearLayout>
 
                         <LinearLayout
@@ -100,8 +118,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="0"
                             android:orientation="vertical"
-                            android:visibility="gone"
-                            tools:visibility="visible">
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"

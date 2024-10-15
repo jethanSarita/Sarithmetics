@@ -42,35 +42,89 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Item Price"
+            android:text="Item Cost"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/popup_item_add_price"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_weight="0"
-            android:ems="10"
-            android:hint="₱0.00"
-            android:inputType="numberDecimal" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:text="₱"/>
+
+            <EditText
+                android:id="@+id/popup_item_add_cost_price"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="0.00"
+                android:inputType="number" />
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Item Cost Price"
+            android:text="Markup"
             android:textColor="@color/colorTextPrimary"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/popup_item_add_cost_price"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/popup_item_price_mark_up"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="0"
+                android:inputType="number" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:text="%"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:ems="10"
-            android:hint="₱0.00"
-            android:inputType="number" />
+            android:text="Item Price"
+            android:textColor="@color/colorTextPrimary"
+            android:textStyle="bold" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:text="₱"/>
+
+            <EditText
+                android:id="@+id/popup_item_add_price"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="0.00"
+                android:inputType="numberDecimal" />
+        </LinearLayout>
 
         <Spinner
             android:id="@+id/popup_item_category_spinner"
