@@ -19,7 +19,7 @@ The application is built in **Android Studio** using **Java** and **XML**, with 
 
 ### For Employees:
 - **Standard Employee Role**: Process sales transactions via the quickbuy or add-to-cart options.
-- **Inventory Manager Role**: Manage inventory in the same way as the business owner, with permissions to add, restock, and remove items.
+- **Inventory Manager Role**: Manage inventory similar to the business owner, with permissions to restock, and categorize items.
 
 ---
 
