@@ -1898,15 +1898,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 categories.clear();
                 categories.add("Select Category");
-                boolean hasData = false;
                 if (snapshot.exists()) {
-                    hasData = true;
                     for (DataSnapshot current_snapshot : snapshot.getChildren()) {
                         Category current_category = current_snapshot.getValue(Category.class);
                         categories.add(current_category.getName());
                         if (item.getCategory() != null && item.getCategory().equals(current_category.getName())) {
                             epp_tv_item_category.setText(current_category.getName());
-                            position = count;
+                            position = count + 1;
                         }
                         count++;
                     }
@@ -1916,11 +1914,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
                 category_spinner.setAdapter(adapter);
 
-                if (!hasData) {
-                    category_spinner.setSelection(position);
-                } else {
-                    category_spinner.setSelection(position + 1);
-                }
+                category_spinner.setSelection(position);
             }
 
             @Override
@@ -1988,7 +1982,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (!input_item_category.equals("Select Category")) {
                 new_item.setCategory(input_item_category);
             } else {
-                new_item.setCategory(current_item_category);
+                new_item.setCategory(null);
             }
 
             new_item.setCost_price(current_item_cost_price);
@@ -2036,7 +2030,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Log.e(TAG, "cart item unsuccessful");
                     }
                 });
-                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - selected_item_quantity));
+                items_ref.child(current_item_name).setValue(new Item(current_item_name,  current_item_price, current_item_cost_price, current_item_quantity - selected_item_quantity, current_item_category));
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
                 hideKeyboard(view);
@@ -2086,7 +2080,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 ref.setValue(transaction);
 
-                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_quantity - item_count));
+                items_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, current_item_cost_price,current_item_quantity - item_count, current_item_category));
 
                 openReceipt(ref.getKey());
                 popupWindow.dismiss();

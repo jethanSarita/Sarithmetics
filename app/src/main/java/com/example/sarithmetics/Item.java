@@ -59,6 +59,14 @@ public class Item {
 
     }
 
+    public Item(String name, double price, double cost_price, int quantity, String category) {
+        this.name = name;
+        this.price = price;
+        this.cost_price = cost_price;
+        this.quantity = quantity;
+        this.category = category;
+    }
+
     public String getCategory() {
         return category;
     }
