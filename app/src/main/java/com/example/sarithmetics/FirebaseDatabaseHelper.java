@@ -6,10 +6,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-
 public class FirebaseDatabaseHelper {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private FirebaseDatabase firebaseDatabase;
@@ -49,7 +45,8 @@ public class FirebaseDatabaseHelper {
     }
 
     public DatabaseReference getItemsRef(String business_code) {
-        return firebaseDatabase.getReference("businesses").child(business_code).child("items");
+        return firebaseDatabase.getReference("businesses").child(business_code)
+                .child("items");
     }
 
     public DatabaseReference getCartRef(String user_uid) {
@@ -60,12 +57,14 @@ public class FirebaseDatabaseHelper {
         return firebaseDatabase.getReference("businesses").child(business_code);
     }
 
-    public DatabaseReference getItemsCategories(String business_code) {
-        return firebaseDatabase.getReference("businesses").child(business_code).child("categories");
+    public DatabaseReference getItemsCategoriesRef(String business_code) {
+        return firebaseDatabase.getReference("businesses").child(business_code)
+                .child("categories");
     }
 
     public Query getEmployeesQuery(String business_code) {
-        return firebaseDatabase.getReference("Users").orderByChild("business_code").equalTo(business_code);
+        return firebaseDatabase.getReference("Users").orderByChild("business_code")
+                .equalTo(business_code);
     }
 
     public DatabaseReference getBusinessRef() {
@@ -73,19 +72,14 @@ public class FirebaseDatabaseHelper {
     }
 
     public DatabaseReference getBusinessTransactionHistoryRef(String business_code) {
-        return firebaseDatabase.getReference("businesses").child(business_code).child("history");
+        return firebaseDatabase.getReference("businesses").child(business_code)
+                .child("history");
     }
 
-    public String getDayOfWeek(int context){
-        ArrayList<String> today_list = new ArrayList<>(Arrays.asList("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"));
-        ArrayList<String> yesterday_list = new ArrayList<>(Arrays.asList("saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"));
-        switch (context) {
-            case 0:
-                return today_list.get(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1);
-            case 1:
-                return yesterday_list.get(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1);
-            default:
-                return "Error DaysOfWeek";
-        }
+    public DatabaseReference getSubscriptionRef(String business_code) {
+        return firebaseDatabase
+                .getReference("businesses")
+                .child(business_code)
+                .child("subscription");
     }
 }
