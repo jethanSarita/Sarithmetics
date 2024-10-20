@@ -120,8 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     User cUser, lUser;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref,
-            category_ref, subscription_ref;
+    DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref, category_ref;
     Query item_query, employee_query, restock_query, history_query, category_query;
 
     ArrayAdapter<String> adp;
@@ -140,12 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     long TIMEOUT_DURATION;
     Handler time_out_handler;
     Runnable time_out_runnable;
-
-    /*Subscription System*/
-    int subscription_type;
-    boolean is_at_max_items = false;
-    boolean is_at_max_transactions = false;
-    boolean is_at_max_categories = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -273,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Clear cart
         cartedItem.clear();
 
-        /*Insight*/
         insight_item_spinner = findViewById(R.id.insight_item_perf_spinner);
         insight_context_spinner = findViewById(R.id.insight_context_perf_spinner);
 
@@ -425,17 +417,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     /*Update item's stock*/
                     items_ref.child(item.getName()).setValue(item).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Log.i(FUNCTION_TAG, item.getName() + " has been restocked");
+                            Log.e(FUNCTION_TAG, item.getName() + " has been restocked");
                         } else {
-                            Log.i(FUNCTION_TAG, item.getName() + " has had an error:\n" + task);
+                            Log.e(FUNCTION_TAG, item.getName() + " has had an error:\n" + task);
                         }
                     });
                 } else {
                     item_without_cost_price = true;
-                    Log.d(FUNCTION_TAG, item.getName() + "'s cost_price is empty");
+                    Log.e(FUNCTION_TAG, item.getName() + "'s cost_price is empty");
                 }
             } else {
-                Log.d(FUNCTION_TAG, item.getName() + "'s restock_quantity is empty");
+                Log.e(FUNCTION_TAG, item.getName() + "'s restock_quantity is empty");
             }
         }
 
@@ -510,29 +502,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void getCurrentUserInformation() {
-        String FUNCTION_TAG = "getCurrentUserInformation";
-
-        /*ATTENTION you might have to change this and put this further up the run order (This may be
-        why the system breaks when the user is deleted)*/
+        user_ref = firebaseDatabaseHelper.getCurrentUserRef();
         if (firebaseDatabaseHelper.getFirebaseUser() == null) {
             logout();
         }
-
-        user_ref = firebaseDatabaseHelper.getCurrentUserRef();
-
         user_ref.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                Log.e(FUNCTION_TAG, "Error getting data", task.getException());
+                Log.e(TAG, "Error getting data", task.getException());
             } else {
-                Log.i(FUNCTION_TAG, "Got User object: " + (task.getResult().getValue()));
+                Log.d(TAG, "Got User object: " + (task.getResult().getValue()));
 
-                /*Disable Loading Timer*/
                 time_out_handler.removeCallbacks(time_out_runnable);
-
-                /*Get Current User*/
+                
                 cUser = task.getResult().getValue(User.class);
                 
                 setUserData();
+
+                //item_list_ref = firebaseDatabaseHelper.getItemsRef(cUser.getBusiness_code()); //might be unnecessary
 
                 //Check usertype
                 //[Employee, Business Owner, Employee - Inventory Manager]
@@ -551,9 +537,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setUpInsightAdapters();
             }
 
-            //subscription tracking system
-            setUpSubscriptionTracking();
-
             //Sidebar continuity
             sidebarContinuity();
 
@@ -569,140 +552,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //List of Restock
             setUpRestockList();
 
-            //List of History
+            //List of History Out
             setUpHistoryList();
 
-            //Search item search bar system
+            //Search item search bar functionality
             setUpItemSearchBar();
 
-            //Search restock search bar system
+            //Search restock search bar functionality
             setUpRestockSearchBar();
 
             //Dismiss loading popup
             systemLoading.dismissDialog();
-        });
-    }
-
-    private void setUpSubscriptionTracking() {
-        String FUNCTION_TAG = "setUpSubscriptionTracking";
-
-        //Get Subscription Type
-        subscription_ref.child("type").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    subscription_type = snapshot.getValue(Integer.class);
-                    Log.d(FUNCTION_TAG, "subscription_type: " + subscription_type);
-                    setUpTrackers();
-                } else {
-                    subscription_ref.child("type").setValue(0).addOnCompleteListener(task ->
-                    {
-                        Log.d(FUNCTION_TAG, "Added new data:\n" +
-                                "subscription/type/0");
-                        subscription_type = 0;
-                        Log.d(FUNCTION_TAG, "" + subscription_type);
-                        setUpTrackers();
-                    });
-                }
-            }
-
-            private void setUpTrackers() {
-                setUpItemTracker();
-                setUpTransactionTracker();
-                setUpCategoryTracker();
-            }
-
-            private void setUpItemTracker() {
-                String NESTED_FUNCTION_TAG = FUNCTION_TAG + " -> setUpItemTracker";
-                
-                long limit = Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM);
-
-                Log.d(NESTED_FUNCTION_TAG, "Item limit: " + limit);
-
-                items_ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if (!snapshot.exists()) {
-
-                            Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
-                            return;
-                        }
-
-                        if (snapshot.getChildrenCount() >= limit) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + snapshot.getChildrenCount() +
-                                    "\nVerdict: Outside max limit");
-                            is_at_max_items = true;
-                        } else {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + snapshot.getChildrenCount() +
-                                    "\nVerdict: Inside max limit");
-                            is_at_max_items = false;
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-
-            private void setUpTransactionTracker() {
-                String NESTED_FUNCTION_TAG = FUNCTION_TAG + " -> setUpTransactionTracker";
-
-                history_ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            if (snapshot.getChildrenCount() > Subscription.DEBUG_ITEM_COUNT_LIMIT) {
-                                Log.d(NESTED_FUNCTION_TAG, "Transaction Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Outside max limit");
-                            } else {
-                                Log.d(NESTED_FUNCTION_TAG, "Transaction Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Inside max limit");
-                            }
-                        } else {
-                            Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-
-            private void setUpCategoryTracker() {
-                String NESTED_FUNCTION_TAG = FUNCTION_TAG + " -> setUpCategoryTracker";
-
-                category_ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            if (snapshot.getChildrenCount() > Subscription.DEBUG_ITEM_COUNT_LIMIT) {
-                                Log.d(NESTED_FUNCTION_TAG, "Category Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Outside max limit");
-                            } else {
-                                Log.d(NESTED_FUNCTION_TAG, "Category Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Inside max limit");
-                            }
-                        } else {
-                            Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
         });
     }
 
@@ -751,23 +611,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterItemFirebase = new ListAdapterItemFirebase(options1, this, cUser);
         rvItems.setAdapter(listAdapterItemFirebase);
         listAdapterItemFirebase.startListening();
-
-        //Item List Child Node Counter
-        item_query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getChildrenCount() >= Subscription.FREE_ITEM_COUNT_LIMIT) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     private void setUpRestockList() {
@@ -1165,8 +1008,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         business_ref = firebaseDatabaseHelper.getBusinessRef();
         business_code_ref = firebaseDatabaseHelper.getBusinessCodeRef(cUser.getBusiness_code());
         history_ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code());
-        category_ref = firebaseDatabaseHelper.getItemsCategoriesRef(cUser.getBusiness_code());
-        subscription_ref = firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code());
+        category_ref = firebaseDatabaseHelper.getItemsCategories(cUser.getBusiness_code());
     }
 
     private void checkSession() {
@@ -1223,6 +1065,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 }
             });
+            //displayPerformance();
         }
 
         if (insight_selected_item.equals("Choose Item")) {
@@ -1255,12 +1098,93 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 }
             });
+            /*switch (insight_selected_context) {
+                case "Today":
+                case "Yesterday":
+                    getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot current_snapshot : snapshot.getChildren()) {
+                                MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+                                List<Item> items = current_transaction.getItems();
+                                for (Item current_item : items) {
+                                    top_list_item.add(current_item);
+                                }
+                            }
+
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    break;
+                case "This Week":
+                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task ->{
+                        if (task.isSuccessful()) {
+                            DataSnapshot week = task.getResult();
+                            for (DataSnapshot day : week.getChildren()) {
+                                for (DataSnapshot time : day.getChildren()) {
+                                    for (DataSnapshot cItem : time.getChildren()) {
+                                        Item item = cItem.getValue(Item.class);
+                                        if (item != null) {
+                                            top_list_item.add(item);
+                                        } else {
+                                            Log.e("Insight Error", "This Week - item is null");
+                                        }
+                                    }
+                                }
+                            }
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
+                            }
+                        }
+                    });
+                    break;
+                case "This Month":
+                    getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DataSnapshot month = task.getResult();
+                            for (DataSnapshot week : month.getChildren()) {
+                                for (DataSnapshot day : week.getChildren()) {
+                                    for (DataSnapshot time : day.getChildren()) {
+                                        for (DataSnapshot cItem : time.getChildren()) {
+                                            Item item = cItem.getValue(Item.class);
+                                            if (item != null) {
+                                                top_list_item.add(item);
+                                            } else {
+                                                Log.e("Insight Error", "This Week - item is null");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (!top_list_item.isEmpty()) {
+                                displayInsightPieChart(sortList(combineItems(top_list_item)), insight_selected_context);
+                            } else {
+                                pieChart.clear();
+                                pieChart.setNoDataText("No Data for " + insight_selected_context);
+                            }
+                        }
+                    });
+                    break;
+            }*/
         } else {
             pieChart.clear();
         }
     }
 
-    /*private void displayPerformance() {
+    private void displayPerformance() {
         switch (insight_selected_context) {
             case "Today":
             case "Yesterday":
@@ -1273,9 +1197,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 displayPerformanceMonth();
                 break;
         }
-    }*/
+    }
 
-    /*private void displayPerformanceMonth() {
+    private void displayPerformanceMonth() {
         getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot month = task.getResult();
@@ -1300,9 +1224,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
             }
         });
-    }*/
+    }
 
-    /*private void displayPerformanceWeek() {
+    private void displayPerformanceWeek() {
         getInsightReference(insight_selected_context).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot week = task.getResult();
@@ -1325,9 +1249,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 item_revenue_tv.setText("₱" + total_rev + " Worth Sold");
             }
         });
-    }*/
+    }
 
-    /*private void displayPerformanceTodayOrYesterday() {
+    private void displayPerformanceTodayOrYesterday() {
         getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -1350,7 +1274,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
-    }*/
+    }
 
     private List<Item> combineItems(List<Item> list) {
 
@@ -1850,44 +1774,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             cost_price = cost_price_field.getText().toString().trim();
             category = category_spinner.getSelectedItem().toString();
 
-            if (is_at_max_items) {
-                //Subscription ad popup
-                Toast.makeText(MainActivity.this, "Reached maximum item limit", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            //To check if fields were empty. No point storing in official data if they are empty
+            if (!isEmpty(name)) {
+                //pName = name;
 
-            if (isEmpty(name)) {
+                Item item = new Item();
+                item.setName(name);
+
+                if (!isEmpty(price)) {
+                    item.setPrice(Double.parseDouble(price));
+                }
+
+                if (!isEmpty(cost_price)) {
+                    item.setCost_price(Double.parseDouble(cost_price));
+                }
+
+                if (!category.equals("Select Category")) {
+                    item.setCategory(category);
+                }
+
+                items_ref.child(name).setValue(item);
+
+                popupWindow.dismiss();
+                itemSearchBar.clearFocus();
+                hideKeyboard(view);
+            } else {
                 Toast.makeText(MainActivity.this, "Item should at least have a name", Toast.LENGTH_SHORT).show();
-                return;
             }
-
-            Item item = new Item();
-            item.setName(name);
-
-            if (!isEmpty(price)) {
-                item.setPrice(Double.parseDouble(price));
-            }
-
-            if (!isEmpty(cost_price)) {
-                item.setCost_price(Double.parseDouble(cost_price));
-            }
-
-            if (!category.equals("Select Category")) {
-                item.setCategory(category);
-            }
-
-            items_ref.child(name).setValue(item);
-
-            popupWindow.dismiss();
-            itemSearchBar.clearFocus();
-            hideKeyboard(view);
         });
     }
 
     /*Popup when editing an item*/
     private void itemEditOpenPopup(Item item) {
-        String FUNCTION_TAG = "itemEditOpenPopup";
-
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_edit, null);
 
@@ -2071,7 +1989,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             new_item.setQuantity(current_item_quantity);
 
-            items_ref.child(item.getName()).setValue(new_item);
+            items_ref.child(new_item.getName()).setValue(new_item);
 
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
@@ -2103,13 +2021,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 int added_qty_result = selected_item_quantity + snapshot_item.getQuantity();
                                 cart_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, added_qty_result));
                             } else {
-                                Log.e(FUNCTION_TAG, "Add to cart is null");
+                                Log.e(TAG, "add to cart is null 557");
                             }
                         } else {
                             cart_ref.child(current_item_name).setValue(new Item(current_item_name, current_item_price, selected_item_quantity));
                         }
                     } else {
-                        Log.e(FUNCTION_TAG, "Cart item unsuccessful");
+                        Log.e(TAG, "cart item unsuccessful");
                     }
                 });
                 items_ref.child(current_item_name).setValue(new Item(current_item_name,  current_item_price, current_item_cost_price, current_item_quantity - selected_item_quantity, current_item_category));
