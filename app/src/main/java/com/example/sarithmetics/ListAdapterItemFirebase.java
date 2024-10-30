@@ -9,10 +9,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListAdapterItemFirebase.myViewHolder> {
 
@@ -24,28 +28,41 @@ public class ListAdapterItemFirebase extends FirebaseRecyclerAdapter<Item, ListA
      */
 
     private OnItemClickListener listener;
-    private FirebaseDatabaseHelper firebaseDatabaseHelper;
-    private User user;
     private Context context;
-    public ListAdapterItemFirebase(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, User user) {
+    private boolean lock_marked;
+
+    public ListAdapterItemFirebase(@NonNull FirebaseRecyclerOptions<Item> options, OnItemClickListener listener, boolean lock_marked) {
         super(options);
         this.listener = listener;
-        firebaseDatabaseHelper = new FirebaseDatabaseHelper();
-        this.user = user;
+        this.lock_marked = lock_marked;
     }
 
     public interface OnItemClickListener {
-        void onItemClick(int position, Item item);
+        void onItemClick(int position, Item item, int type);
     }
 
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterItemFirebase.myViewHolder holder, int position, @NonNull Item model) {
+
+        int type;
+
         holder.productNameText.setText(model.getName());
         holder.productPriceText.setText("₱" + model.getPrice());
         holder.productQtyText.setText("Stock: " + model.getQuantity());
+
+        if (lock_marked && model.isSub_marked()) {
+            holder.rowListLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_list_locked));
+            holder.productNameText.setTextColor(ContextCompat.getColor(context, R.color.graySecondary));
+            holder.productPriceText.setTextColor(ContextCompat.getColor(context, R.color.graySecondary));
+            holder.productQtyText.setTextColor(ContextCompat.getColor(context, R.color.graySecondary));
+            type = 1;
+        } else {
+            type = 0;
+        }
+
         holder.rowListLayout.setOnClickListener(view -> {
             if (listener != null) {
-                listener.onItemClick(position, model);
+                listener.onItemClick(position, model, type);
             }
         });
     }

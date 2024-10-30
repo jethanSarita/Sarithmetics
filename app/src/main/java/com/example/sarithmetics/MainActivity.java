@@ -80,29 +80,39 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener, ListAdapterHistoryFirebase.OnItemClickListener, ListAdapterCategoryFirebase.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String TAG = "firebaseDatabase MainAct";
+
     FloatingActionButton add_button, restock_button;
+
     String punch_in_code;
+
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
+
     ImageView settings, homeIcon, cart_button, eye_open_button, eye_close_button;
+
     RelativeLayout home_layout, items_layout, insights_layout, restock_layout, history_layout;
-    MyDatabaseHelper database;
+
+    /*MyDatabaseHelper database;
     ArrayList<String> listItemID;
     ArrayList<String> listItemName;
     ArrayList<String> listItemPrice;
-    ArrayList<String> listItemQty;
+    ArrayList<String> listItemQty;*/
+
     SessionManager sessionManager;
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
-    //ListAdapterItem listAdapterItem;
+
+    /*Items*/
+    TextView items_counter;
+
     ListAdapterItemFirebase listAdapterItemFirebase;
     ListAdapterCategoryFirebase listAdapterCategoryFirebase;
     ListAdapterEmployeeFirebase listAdapterEmployeeFirebase;
     ListAdapterRestockFirebase listAdapterRestockFirebase;
     ListAdapterHistoryFirebase listAdapterHistoryFirebase;
     RecyclerView rvItems, rvEmployees, rvRestocking, rvHistory, rvCategory;
-    ArrayList<Product> cartedProduct, currProduct;
-    ArrayList<Item> cartedItem;
+    /*ArrayList<Product> cartedProduct, currProduct;
+    ArrayList<Item> cartedItem;*/
     Spinner insight_item_spinner, insight_context_spinner, category_spinner;
     ArrayList<String> insight_item_list, insight_context_list;
     ArrayAdapter<String> insight_item_adapter, insight_context_adapter;
@@ -110,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     androidx.appcompat.widget.SearchView itemSearchBar, restockingSearchBar;
     EditText etBusinessCode, etPunchInCode;
     Button btnEnterBusinessCode, amBtnGeneratePunchInCode, btnEnterPunchInCode;
+
     //ScrollView maSvItems;
     RandomHelper randomHelper;
     MenuItem nav_insights, nav_restock;
@@ -143,17 +154,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /*Subscription System*/
     int subscription_type;
-    boolean is_at_max_items = false;
-    boolean is_at_max_transactions = false;
-    boolean is_at_max_categories = false;
+    /*Items*/
+    boolean is_at_max_free_items = false;
+    boolean is_at_max_premium1_items = false;
+    boolean is_at_max_premium2_items = false;
+    boolean is_at_max_debug_items = false;
+    /*Transactions*/
+    boolean is_at_max_free_transactions = false;
+    boolean is_at_max_premium1_transactions = false;
+    boolean is_at_max_premium2_transactions = false;
+    boolean is_at_max_debug_transactions = false;
+    /*Categories*/
+    boolean is_at_max_free_categories = false;
+    boolean is_at_max_premium1_categories = false;
+    boolean is_at_max_premium2_categories = false;
+    boolean is_at_max_debug_categories = false;
+
+    boolean lock_marked = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
-        initializeAds();
 
         randomHelper = new RandomHelper();
 
@@ -168,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         /*database*/
-        database = new MyDatabaseHelper(MainActivity.this);
+        /*database = new MyDatabaseHelper(MainActivity.this);*/
 
         /*general hooks*/
         toolbar = findViewById(R.id.toolbar);
@@ -209,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemSearchBar = findViewById(R.id.items_search_bar_serv);
         cart_button = findViewById(R.id.items_cart_iv);
         add_button = findViewById(R.id.items_add_button_fab);
+        items_counter = findViewById(R.id.items_counter);
         //maSvItems = findViewById(R.id.items_sv);
         /*Category*/
         category_plus_btn = findViewById(R.id.items_category_plus_btn);
@@ -244,14 +269,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         eye_close_button = findViewById(R.id.home_owner_eye_close_icon_iv);
         boxBusinessCode = findViewById(R.id.home_owner_business_code_box_ll);
 
-        /*array lists*/
+        /*array lists*//*
         currProduct = new ArrayList<>();
         cartedProduct = new ArrayList<>();
         cartedItem = new ArrayList<>();
         listItemID = new ArrayList<>();
         listItemName = new ArrayList<>();
         listItemPrice = new ArrayList<>();
-        listItemQty = new ArrayList<>();
+        listItemQty = new ArrayList<>();*/
 
         /*Loading system*/
         systemLoading = new SystemLoading(MainActivity.this);
@@ -271,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         //Clear cart
-        cartedItem.clear();
+        //cartedItem.clear();
 
         /*Insight*/
         insight_item_spinner = findViewById(R.id.insight_item_perf_spinner);
@@ -330,7 +355,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         category_plus_btn.setOnClickListener(view -> {
-            //business_code_ref.child("categories").push().setValue("Test");
             categoryAddOpenPopup();
         });
     }
@@ -472,8 +496,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         mAdView = findViewById(R.id.adViewItems);
+        mAdView.setVisibility(View.VISIBLE);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+    }
+
+    private void deinitializeAds() {
+        mAdView = findViewById(R.id.adViewItems);
+        mAdView.setVisibility(View.GONE);
     }
 
     private void openCart() {
@@ -552,25 +582,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             //subscription tracking system
-            setUpSubscriptionTracking();
+            setUpSubscriptionTracker();
 
             //Sidebar continuity
             sidebarContinuity();
 
-            //List of Items
-            setUpItemList();
-
-            //List of Categories
-            setUpCategoryList();
-
-            //List of Employees
-            setUpEmployeeList();
-
-            //List of Restock
-            setUpRestockList();
-
-            //List of History
-            setUpHistoryList();
+            //Lists
+            setUpLists();
 
             //Search item search bar system
             setUpItemSearchBar();
@@ -583,7 +601,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void setUpSubscriptionTracking() {
+    private void setUpLists() {
+        //List of Items
+        setUpItemList();
+
+        //List of Categories
+        setUpCategoryList();
+
+        //List of Employees
+        setUpEmployeeList();
+
+        //List of Restock
+        setUpRestockList();
+
+        //List of History
+        setUpHistoryList();
+    }
+
+    private void setUpSubscriptionTracker() {
         String FUNCTION_TAG = "setUpSubscriptionTracking";
 
         //Get Subscription Type
@@ -593,14 +628,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (snapshot.exists()) {
                     subscription_type = snapshot.getValue(Integer.class);
                     Log.d(FUNCTION_TAG, "subscription_type: " + subscription_type);
+
+                    if (subscription_type == Subscription.FREE) {
+                        lock_marked = true;
+                        initializeAds();
+                    } else {
+                        lock_marked = false;
+                        deinitializeAds();
+                    }
+
+                    setUpLists();
                     setUpTrackers();
                 } else {
+
                     subscription_ref.child("type").setValue(0).addOnCompleteListener(task ->
                     {
                         Log.d(FUNCTION_TAG, "Added new data:\n" +
                                 "subscription/type/0");
                         subscription_type = 0;
                         Log.d(FUNCTION_TAG, "" + subscription_type);
+
+                        lock_marked = true;
+
+                        setUpLists();
                         setUpTrackers();
                     });
                 }
@@ -614,30 +664,52 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             private void setUpItemTracker() {
                 String NESTED_FUNCTION_TAG = FUNCTION_TAG + " -> setUpItemTracker";
-                
-                long limit = Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM);
-
-                Log.d(NESTED_FUNCTION_TAG, "Item limit: " + limit);
 
                 items_ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                         if (!snapshot.exists()) {
-
                             Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
                             return;
                         }
 
-                        if (snapshot.getChildrenCount() >= limit) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + snapshot.getChildrenCount() +
-                                    "\nVerdict: Outside max limit");
-                            is_at_max_items = true;
-                        } else {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + snapshot.getChildrenCount() +
-                                    "\nVerdict: Inside max limit");
-                            is_at_max_items = false;
+                        long node_count = snapshot.getChildrenCount();
+
+                        String count = String.valueOf(node_count);
+
+                        if (subscription_type == Subscription.DEBUG) {
+                            count += "/" + Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM);
+                        } else if (subscription_type == Subscription.FREE) {
+                            count += "/" + Subscription.getLimit(Subscription.FREE, Subscription.ITEM);
+                        } else if (subscription_type == Subscription.PREMIUM1) {
+                            count += "/" + Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM);
+                        } else if (subscription_type == Subscription.PREMIUM2) {
+                            count += "/" + Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM);
                         }
+
+                        items_counter.setText(count);
+
+                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
+                            is_at_max_debug_items = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.ITEM)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + node_count + "\nOutside max free limit");
+                            is_at_max_free_items = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium1 limit");
+                            is_at_max_premium1_items = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium2 limit");
+                            is_at_max_premium2_items = true;
+                        }
+
+
                     }
 
                     @Override
@@ -653,17 +725,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 history_ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            if (snapshot.getChildrenCount() > Subscription.DEBUG_ITEM_COUNT_LIMIT) {
-                                Log.d(NESTED_FUNCTION_TAG, "Transaction Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Outside max limit");
-                            } else {
-                                Log.d(NESTED_FUNCTION_TAG, "Transaction Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Inside max limit");
-                            }
-                        } else {
+
+                        if (!snapshot.exists()) {
                             Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
+                            return;
                         }
+
+                        long node_count = snapshot.getChildrenCount();
+
+                        if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.TRANSACTION)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + node_count + "\nOutside max free limit");
+                            is_at_max_free_transactions = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.TRANSACTION)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium1 limit");
+                            is_at_max_premium1_transactions = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.TRANSACTION)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium2 limit");
+                            is_at_max_premium2_transactions = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.TRANSACTION)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
+                            is_at_max_debug_transactions = true;
+                        }
+
                     }
 
                     @Override
@@ -679,16 +768,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 category_ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            if (snapshot.getChildrenCount() > Subscription.DEBUG_ITEM_COUNT_LIMIT) {
-                                Log.d(NESTED_FUNCTION_TAG, "Category Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Outside max limit");
-                            } else {
-                                Log.d(NESTED_FUNCTION_TAG, "Category Count: " + snapshot.getChildrenCount() +
-                                        "\nVerdict: Inside max limit");
-                            }
-                        } else {
+
+                        if (!snapshot.exists()) {
                             Log.e(NESTED_FUNCTION_TAG, "Snapshot doesn't exist");
+                            return;
+                        }
+
+                        long node_count = snapshot.getChildrenCount();
+
+                        if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.CATEGORY)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + node_count + "\nOutside max free limit");
+                            is_at_max_free_categories = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.CATEGORY)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium1 limit");
+                            is_at_max_premium1_categories = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.CATEGORY)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium2 limit");
+                            is_at_max_premium2_categories = true;
+                        }
+
+                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.CATEGORY)) {
+                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
+                            is_at_max_debug_categories = true;
                         }
                     }
 
@@ -748,26 +853,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new FirebaseRecyclerOptions.Builder<Item>()
                         .setQuery(item_query, Item.class)
                         .build();
-        listAdapterItemFirebase = new ListAdapterItemFirebase(options1, this, cUser);
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options1, this, lock_marked);
         rvItems.setAdapter(listAdapterItemFirebase);
         listAdapterItemFirebase.startListening();
-
-        //Item List Child Node Counter
-        item_query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getChildrenCount() >= Subscription.FREE_ITEM_COUNT_LIMIT) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     private void setUpRestockList() {
@@ -1570,7 +1658,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setQuery(items_ref.orderByChild("name").startAt(str).endAt(str + "~"), Item.class)
                         .build();
 
-        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, lock_marked);
         listAdapterItemFirebase.startListening();
         rvItems.setAdapter(listAdapterItemFirebase);
     }
@@ -1591,7 +1679,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new FirebaseRecyclerOptions.Builder<Item>()
                         .setQuery(items_ref.orderByChild("category").equalTo(model.getName()), Item.class)
                         .build();
-        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, lock_marked);
         listAdapterItemFirebase.startListening();
         rvItems.setAdapter(listAdapterItemFirebase);
     }
@@ -1850,9 +1938,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             cost_price = cost_price_field.getText().toString().trim();
             category = category_spinner.getSelectedItem().toString();
 
-            if (is_at_max_items) {
-                //Subscription ad popup
-                Toast.makeText(MainActivity.this, "Reached maximum item limit", Toast.LENGTH_SHORT).show();
+            boolean is_sub_marked = false;
+
+            if (subscription_type == Subscription.FREE && is_at_max_free_items) {
+                //Debug plan, maxed out
+                Toast.makeText(MainActivity.this, "Debug max", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (is_at_max_debug_items) {
+                //Not debug plan, maxed out
+                is_sub_marked = true;
+            }
+
+            if (subscription_type == Subscription.PREMIUM1 && is_at_max_premium1_items) {
+                Toast.makeText(MainActivity.this, "Free max", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -1874,6 +1974,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             if (!category.equals("Select Category")) {
                 item.setCategory(category);
+            }
+
+            if (is_sub_marked) {
+                item.setSub_marked(true);
             }
 
             items_ref.child(name).setValue(item);
@@ -2184,6 +2288,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void itemLockOpenPopup(Item item) {
+        String FUNCTION_TAG = "itemEditOpenPopup";
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_item_edit, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
+
+        /*Display info here*/
+    }
+
     private void restockQuantityEditOpenPopup(Item item) {
         /*Toast.makeText(getApplicationContext(), "Works", Toast.LENGTH_SHORT).show();*/
         String FUNCTION_TAG = "createRestockQuantityEditPopupWindow";
@@ -2459,8 +2581,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //Item List OnClick Listener
     @Override
-    public void onItemClick(int position, Item item) {
-        itemEditOpenPopup(item);
+    public void onItemClick(int position, Item item, int type) {
+        if (type == 0) {
+            itemEditOpenPopup(item);
+        } else if (type == 1) {
+            itemLockOpenPopup(item);
+        } else {
+            Log.wtf("???", "???");
+        }
     }
 
     //Employee List OnClick Listener
@@ -2519,7 +2647,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new FirebaseRecyclerOptions.Builder<Item>()
                         .setQuery(item_query, Item.class)
                         .build();
-        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, cUser);
+        listAdapterItemFirebase = new ListAdapterItemFirebase(options, this, lock_marked);
         rvItems.setAdapter(listAdapterItemFirebase);
         listAdapterItemFirebase.startListening();
     }

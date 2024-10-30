@@ -8,6 +8,7 @@ public class Item {
     private int restock_quantity;
     private int in_cart_quantity;
     private String category;
+    private boolean sub_marked;
 
     public Item(String name, double price, int quantity) {
         this.name = name;
@@ -121,5 +122,13 @@ public class Item {
 
     public double getCost_price() {
         return cost_price;
+    }
+
+    public boolean isSub_marked() {
+        return sub_marked;
+    }
+
+    public void setSub_marked(boolean sub_marked) {
+        this.sub_marked = sub_marked;
     }
 }
