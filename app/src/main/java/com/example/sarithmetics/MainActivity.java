@@ -72,6 +72,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -186,6 +189,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     long transaction_count = 0;
     long category_count = 0;
 
+    private static JSONObject getBaseRequest() throws JSONException {
+        return new JSONObject()
+                .put("apiVersion", 2)
+                .put("apiVersionMinor", 0);
+    }
+
+    private static JSONObject getGatewayTokenizationSpecification() throws JSONException {
+        return new JSONObject()
+                .put("type", "PAYMENT_GATEWAY")
+                .put("parameters", new JSONObject()
+                        .put("gateway", "example")
+                        .put("gatewayMerchantId", "exampleGatewayMerchantId")
+                );
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -983,8 +1000,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ItemTouchHelper.Callback call_back = new ItemTouchHelper.Callback() {
         @Override
         public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            int drag_flags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-            return makeMovementFlags(drag_flags, 0);
+            int drag_flag = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+            return makeMovementFlags(drag_flag, 0);
         }
 
         @Override
@@ -1008,38 +1025,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options, this);
         rvCategory.setAdapter(listAdapterCategoryFirebase);
         rvCategory.setItemAnimator(null);
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(call_back);
-        itemTouchHelper.attachToRecyclerView(rvCategory);
+        /*ItemTouchHelper itemTouchHelper = new ItemTouchHelper(call_back);
+        itemTouchHelper.attachToRecyclerView(rvCategory);*/
         listAdapterCategoryFirebase.startListening();
     }
-
-
-    /*ItemTouchHelper.SimpleCallback simple_call_back = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            int from_position = viewHolder.getBindingAdapterPosition();
-            int to_position = target.getBindingAdapterPosition();
-
-            DatabaseReference fromRef = listAdapterCategoryFirebase.getRef(from_position);
-            DatabaseReference toRef = listAdapterCategoryFirebase.getRef(to_position);
-
-            fromRef.get().addOnSuccessListener(fromSnapshot -> {
-                toRef.get().addOnSuccessListener(toSnapshot -> {
-                    fromRef.setValue(toSnapshot.getValue());
-                    toRef.setValue(fromSnapshot.getValue());
-                });
-            });
-
-            listAdapterCategoryFirebase.notifyItemMoved(from_position, to_position);
-
-            return true;
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-        }
-    };*/
 
     private void sidebarContinuity() {
         switch (sessionManager.getMainStatus()) {

@@ -57,7 +57,7 @@ public class ListAdapterCategoryFirebase extends FirebaseRecyclerAdapter<Categor
             holder.category_name.setTextColor(Color.parseColor("#FFFFFF"));
         }
 
-        /*holder.itemView.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(view -> {
 
             long click_time = System.currentTimeMillis();
 
@@ -93,7 +93,7 @@ public class ListAdapterCategoryFirebase extends FirebaseRecyclerAdapter<Categor
             }
 
             holder.last_click_time = click_time;
-        });*/
+        });
     }
 
     @NonNull
