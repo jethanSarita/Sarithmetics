@@ -158,19 +158,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean is_at_max_free_items = false;
     boolean is_at_max_premium1_items = false;
     boolean is_at_max_premium2_items = false;
-    boolean is_at_max_debug_items = false;
+    boolean is_at_max_debug_free_items = false;
+    boolean is_at_max_debug_premium_items = false;
     /*Transactions*/
     boolean is_at_max_free_transactions = false;
     boolean is_at_max_premium1_transactions = false;
     boolean is_at_max_premium2_transactions = false;
-    boolean is_at_max_debug_transactions = false;
+    boolean is_at_max_debug_free_transactions = false;
+    boolean is_at_max_debug_premium_transactions = false;
     /*Categories*/
     boolean is_at_max_free_categories = false;
     boolean is_at_max_premium1_categories = false;
     boolean is_at_max_premium2_categories = false;
-    boolean is_at_max_debug_categories = false;
+    boolean is_at_max_debug_free_categories = false;
+    boolean is_at_max_debug_premium_items_categories = false;
 
     boolean lock_marked = false;
+
+    /*New Subscription System*/
+    boolean at_max_items = false;
+    boolean at_max_transactions = false;
+    boolean at_max_categories = false;
+
+    long item_count_general = 0;
+    long item_count_marked = 0;
+    long item_count_unmarked = 0;
+    long transaction_count = 0;
+    long category_count = 0;
 
 
     @Override
@@ -629,13 +643,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     subscription_type = snapshot.getValue(Integer.class);
                     Log.d(FUNCTION_TAG, "subscription_type: " + subscription_type);
 
-                    if (subscription_type == Subscription.FREE) {
+                    switch (subscription_type) {
+                        case Subscription.FREE:
+                        case Subscription.DEBUG_FREE:
+                            lock_marked = true;
+                            initializeAds();
+                            break;
+                        case Subscription.PREMIUM1:
+                        case Subscription.PREMIUM2:
+                        case Subscription.DEBUG_PREMIUM:
+                            lock_marked = false;
+                            deinitializeAds();
+                            break;
+                        default:
+                            Log.wtf(FUNCTION_TAG, "Subscription type out of bounds");
+                            break;
+                    }
+
+                    /*if (subscription_type == Subscription.FREE) {
                         lock_marked = true;
                         initializeAds();
-                    } else {
+                    } else if (subscription_type == Subscription.DEBUG) {
                         lock_marked = false;
                         deinitializeAds();
-                    }
+                    }*/
 
                     setUpLists();
                     setUpTrackers();
@@ -673,42 +704,97 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             return;
                         }
 
-                        long node_count = snapshot.getChildrenCount();
+                        item_count_general = snapshot.getChildrenCount();
+                        item_count_marked = 0;
+                        item_count_unmarked = 0;
 
-                        String count = String.valueOf(node_count);
-
-                        if (subscription_type == Subscription.DEBUG) {
-                            count += "/" + Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM);
-                        } else if (subscription_type == Subscription.FREE) {
-                            count += "/" + Subscription.getLimit(Subscription.FREE, Subscription.ITEM);
-                        } else if (subscription_type == Subscription.PREMIUM1) {
-                            count += "/" + Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM);
-                        } else if (subscription_type == Subscription.PREMIUM2) {
-                            count += "/" + Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM);
+                        for (DataSnapshot curr_snap : snapshot.getChildren()) {
+                            if (curr_snap.getValue(Item.class).isSub_marked()) {
+                                item_count_marked++;
+                            } else {
+                                item_count_unmarked++;
+                            }
                         }
 
-                        items_counter.setText(count);
+                        String count = String.valueOf(item_count_general);
+                        String limit = "/0";
 
-                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.ITEM)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
-                            is_at_max_debug_items = true;
+                        switch (subscription_type) {
+                            case Subscription.DEBUG_FREE:
+                                limit = "/" + Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.ITEM);
+                                if (item_count_general >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.ITEM)) {
+                                    at_max_items = true;
+                                } else {
+                                    at_max_items = false;
+                                }
+                                break;
+                            case Subscription.FREE:
+                                limit = "/" + Subscription.getLimit(Subscription.FREE, Subscription.ITEM);
+                                if (item_count_general >= Subscription.getLimit(Subscription.FREE, Subscription.ITEM)) {
+                                    at_max_items = true;
+                                } else {
+                                    at_max_items = false;
+                                }
+                                break;
+                            case Subscription.PREMIUM1:
+                                limit = "/" + Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM);
+                                if (item_count_general >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM)) {
+                                    at_max_items = true;
+                                } else {
+                                    at_max_items = false;
+                                }
+                                break;
+                            case Subscription.PREMIUM2:
+                                limit = "/" + Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM);
+                                if (item_count_general >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM)) {
+                                    at_max_items = true;
+                                } else {
+                                    at_max_items = false;
+                                }
+                                break;
+                            case Subscription.DEBUG_PREMIUM:
+                                limit = "/" + Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM);
+                                if (item_count_general >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM)) {
+                                    at_max_items = true;
+                                } else {
+                                    at_max_items = false;
+                                }
+                                break;
                         }
 
-                        if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.ITEM)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + node_count + "\nOutside max free limit");
+                        String total = count + limit;
+
+                        items_counter.setText(total);
+
+                        /*if (node_count >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.ITEM)) {
+                            is_at_max_debug_free_items = true;
+                        } else {
+                            is_at_max_debug_free_items = false;
+                        }*/
+
+                        /*if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.ITEM)) {
                             is_at_max_free_items = true;
-                        }
+                        } else {
+                            is_at_max_free_items = false;
+                        }*/
 
-                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium1 limit");
+                        /*if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM)) {
                             is_at_max_premium1_items = true;
-                        }
+                        } else {
+                            is_at_max_premium1_items = false;
+                        }*/
 
-                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium2 limit");
+                        /*if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM)) {
                             is_at_max_premium2_items = true;
-                        }
+                        } else {
+                            is_at_max_premium2_items = false;
+                        }*/
 
+                        /*if (node_count >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM)) {
+                            is_at_max_debug_premium_items = true;
+                        } else {
+                            is_at_max_debug_premium_items = false;
+                        }*/
 
                     }
 
@@ -748,9 +834,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             is_at_max_premium2_transactions = true;
                         }
 
-                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.TRANSACTION)) {
+                        if (node_count >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.TRANSACTION)) {
                             Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
-                            is_at_max_debug_transactions = true;
+                            is_at_max_debug_free_transactions = true;
                         }
 
                     }
@@ -791,9 +877,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             is_at_max_premium2_categories = true;
                         }
 
-                        if (node_count >= Subscription.getLimit(Subscription.DEBUG, Subscription.CATEGORY)) {
+                        if (node_count >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.CATEGORY)) {
                             Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
-                            is_at_max_debug_categories = true;
+                            is_at_max_debug_free_categories = true;
                         }
                     }
 
@@ -894,6 +980,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterHistoryFirebase.startListening();
     }
 
+    ItemTouchHelper.Callback call_back = new ItemTouchHelper.Callback() {
+        @Override
+        public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            int drag_flags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+            return makeMovementFlags(drag_flags, 0);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
+    };
+
     private void setUpCategoryList() {
         rvCategory.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
         category_query = business_code_ref.child("categories");
@@ -904,13 +1008,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterCategoryFirebase = new ListAdapterCategoryFirebase(options, this);
         rvCategory.setAdapter(listAdapterCategoryFirebase);
         rvCategory.setItemAnimator(null);
-        listAdapterCategoryFirebase.startListening();
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(call_back);
         itemTouchHelper.attachToRecyclerView(rvCategory);
+        listAdapterCategoryFirebase.startListening();
     }
 
-    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
+
+    /*ItemTouchHelper.SimpleCallback simple_call_back = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             int from_position = viewHolder.getBindingAdapterPosition();
@@ -935,7 +1039,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
         }
-    };
+    };*/
 
     private void sidebarContinuity() {
         switch (sessionManager.getMainStatus()) {
@@ -1940,20 +2044,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             boolean is_sub_marked = false;
 
-            if (subscription_type == Subscription.FREE && is_at_max_free_items) {
-                //Debug plan, maxed out
-                Toast.makeText(MainActivity.this, "Debug max", Toast.LENGTH_SHORT).show();
+            if (at_max_items) {
+                Toast.makeText(MainActivity.this, "Maximum items for this plan has been reached", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (is_at_max_debug_items) {
-                //Not debug plan, maxed out
+            if (is_item_premium()) {
                 is_sub_marked = true;
-            }
-
-            if (subscription_type == Subscription.PREMIUM1 && is_at_max_premium1_items) {
-                Toast.makeText(MainActivity.this, "Free max", Toast.LENGTH_SHORT).show();
-                return;
             }
 
             if (isEmpty(name)) {
@@ -1986,6 +2083,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             itemSearchBar.clearFocus();
             hideKeyboard(view);
         });
+    }
+
+    private boolean is_item_max() {
+        switch (subscription_type) {
+            case Subscription.FREE:
+                return is_at_max_free_items;
+            case Subscription.DEBUG_FREE:
+                return is_at_max_debug_free_items;
+            case Subscription.PREMIUM1:
+                return is_at_max_premium1_items;
+            case Subscription.PREMIUM2:
+                return is_at_max_premium2_items;
+            case Subscription.DEBUG_PREMIUM:
+                return is_at_max_debug_premium_items;
+            default:
+                return false;
+        }
+    }
+
+    private boolean is_item_premium() {
+        switch (subscription_type) {
+            case Subscription.PREMIUM1:
+            case Subscription.PREMIUM2:
+            case Subscription.DEBUG_PREMIUM:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /*Popup when editing an item*/
@@ -2292,7 +2417,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String FUNCTION_TAG = "itemEditOpenPopup";
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.popup_item_edit, null);
+        View popupView = inflater.inflate(R.layout.popup_item_locked, null);
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -2303,8 +2428,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
-        /*Display info here*/
+        Button locked_item_btn_unlock;
+        ImageButton locked_item_btn_close;
+        locked_item_btn_unlock = popupView.findViewById(R.id.locked_item_btn_unlock);
+        locked_item_btn_close = popupView.findViewById(R.id.locked_item_btn_close);
+
+        locked_item_btn_close.setOnClickListener(view -> {
+            popupWindow.dismiss();
+        });
+
+        locked_item_btn_unlock.setOnClickListener(view -> {
+            if (item_count_unmarked < Subscription.FREE_ITEM_COUNT_LIMIT) {
+                items_ref.child(item.getName()).child("sub_marked").setValue(false);
+                popupWindow.dismiss();
+            } else {
+                Toast.makeText(getApplicationContext(), "No space left to unlock item", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+
 
     private void restockQuantityEditOpenPopup(Item item) {
         /*Toast.makeText(getApplicationContext(), "Works", Toast.LENGTH_SHORT).show();*/

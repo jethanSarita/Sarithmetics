@@ -57,39 +57,43 @@ public class ListAdapterCategoryFirebase extends FirebaseRecyclerAdapter<Categor
             holder.category_name.setTextColor(Color.parseColor("#FFFFFF"));
         }
 
-        holder.itemView.setOnClickListener(view -> {
-            int previousItem = selectedItem;
+        /*holder.itemView.setOnClickListener(view -> {
 
-            selectedItem = holder.getBindingAdapterPosition();
+            long click_time = System.currentTimeMillis();
 
-            if (previousItem != -1) {
-                notifyItemChanged(previousItem);
-            }
-
-            if (selectedItem == previousItem) {
+            if (click_time - holder.last_click_time < holder.DOUBLE_CLICK_THRESHOLD) {
                 selectedItem = -1;
+
+                notifyItemChanged(holder.getBindingAdapterPosition());
+
+                if (listener != null) {
+                    listener.onItemClick(position, model, ref, 1);
+                }
+
                 if (listener != null) {
                     listener.onItemClick(position, model, ref, 2);
                 }
+            } else {
+                int previousItem = selectedItem;
+
+                selectedItem = holder.getBindingAdapterPosition();
+
+                if (previousItem != -1) {
+                    notifyItemChanged(previousItem);
+                }
+
+                if (selectedItem == previousItem) {
+                    selectedItem = -1;
+                    if (listener != null) {
+                        listener.onItemClick(position, model, ref, 2);
+                    }
+                }
+
+                notifyItemChanged(selectedItem);
             }
 
-            notifyItemChanged(selectedItem);
-        });
-
-        holder.itemView.setOnLongClickListener(view -> {
-            selectedItem = -1;
-
-            notifyItemChanged(holder.getBindingAdapterPosition());
-
-            if (listener != null) {
-                listener.onItemClick(position, model, ref, 1);
-            }
-
-            if (listener != null) {
-                listener.onItemClick(position, model, ref, 2);
-            }
-            return true;
-        });
+            holder.last_click_time = click_time;
+        });*/
     }
 
     @NonNull
@@ -101,6 +105,8 @@ public class ListAdapterCategoryFirebase extends FirebaseRecyclerAdapter<Categor
 
     static class myViewHolder extends RecyclerView.ViewHolder {
 
+        private static final long DOUBLE_CLICK_THRESHOLD = 300;
+        private long last_click_time = 0;
         TextView category_name;
 
         public myViewHolder(@NonNull View itemView) {

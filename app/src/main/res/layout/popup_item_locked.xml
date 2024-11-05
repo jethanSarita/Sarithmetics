@@ -13,41 +13,72 @@
         android:orientation="vertical"
         android:padding="15dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Locked Item"
+                android:textAlignment="center"
+                android:textColor="@color/colorTextPrimary"
+                android:textStyle="bold"
+                android:layout_marginLeft="27dp"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/locked_item_btn_close"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_gravity="end"
+                android:background="@drawable/icon_close" />
+        </LinearLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="Add Category"
+            android:text="Upgrade to Premium"
             android:textAlignment="center"
-            android:textColor="@color/colorTextPrimary"
-            android:textStyle="bold" />
+            android:textSize="34sp" />
 
-
-        <LinearLayout
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/locked_item_btn_premium_buy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_button"
+            android:text="₱0.0"
+            android:textColor="@color/white" />
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/category_add_field"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="Category Name"
-                android:inputType="text"
-                android:textSize="14sp" />
+            android:text="Or"
+            android:textSize="34sp"
+            android:textAlignment="center"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/category_add_set_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom"
-                android:layout_margin="10dp"
-                android:background="@drawable/shape_button"
-                android:textColor="@color/white"
-                android:text="Set" />
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Free Up Space"
+            android:textSize="34sp"
+            android:textAlignment="center"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/locked_item_btn_unlock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_button"
+            android:text="Unlock"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

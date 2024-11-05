@@ -51,7 +51,7 @@
             android:layout_weight="0"
             android:ems="10"
             android:hint="Item Name"
-            android:inputType="text" />
+            android:inputType="text|textNoSuggestions"/>
 
         <TextView
             android:layout_width="wrap_content"
