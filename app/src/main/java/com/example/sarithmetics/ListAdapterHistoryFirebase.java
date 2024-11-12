@@ -50,6 +50,8 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
     @Override
     protected void onBindViewHolder(@NonNull ListAdapterHistoryFirebase.myViewHolder holder, int position, @NonNull MyTransaction model) {
 
+        holder.transaction_key = getRef(position).getKey();
+
         Date value = new Date(((Number)model.getTransaction_date()).longValue());
         SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
@@ -65,7 +67,7 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
 
         holder.listLayoutHistory.setOnClickListener(view ->{
             if (listener != null) {
-                listener.onHistoryItemClick(position, getRef(position).getKey());
+                listener.onHistoryItemClick(position, holder.transaction_key);
             }
         });
     }
@@ -80,8 +82,11 @@ public class ListAdapterHistoryFirebase extends FirebaseRecyclerAdapter<MyTransa
     }
 
     class myViewHolder extends RecyclerView.ViewHolder {
+
         LinearLayout listLayoutHistory;
         TextView tvHistoryDate, tvHistoryTime, tvHistoryID, tvHistoryEmployeeName, tvHistoryTotal, tvHistoryType;
+
+        String transaction_key;
 
         public myViewHolder(@NonNull View view) {
             super(view);

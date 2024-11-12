@@ -75,10 +75,17 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ListAdapterItemFirebase.OnItemClickListener, ListAdapterEmployeeFirebase.OnItemClickListener, ListAdapterRestockFirebase.OnItemClickListener, AdapterView.OnItemSelectedListener, ListAdapterHistoryFirebase.OnItemClickListener, ListAdapterCategoryFirebase.OnItemClickListener {
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -96,17 +103,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     RelativeLayout home_layout, items_layout, insights_layout, restock_layout, history_layout;
 
-    /*MyDatabaseHelper database;
-    ArrayList<String> listItemID;
-    ArrayList<String> listItemName;
-    ArrayList<String> listItemPrice;
-    ArrayList<String> listItemQty;*/
-
     SessionManager sessionManager;
     TextView profileFnLNameBusinessOwner, profileFnLNameEmployee, tv_business_code, maTvStatusNotSync, maTvStatusPending, amTvCurrentPunchInCode, employeeStatus, profileFnLUserType, item_total_sales_vol_tv, item_revenue_tv, item_turnover_rate_tv, top1_tv, top2_tv, top3_tv;
 
     /*Items*/
     TextView items_counter;
+    /*History*/
+    TextView history_counter;
 
     ListAdapterItemFirebase listAdapterItemFirebase;
     ListAdapterCategoryFirebase listAdapterCategoryFirebase;
@@ -114,8 +117,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ListAdapterRestockFirebase listAdapterRestockFirebase;
     ListAdapterHistoryFirebase listAdapterHistoryFirebase;
     RecyclerView rvItems, rvEmployees, rvRestocking, rvHistory, rvCategory;
-    /*ArrayList<Product> cartedProduct, currProduct;
-    ArrayList<Item> cartedItem;*/
     Spinner insight_item_spinner, insight_context_spinner, category_spinner;
     ArrayList<String> insight_item_list, insight_context_list;
     ArrayAdapter<String> insight_item_adapter, insight_context_adapter;
@@ -204,11 +205,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 );
     }
 
+    OkHttpClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        client = new OkHttpClient();
 
         randomHelper = new RandomHelper();
 
@@ -279,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         history_layout = findViewById(R.id.layout_history_rl);
         rvHistory = findViewById(R.id.history_out_rv);
         history_filter_button = findViewById(R.id.history_filter_btn);
+        history_counter = findViewById(R.id.history_counter);
 
         /*insights layout*/
         insights_layout = findViewById(R.id.layout_insight_rl);
@@ -344,13 +350,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         /*navigation drawer menu*/
         setNavigationDrawerMenu();
-
-        // THIS IS REDUNDANT NOW but keeping it for some reason idk uwu
-        /*database arraylist storing*/
-        //storeDataInArrays();
-        /*customAdapter = new CustomAdapter(MainActivity.this, listItemName, listItemPrice, listItemQty, this);
-        rvItems.setAdapter(customAdapter);
-        rvItems.setLayoutManager(new LinearLayoutManager(MainActivity.this));*/
 
 
         eye_close_button.setOnClickListener(view -> {
@@ -652,6 +651,88 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setUpSubscriptionTracker() {
         String FUNCTION_TAG = "setUpSubscriptionTracking";
 
+        //Check recent payment
+        subscription_ref.child("current_checkout_id").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    if (snapshot.getValue(String.class) != null) {
+
+                        String id = snapshot.getValue(String.class);
+
+                        Request request = Subscription.createCheckOutGetRequest(id);
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                Log.e(FUNCTION_TAG, e.toString());
+                            }
+
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                String result = "Empty";
+
+                                if (response.body() != null) {
+                                    result = Subscription.parseCheckOutStatus(response.body().string());
+                                }
+
+                                Log.i("JethanTest", result);
+
+                                if (result.equals("succeeded")) {
+                                    subscription_ref.child("type").setValue(1);
+                                    subscription_ref.child("expiration_date").setValue(Subscription.getUnixOneMonthExpiry());
+                                    subscription_ref.child("current_checkout_id").removeValue();
+                                    subscription_ref.child("checkout_expiration").removeValue();
+                                }
+
+                                subscription_ref.child("checkout_expiration").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.exists()) {
+                                            Long expiration_timestamp = snapshot.getValue(Long.class);
+
+                                            if (expiration_timestamp != null) {
+                                                long current_timestamp = System.currentTimeMillis() / 1000;
+
+                                                if (current_timestamp >= expiration_timestamp) {
+                                                    /*Expired*/
+                                                    Request request2 = Subscription.createCheckOutExpireRequest(id);
+                                                    client.newCall(request2).enqueue(new Callback() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                                            Log.e(FUNCTION_TAG, e.toString());
+                                                        }
+
+                                                        @Override
+                                                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                                            if (response.body() != null) {
+                                                                Log.i(FUNCTION_TAG, response.body().string());
+                                                            }
+                                                            subscription_ref.child("current_checkout_id").removeValue();
+                                                            subscription_ref.child("checkout_expiration").removeValue();
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         //Get Subscription Type
         subscription_ref.child("type").addValueEventListener(new ValueEventListener() {
             @Override
@@ -671,19 +752,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         case Subscription.DEBUG_PREMIUM:
                             lock_marked = false;
                             deinitializeAds();
+                            setUpExpiryTracker();
                             break;
                         default:
                             Log.wtf(FUNCTION_TAG, "Subscription type out of bounds");
                             break;
                     }
-
-                    /*if (subscription_type == Subscription.FREE) {
-                        lock_marked = true;
-                        initializeAds();
-                    } else if (subscription_type == Subscription.DEBUG) {
-                        lock_marked = false;
-                        deinitializeAds();
-                    }*/
 
                     setUpLists();
                     setUpTrackers();
@@ -702,6 +776,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         setUpTrackers();
                     });
                 }
+            }
+
+            private void setUpExpiryTracker() {
+                subscription_ref.child("expiration_date").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Long expiration_timestamp = snapshot.getValue(Long.class);
+
+                            if (expiration_timestamp != null) {
+                                long current_timestamp = System.currentTimeMillis() / 1000;
+
+                                if (current_timestamp >= expiration_timestamp) {
+                                    /*Expired*/
+                                    subscription_ref.child("type").setValue(0);
+                                    subscription_ref.child("expiration_date").removeValue();
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             private void setUpTrackers() {
@@ -736,6 +836,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         String count = String.valueOf(item_count_general);
                         String limit = "/0";
 
+                        //Counter visual
                         switch (subscription_type) {
                             case Subscription.DEBUG_FREE:
                                 limit = "/" + Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.ITEM);
@@ -771,48 +872,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 break;
                             case Subscription.DEBUG_PREMIUM:
                                 limit = "/" + Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM);
-                                if (item_count_general >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM)) {
-                                    at_max_items = true;
-                                } else {
-                                    at_max_items = false;
-                                }
+                                at_max_items = item_count_general >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM);
                                 break;
                         }
 
                         String total = count + limit;
 
                         items_counter.setText(total);
-
-                        /*if (node_count >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.ITEM)) {
-                            is_at_max_debug_free_items = true;
-                        } else {
-                            is_at_max_debug_free_items = false;
-                        }*/
-
-                        /*if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.ITEM)) {
-                            is_at_max_free_items = true;
-                        } else {
-                            is_at_max_free_items = false;
-                        }*/
-
-                        /*if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.ITEM)) {
-                            is_at_max_premium1_items = true;
-                        } else {
-                            is_at_max_premium1_items = false;
-                        }*/
-
-                        /*if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.ITEM)) {
-                            is_at_max_premium2_items = true;
-                        } else {
-                            is_at_max_premium2_items = false;
-                        }*/
-
-                        /*if (node_count >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.ITEM)) {
-                            is_at_max_debug_premium_items = true;
-                        } else {
-                            is_at_max_debug_premium_items = false;
-                        }*/
-
                     }
 
                     @Override
@@ -836,26 +902,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         long node_count = snapshot.getChildrenCount();
 
-                        if (node_count >= Subscription.getLimit(Subscription.FREE, Subscription.TRANSACTION)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items Count: " + node_count + "\nOutside max free limit");
-                            is_at_max_free_transactions = true;
+                        String count = String.valueOf(node_count);
+                        String limit = "/0";
+
+                        switch (subscription_type) {
+                            case Subscription.DEBUG_FREE:
+                                limit = "/" + Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.TRANSACTION);
+                                if (item_count_general >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.TRANSACTION)) {
+                                    at_max_transactions = true;
+                                } else {
+                                    at_max_transactions = false;
+                                }
+                                break;
+                            case Subscription.FREE:
+                                limit = "/" + Subscription.getLimit(Subscription.FREE, Subscription.TRANSACTION);
+                                if (item_count_general >= Subscription.getLimit(Subscription.FREE, Subscription.TRANSACTION)) {
+                                    at_max_transactions = true;
+                                } else {
+                                    at_max_transactions = false;
+                                }
+                                break;
+                            case Subscription.PREMIUM1:
+                                limit = "/" + Subscription.getLimit(Subscription.PREMIUM1, Subscription.TRANSACTION);
+                                if (item_count_general >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.TRANSACTION)) {
+                                    at_max_transactions = true;
+                                } else {
+                                    at_max_transactions = false;
+                                }
+                                break;
+                            case Subscription.PREMIUM2:
+                                limit = "/" + Subscription.getLimit(Subscription.PREMIUM2, Subscription.TRANSACTION);
+                                if (item_count_general >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.TRANSACTION)) {
+                                    at_max_transactions = true;
+                                } else {
+                                    at_max_transactions = false;
+                                }
+                                break;
+                            case Subscription.DEBUG_PREMIUM:
+                                limit = "/" + Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.TRANSACTION);
+                                at_max_transactions = item_count_general >= Subscription.getLimit(Subscription.DEBUG_PREMIUM, Subscription.TRANSACTION);
+                                break;
                         }
 
-                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM1, Subscription.TRANSACTION)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium1 limit");
-                            is_at_max_premium1_transactions = true;
-                        }
+                        String total = count + limit;
 
-                        if (node_count >= Subscription.getLimit(Subscription.PREMIUM2, Subscription.TRANSACTION)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max premium2 limit");
-                            is_at_max_premium2_transactions = true;
-                        }
-
-                        if (node_count >= Subscription.getLimit(Subscription.DEBUG_FREE, Subscription.TRANSACTION)) {
-                            Log.d(NESTED_FUNCTION_TAG, "Items count: " + node_count + "\nOutside max debug limit");
-                            is_at_max_debug_free_transactions = true;
-                        }
-
+                        history_counter.setText(total);
                     }
 
                     @Override
