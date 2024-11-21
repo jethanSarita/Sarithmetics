@@ -116,7 +116,49 @@ public class ReceiptActivity extends AppCompatActivity {
     Bundle bundle;
     String key;
 
-    /*Back*/
+    String current_checkout_link;
+    ValueEventListener getExistingCheckoutLink = new ValueEventListener() {
+        final String FUNC_TAG = "getExistingCheckoutLink";
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
+                return;
+            }
+
+            Request request = Subscription.createCheckOutGetRequest(snapshot.getValue(String.class));
+
+            OkHttpClient client = new OkHttpClient();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.e(FUNC_TAG, e.toString());
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    String result = "Empty";
+
+                    if (response.body() != null) {
+                        result = response.body().string();
+                    }
+
+                    if (result.equals("Empty")) {
+                        return;
+                    }
+
+                    current_checkout_link = Subscription.parseCheckOutUrl(result);
+
+                }
+            });
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +254,8 @@ public class ReceiptActivity extends AppCompatActivity {
 
                     getSubscriptionType();
 
+                    validateCheckoutLink();
+
                     /*Dismiss loading*/
                     systemLoading.dismissDialog();
                 } else {
@@ -225,6 +269,13 @@ public class ReceiptActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void validateCheckoutLink() {
+        /*Check if existing checkout link exists*/
+        firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                .child("current_checkout_id")
+                .addListenerForSingleValueEvent(getExistingCheckoutLink);
     }
 
     private void getSubscriptionType() {
@@ -282,7 +333,6 @@ public class ReceiptActivity extends AppCompatActivity {
         gray_overlay.setVisibility(View.VISIBLE);
         gray_overlay.setOnTouchListener((v, event) -> true);
 
-
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_transaction_max, null);
 
@@ -308,6 +358,17 @@ public class ReceiptActivity extends AppCompatActivity {
         });
 
         upgrade.setOnClickListener(view -> {
+            /*Check if there is existing link*/
+            if (current_checkout_link != null) {
+                /*Parse link*/
+                Uri uri = Uri.parse(current_checkout_link);
+
+                /*Redirect to link*/
+                redirectToLink(uri);
+
+                return;
+            }
+
             Request request = Subscription.createCheckOutRequest();
 
             OkHttpClient client = new OkHttpClient();
@@ -325,20 +386,33 @@ public class ReceiptActivity extends AppCompatActivity {
                     if (response.body() != null) {
                         result = response.body().string();
                     }
+
+                    if (result.equals("Empty")) {
+                        return;
+                    }
+
                     Log.i(FUNC_TAG, result);
                     String id = Subscription.parseCheckOutID(result);
                     String url = Subscription.parseCheckOutUrl(result);
                     Uri uri = Uri.parse(url);
                     Log.i(FUNC_TAG, "LINK: " + url);
-                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
 
-                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code()).child("current_checkout_id").setValue(id);
-                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code()).child("checkout_expiration").setValue(Subscription.getUnixOneMinuteExpiry());
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("current_checkout_id")
+                            .setValue(id);
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("checkout_expiration")
+                            .setValue(Subscription.getUnixOneMinuteExpiry());
+
+                    redirectToLink(uri);
                 }
             });
-
-
         });
+    }
+
+    private void redirectToLink(Uri uri) {
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        finish();
     }
 
     private void deleteOldestTransaction() {

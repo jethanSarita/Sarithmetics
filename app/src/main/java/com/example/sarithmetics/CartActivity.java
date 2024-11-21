@@ -186,13 +186,6 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         systemLoading = new SystemLoading(CartActivity.this);
         systemLoading.startLoadingDialog();
 
-        /*Listing*/
-        /*listAdapterItem = new ListAdapterItem(CartActivity.this, cartedItemName, cartedItemPrice, cartedItemQty, this);
-        recyclerView.setAdapter(listAdapterItem);*/
-        /*recyclerView.setLayoutManager(new LinearLayoutManager(CartActivity.this));*/
-
-        //cart_status.setText("Cart loading...");
-
         /*Get Current User*/
         getCurrentUserInformation();
 
@@ -325,30 +318,6 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
                 }
             });
         }
-
-        /*for (Item curr_item : cartedItem) {
-            items_ref.child(curr_item.getName()).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DataSnapshot dataSnapshot = task.getResult();
-                    if (dataSnapshot.exists()) {
-                        Item item = dataSnapshot.getValue(Item.class);
-                        if (item != null) {
-                            int added_qty_result = curr_item.getQuantity() + item.getQuantity();
-                            items_ref.child(curr_item.getName()).setValue(new Item(curr_item.getName(), curr_item.getPrice(), added_qty_result));
-                        } else {
-                            Log.e(TAG, "add to cart is null 158");
-                        }
-                    } else {
-                        items_ref.child(curr_item.getName()).setValue(curr_item);
-                    }
-                    cart_ref.removeValue();
-                } else {
-                    Log.e(TAG, "empty cart unsuccessful");
-                }
-            });
-        }
-        clearArrays();
-        cartedItem.clear();*/
     }
 
     private void checkOut() {
@@ -390,121 +359,7 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         ref.setValue(transaction);
 
         openReceipt(key);
-        /*displayReceipt(key);*/
     }
-
-    private void displayReceipt(String key) {
-        /*Function Tag*/
-        String FUNCTION_TAG = "displayReceipt";
-
-        /*Switch views*/
-        checkout_view.setVisibility(View.GONE);
-        receipt_view.setVisibility(View.VISIBLE);
-
-        /*Populate data*/
-        DatabaseReference ref = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code());
-
-        ref.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    MyTransaction transaction = snapshot.getValue(MyTransaction.class);
-
-                    Date date = new Date(((Number)transaction.getTransaction_date()).longValue());
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                    String formatted_date = sdf.format(date);
-
-                    setUpReceiptList(key);
-
-                    receipt_tq.setText(transaction.getItem_count() + " Item(s)");
-                    receipt_subtotal.setText("₱" + transaction.getSubtotal());
-                    receipt_total.setText("₱" + transaction.getSubtotal());
-                    receipt_customer_payment.setText("₱" + transaction.getCustomer_payment());
-                    receipt_customer_change.setText("₱" + transaction.getCustomer_change());
-                    receipt_info.setText(formatted_date + " " + key);
-
-                    MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-                    String link = "https://sarithmetics-receipt.vercel.app/" + key + "/" + cUser.getBusiness_code();
-
-                    try {
-                        BitMatrix bitMatrix = multiFormatWriter.encode(link, BarcodeFormat.QR_CODE, 300, 300);
-
-                        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                        Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-
-                        qr_code.setImageBitmap(bitmap);
-                    } catch (WriterException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    Log.e(FUNCTION_TAG, "snapshot doesn't exist\n" + snapshot);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        /*ref
-                .child(key)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        double customer_change = snapshot.child("customerChange").getValue(Double.class);
-                        double customer_payment = snapshot.child("customerPayment").getValue(Double.class);
-                        double subtotal = snapshot.child("subtotal").getValue(Double.class);
-                        long transaction_date = snapshot.child("transactionDate").getValue(Long.class);
-                        int item_count = snapshot.child("itemCount").getValue(Integer.class);
-
-                        Date date = new Date(transaction_date);
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                        String formatted_date = sdf.format(date);
-
-                        setUpReceiptList(key);
-
-                        receipt_tq.setText(item_count + "Item(s)");
-                        receipt_subtotal.setText("₱" + subtotal);
-                        receipt_total.setText("₱" + subtotal);
-                        receipt_customer_payment.setText("₱" + customer_payment);
-                        receipt_customer_change.setText("₱" + customer_change);
-                        receipt_info.setText(formatted_date + " " + key);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });*/
-
-        receipt_btn_ok.setOnClickListener(view -> {
-            finish();
-        });
-    }
-
-    /*{
-        key: {
-            "customerChange": 44,
-            "customerPayment": 200,
-            "items": {
-                "Bean": {
-                    "costPrice": 0,
-                    "name": "Bean",
-                    "price": 60,
-                    "quantity": 2
-                },
-                "Coke": {
-                    "costPrice": 0,
-                    "name": "Coke",
-                    "price": 12,
-                    "quantity": 3
-                }
-            },
-            "subtotal": 156,
-            "transactionDate": 1726745914518
-        }
-    }*/
 
     private void calculate() {
         double customer_payment = 0;
@@ -518,22 +373,10 @@ public class CartActivity extends AppCompatActivity implements ListAdapterCartFi
         if(result < 0){
             Toast.makeText(CartActivity.this,"Missing " + ( -1 * result) + " Pesos", Toast.LENGTH_SHORT).show();
         }else{
-            changeTextView.setText("₱" + String.valueOf(result));
+            changeTextView.setText("₱" + (result));
             btn_checkout.setVisibility(View.VISIBLE);
         }
     }
-
-    public void clearArrays() {
-        cartedItem.clear();
-        cartedItemName.clear();
-        cartedItemPrice.clear();
-        cartedItemQty.clear();
-    }
-
-    /*@Override
-    public void onItemClick(int position, String productName, String productPrice, String productQty) {
-        createCartPopupWindow(productName, Double.parseDouble(productPrice), Integer.parseInt(productQty));
-    }*/
 
     @Override
     public void onItemClick(int position, Item item) {

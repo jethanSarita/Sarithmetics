@@ -652,79 +652,95 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String FUNCTION_TAG = "setUpSubscriptionTracking";
 
         //Check recent payment
-        subscription_ref.child("current_checkout_id").addListenerForSingleValueEvent(new ValueEventListener() {
+        subscription_ref.child("current_checkout_id").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    if (snapshot.getValue(String.class) != null) {
 
-                        String id = snapshot.getValue(String.class);
+                if (!snapshot.exists()) {
+                    return;
+                }
 
-                        Request request = Subscription.createCheckOutGetRequest(id);
-                        client.newCall(request).enqueue(new Callback() {
+                if (snapshot.getValue(String.class) == null) {
+                    return;
+                }
+
+                /*Id of current checkout*/
+                String id = snapshot.getValue(String.class);
+
+                /*Create API request for recent payment*/
+                Request request = Subscription.createCheckOutGetRequest(id);
+
+                /*API call to check if recent payments were made*/
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.e(FUNCTION_TAG, e.toString());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        String result = "Empty";
+
+                        if (response.body() != null) {
+                            result = Subscription.parseCheckOutStatus(response.body().string());
+                        }
+
+                        /*Payment successful*/
+                        if (result.equals("succeeded")) {
+                            subscription_ref.child("type").setValue(1);
+                            subscription_ref.child("expiration_date").setValue(Subscription.getUnixOneMonthExpiry());
+                            subscription_ref.child("current_checkout_id").removeValue();
+                            subscription_ref.child("checkout_expiration").removeValue();
+                            return;
+                        }
+
+                        /*If !successful: check if link is expired*/
+                        subscription_ref.child("checkout_expiration").addValueEventListener(new ValueEventListener() {
                             @Override
-                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                Log.e(FUNCTION_TAG, e.toString());
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                if (!snapshot.exists()) {
+                                    return;
+                                }
+
+                                if (snapshot.getValue(Long.class) == null) {
+                                    return;
+                                }
+
+                                long expiration_timestamp = snapshot.getValue(Long.class);
+
+                                long current_timestamp = System.currentTimeMillis() / 1000;
+
+                                if (current_timestamp >= expiration_timestamp) {
+                                    /*Expired*/
+
+                                    /*API request to expire the current checkout link*/
+                                    Request request2 = Subscription.createCheckOutExpireRequest(id);
+                                    client.newCall(request2).enqueue(new Callback() {
+                                        @Override
+                                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                            Log.e(FUNCTION_TAG, e.toString());
+                                        }
+
+                                        @Override
+                                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                            if (response.body() != null) {
+                                                Log.i(FUNCTION_TAG, response.body().string());
+                                            }
+                                            subscription_ref.child("current_checkout_id").removeValue();
+                                            subscription_ref.child("checkout_expiration").removeValue();
+                                        }
+                                    });
+                                }
                             }
 
                             @Override
-                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                String result = "Empty";
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                if (response.body() != null) {
-                                    result = Subscription.parseCheckOutStatus(response.body().string());
-                                }
-
-                                Log.i("JethanTest", result);
-
-                                if (result.equals("succeeded")) {
-                                    subscription_ref.child("type").setValue(1);
-                                    subscription_ref.child("expiration_date").setValue(Subscription.getUnixOneMonthExpiry());
-                                    subscription_ref.child("current_checkout_id").removeValue();
-                                    subscription_ref.child("checkout_expiration").removeValue();
-                                }
-
-                                subscription_ref.child("checkout_expiration").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            Long expiration_timestamp = snapshot.getValue(Long.class);
-
-                                            if (expiration_timestamp != null) {
-                                                long current_timestamp = System.currentTimeMillis() / 1000;
-
-                                                if (current_timestamp >= expiration_timestamp) {
-                                                    /*Expired*/
-                                                    Request request2 = Subscription.createCheckOutExpireRequest(id);
-                                                    client.newCall(request2).enqueue(new Callback() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                                            Log.e(FUNCTION_TAG, e.toString());
-                                                        }
-
-                                                        @Override
-                                                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                                            if (response.body() != null) {
-                                                                Log.i(FUNCTION_TAG, response.body().string());
-                                                            }
-                                                            subscription_ref.child("current_checkout_id").removeValue();
-                                                            subscription_ref.child("checkout_expiration").removeValue();
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
                             }
                         });
                     }
-                }
+                });
             }
 
             @Override
@@ -1004,6 +1020,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+
 
     private void setUpRestockSearchBar() {
         restockingSearchBar.clearFocus();

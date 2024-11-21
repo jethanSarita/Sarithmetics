@@ -156,8 +156,6 @@ public class Subscription {
     }
 
     public static Request createCheckOutExpireRequest(String id) {
-
-
         return new Request.Builder()
                 .url("https://api.paymongo.com/v1/checkout_sessions/" + id + "/expire")
                 .post(RequestBody.create("", null))
