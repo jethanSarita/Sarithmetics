@@ -414,11 +414,11 @@
                             android:id="@+id/home_owner_punch_in_code_generate_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
                             android:layout_gravity="center_horizontal"
+                            android:layout_margin="10dp"
                             android:layout_weight="1"
-                            android:text="Generate"
                             android:background="@drawable/shape_button"
+                            android:text="Generate"
                             android:textColor="@color/white" />
 
                         <RelativeLayout
@@ -1100,23 +1100,17 @@
                             android:background="@color/colorTextSecondary" />
                     </RelativeLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="24dp"
-                        android:layout_marginRight="24dp"
+                        android:layout_marginLeft="29dp"
+                        android:layout_marginRight="29dp"
                         android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/history_selected_date"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="5dp"
                             android:layout_weight="1"
                             android:fontFamily="@font/varela_round"
                             android:gravity="center"
@@ -1133,6 +1127,53 @@
                             android:background="@drawable/icon_filter" />
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/history_start_end_option"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:id="@+id/history_selected_start"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center"
+                            android:text="Start"
+                            android:textAlignment="center"
+                            android:textColor="@color/clickable_text"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center"
+                            android:text="-"
+                            android:textAlignment="center"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/history_selected_end"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center"
+                            android:text="End"
+                            android:textAlignment="center"
+                            android:textColor="@color/clickable_text"
+                            android:textSize="20sp" />
+
+                    </LinearLayout>
+
                     <!--<RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -1147,10 +1188,47 @@
                             app:iconifiedByDefault="false"
                             app:queryHint="Search" />
                     </RelativeLayout>-->
-
-                    <Space
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="10dp" />
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2.5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/varela_round"
+                            android:text="Total: "
+                            android:textAlignment="center"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/history_current_total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/varela_round"
+                            android:gravity="center"
+                            android:text="[]"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="20sp" />
+
+                    </LinearLayout>
+
 
                     <RelativeLayout
                         android:layout_width="match_parent"

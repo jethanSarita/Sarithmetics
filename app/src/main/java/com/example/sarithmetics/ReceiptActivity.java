@@ -347,9 +347,18 @@ public class ReceiptActivity extends AppCompatActivity {
         receipt_layout.post(() -> popupWindow.showAtLocation(receipt_layout, Gravity.CENTER, 0, 0));
 
         Button delete, upgrade;
+        TextView desc;
+        LinearLayout upgrade_option;
 
         delete = popupView.findViewById(R.id.transaction_max_delete_btn);
         upgrade = popupView.findViewById(R.id.transaction_max_upgrade_btn);
+        desc = popupView.findViewById(R.id.transaction_max_description);
+        upgrade_option = popupView.findViewById(R.id.transaction_max_upgrade_option);
+
+        if (subscription_type == Subscription.PREMIUM1) {
+            desc.setText("You've reached the transaction limit. Delete the oldest to add this one.");
+            upgrade_option.setVisibility(View.GONE);
+        }
 
         delete.setOnClickListener(view -> {
             gray_overlay.setVisibility(View.GONE);
@@ -369,7 +378,7 @@ public class ReceiptActivity extends AppCompatActivity {
                 return;
             }
 
-            Request request = Subscription.createCheckOutRequest();
+            Request request = Subscription.createCheckOutRequest(Subscription.PREMIUM1_PRICE);
 
             OkHttpClient client = new OkHttpClient();
 
@@ -422,6 +431,8 @@ public class ReceiptActivity extends AppCompatActivity {
             return;
         }
 
+        currently_maxed = false;
+
         history_ref.orderByChild("transaction_date").limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -450,13 +461,13 @@ public class ReceiptActivity extends AppCompatActivity {
 
             }
         });
-
-        finish();
     }
 
     private void handleBack() {
+        if (!currently_maxed) {
+            Toast.makeText(ReceiptActivity.this, "Deleted oldest transaction to make room for new one", Toast.LENGTH_SHORT).show();
+        }
         deleteOldestTransaction();
-        Toast.makeText(ReceiptActivity.this, "Deleted oldest transaction to make room for new one", Toast.LENGTH_SHORT).show();
     }
 
     private void populateViewData() {

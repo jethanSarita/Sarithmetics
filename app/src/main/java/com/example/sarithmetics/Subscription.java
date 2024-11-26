@@ -45,6 +45,8 @@ public class Subscription {
     public static final int TRANSACTION = 1;
     public static final int CATEGORY = 2;
 
+    public static final long PREMIUM1_PRICE = 24900;
+
     public static long getLimit(int subscription_type, int limit_type) {
         switch (limit_type) {
             case 0: return getItemLimit(subscription_type);
@@ -87,11 +89,13 @@ public class Subscription {
         return -1;
     }
 
-    public static Request createCheckOutRequest() {
+    public static Request createCheckOutRequest(long price) {
+        String parsed_price = String.valueOf(price);
+
         String FUNC_TAG = "createCheckOutRequest";
 
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, "{\"data\":{\"attributes\":{\"send_email_receipt\":false,\"show_description\":true,\"show_line_items\":true,\"line_items\":[{\"currency\":\"PHP\",\"amount\":24999,\"description\":\"More storage space for your Sarithmetics account\",\"name\":\"Sarithmetics Premium Subscription\",\"quantity\":1}],\"description\":\"Subscription to premium\",\"payment_method_types\":[\"gcash\",\"card\",\"paymaya\"]}}}");
+        RequestBody body = RequestBody.create(mediaType, "{\"data\":{\"attributes\":{\"send_email_receipt\":false,\"show_description\":true,\"show_line_items\":true,\"line_items\":[{\"currency\":\"PHP\",\"amount\":" + parsed_price + ",\"description\":\"More storage space for your Sarithmetics account\",\"name\":\"Sarithmetics Premium Subscription\",\"quantity\":1}],\"description\":\"Subscription to premium\",\"payment_method_types\":[\"gcash\",\"card\",\"paymaya\"]}}}");
         Request request = new Request.Builder()
                 .url("https://api.paymongo.com/v1/checkout_sessions")
                 .post(body)

@@ -32,8 +32,6 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.Random;
-
 public class LoginRegisterActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -121,28 +119,26 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance(DB);
 
-        //database.setPersistenceEnabled(false);
-
         /*Loading System*/
         systemLoading = new SystemLoading(LoginRegisterActivity.this);
 
         tvRegister.setOnClickListener(view -> {
-            /*Bundle bundle = new Bundle();
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "tvRegister");
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Register redirect button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);*/
+            GeneralHelper.hideKeyboard(view);
             openRegister(view);
         });
 
         tvLogin.setOnClickListener(view -> {
+            GeneralHelper.hideKeyboard(view);
             openLogin(view);
         });
 
         registerBtn.setOnClickListener(view -> {
+            GeneralHelper.hideKeyboard(view);
             registerUser();
         });
 
         loginBtn.setOnClickListener(view -> {
+            GeneralHelper.hideKeyboard(view);
             loginUser();
         });
 
@@ -216,55 +212,81 @@ public class LoginRegisterActivity extends AppCompatActivity {
         // [START create_user_with_email]
         systemLoading.startLoadingDialog();
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Account creation success
+                        // Update UI with the newly created user's information
 
-                            String full_name = first_name + " " + last_name;
-                            myRef = database.getReference("User");
+                        Log.d(TAG, "createUserWithEmail:success");
 
-                            UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(full_name)
-                                    .build();
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            if (user != null){
-                                user.updateProfile(profileChangeRequest).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
+                        String full_name = first_name + " " + last_name;
+                        myRef = database.getReference("User");
+
+                        UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(full_name)
+                                .build();
+
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        if (user != null){
+                            user.updateProfile(profileChangeRequest).addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    randomHelper.generateUniqueBusinessCode(new RandomHelper.OnUniqueIdGenerated() {
+                                        @Override
+                                        public void onGenrated(String unique_id) {
                                             Log.d(TAG, "User profile updated. " + user.getEmail() + " with " + user.getDisplayName());
+
+                                            User cUser = getUser(unique_id);
+
+                                            myRef = database.getReference("Users");
+                                            myRef.child(cUser.getUid()).setValue(cUser);
+
+                                            //Check if business owner
+                                            if (!(cUser.getBusiness_code().equals("null"))) {
+                                                //Yes
+                                                //Populate businesses ref
+                                                database.getReference("businesses").child(cUser.getBusiness_code()).child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
+                                                database.getReference("businesses").child(cUser.getBusiness_code()).child("subscription").child("type").setValue(0);
+                                            }
+
+                                            systemLoading.dismissDialog();
+                                            updateUI(user);
+                                        }
+
+                                        @NonNull
+                                        private User getUser(String unique_id) {
                                             User cUser = new User();
+
                                             if (user_type == 0) {
                                                 //Employee
                                                 cUser = new User(user.getUid(), first_name, last_name, "null", 0);
                                             } else if (user_type == 1) {
                                                 //Business owner
-                                                cUser = new User(user.getUid(), first_name, last_name, randomHelper.generateRandom5CharString(), 1);
+                                                cUser = new User(user.getUid(), first_name, last_name, unique_id, 1);
+                                                /*Might need to add a query to check if the business code already exists*/
                                             }
-                                            myRef = database.getReference("Users");
-                                            myRef.child(cUser.getUid()).setValue(cUser);
-                                            database.getReference("businesses").child(cUser.getBusiness_code()).child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
-                                            systemLoading.dismissDialog();
-                                            updateUI(user);
-                                        } else {
-                                            Log.d(TAG, "User profile update error.", task.getException());
+                                            return cUser;
                                         }
-                                    }
-                                });
-                            } else {
-                                Log.d(TAG, "Register error, user is null");
-                            }
+
+                                        @Override
+                                        public void onError(Exception e) {
+
+                                        }
+                                    });
+                                } else {
+                                    Log.d(TAG, "User profile update error.", task1.getException());
+                                }
+                            });
                         } else {
-                            // If sign in fails, display a message to the user.
-                            systemLoading.dismissDialog();
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(LoginRegisterActivity.this, "Register failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
+                            Log.d(TAG, "Register error, user is null");
                         }
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        systemLoading.dismissDialog();
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        Toast.makeText(LoginRegisterActivity.this, "Register failed.",
+                                Toast.LENGTH_SHORT).show();
+                        //updateUI(null);
                     }
                 });
     }
@@ -312,12 +334,12 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }
 
     void openLogin(View view){
-        loginLayout.setVisibility(view.VISIBLE);
-        registerLayout.setVisibility(view.GONE);
+        loginLayout.setVisibility(View.VISIBLE);
+        registerLayout.setVisibility(View.GONE);
     }
     void openRegister(View view){
-        loginLayout.setVisibility(view.GONE);
-        registerLayout.setVisibility(view.VISIBLE);
+        loginLayout.setVisibility(View.GONE);
+        registerLayout.setVisibility(View.VISIBLE);
     }
 
     private void updateUI(FirebaseUser user) {

@@ -19,8 +19,11 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,11 +33,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -95,7 +96,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     String punch_in_code;
 
+    //Toolbar
     Toolbar toolbar;
+    ImageView premium_icon;
+
     DrawerLayout drawerLayout;
     NavigationView navigationView;
 
@@ -110,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView items_counter;
     /*History*/
     TextView history_counter;
+    TextView history_current_total;
 
     ListAdapterItemFirebase listAdapterItemFirebase;
     ListAdapterCategoryFirebase listAdapterCategoryFirebase;
@@ -137,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseDatabase firebaseDatabase;
     DatabaseReference user_ref, items_ref, cart_ref, business_ref, business_code_ref, history_ref,
             category_ref, subscription_ref;
-    Query item_query, employee_query, restock_query, history_query, category_query;
+    Query item_query, employee_query, restock_query, history_query, category_query, history_filtered_query;
 
     ArrayAdapter<String> adp;
 
@@ -207,6 +212,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     OkHttpClient client;
 
+    /*Haptic Feedback*/
+    Vibrator vibrator;
+    final int VIB_DURATION = 50;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -227,14 +236,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sessionManager = new SessionManager(getApplicationContext());
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        /*database*/
-        /*database = new MyDatabaseHelper(MainActivity.this);*/
-
         /*general hooks*/
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
-        settings = findViewById(R.id.vEyeCloseIcon);
+        premium_icon = findViewById(R.id.premium_icon);
         homeIcon = findViewById(R.id.homeIcon);
 
         /*navigation*/
@@ -285,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rvHistory = findViewById(R.id.history_out_rv);
         history_filter_button = findViewById(R.id.history_filter_btn);
         history_counter = findViewById(R.id.history_counter);
+        history_current_total = findViewById(R.id.history_current_total);
 
         /*insights layout*/
         insights_layout = findViewById(R.id.layout_insight_rl);
@@ -305,6 +312,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         eye_open_button = findViewById(R.id.home_owner_eye_open_icon_iv);
         eye_close_button = findViewById(R.id.home_owner_eye_close_icon_iv);
         boxBusinessCode = findViewById(R.id.home_owner_business_code_box_ll);
+
+        //haptic feedback
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         /*array lists*//*
         currProduct = new ArrayList<>();
@@ -331,10 +341,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Initiate login
         systemLoading.startLoadingDialog();
 
-
-        //Clear cart
-        //cartedItem.clear();
-
         /*Insight*/
         insight_item_spinner = findViewById(R.id.insight_item_perf_spinner);
         insight_context_spinner = findViewById(R.id.insight_context_perf_spinner);
@@ -352,16 +358,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setNavigationDrawerMenu();
 
 
+        //buttons
         eye_close_button.setOnClickListener(view -> {
+            vibrate(VIB_DURATION);
             eyeClose();
         });
 
         eye_open_button.setOnClickListener(view -> {
+            vibrate(VIB_DURATION);
             eyeOpen();
-        });
-
-        settings.setOnClickListener(view -> {
-            openSettings();
         });
 
         homeIcon.setOnClickListener(view -> {
@@ -381,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         history_filter_button.setOnClickListener(view ->{
-            openDatePickerDialog();
+            openDatePickerOption();
         });
 
         category_plus_btn.setOnClickListener(view -> {
@@ -389,40 +394,84 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    boolean isTransactionFilterSet = false;
+    private void vibrate(int duration) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(duration);
+        }
+    }
 
-    private void openDatePickerDialog() {
+    boolean is_transaction_filter_set = false;
+    boolean is_start_set = false;
+    boolean is_end_set = false;
+    Calendar start_date;
+    Calendar end_date;
+    long[] selected_date_range = new long[2];
 
-        if (!isTransactionFilterSet) {
-            DatePickerDialog dialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+    private void openDatePickerOption() {
+        LinearLayout history_start_end_option = findViewById(R.id.history_start_end_option);
+        TextView history_selected_date = findViewById(R.id.history_selected_date);
+        
+        if (!is_transaction_filter_set) {
+            //Open Options
+            is_transaction_filter_set = true;
+            history_start_end_option.setVisibility(View.VISIBLE);
+
+            start_date = Calendar.getInstance();
+            end_date = Calendar.getInstance();
+
+            TextView history_selected_start = findViewById(R.id.history_selected_start);
+            TextView history_selected_end = findViewById(R.id.history_selected_end);
+
+            history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter_clear));
+
+            history_selected_start.setOnClickListener(v -> {
+                DatePickerDialog dialog = new DatePickerDialog(MainActivity.this, (view, year, month, dayOfMonth) -> {
                     Calendar calendar = Calendar.getInstance();
 
                     calendar.set(year, month, dayOfMonth, 0, 0, 0);
-                    long start = calendar.getTimeInMillis();
+                    selected_date_range[0] = calendar.getTimeInMillis();
+
+                    history_selected_start.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
+                    start_date.set(year, month, dayOfMonth);
+
+                    is_start_set = true;
+
+                    history_selected_date.setText("Custom");
+
+                    transactionDateFilter();
+                }, start_date.get(Calendar.YEAR), start_date.get(Calendar.MONTH), start_date.get(Calendar.DAY_OF_MONTH));
+                dialog.show();
+            });
+
+            history_selected_end.setOnClickListener(v -> {
+                DatePickerDialog dialog = new DatePickerDialog(MainActivity.this, (view, year, month, dayOfMonth) -> {
+                    Calendar calendar = Calendar.getInstance();
 
                     calendar.set(year, month, dayOfMonth, 23, 59, 59);
-                    long end = calendar.getTimeInMillis();
+                    selected_date_range[1] = calendar.getTimeInMillis();
 
-                    long[] date = new long[] {start, end};
+                    history_selected_end.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
+                    end_date.set(year, month, dayOfMonth);
 
-                    TextView history_selected_date = findViewById(R.id.history_selected_date);
-                    history_selected_date.setText(year + "-" + (month + 1) + "-" + dayOfMonth);
+                    is_end_set = true;
 
-                    isTransactionFilterSet = true;
-                    history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter_clear));
+                    history_selected_date.setText("Custom");
 
-                    transactionDateFilter(date);
-                }
-            }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
-
-            dialog.show();
+                    transactionDateFilter();
+                }, end_date.get(Calendar.YEAR), end_date.get(Calendar.MONTH), end_date.get(Calendar.DAY_OF_MONTH));
+                dialog.show();
+            });
         } else {
-            isTransactionFilterSet = false;
-            history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter));
-            TextView history_selected_date = findViewById(R.id.history_selected_date);
+            //Close Options and reset
+            is_transaction_filter_set = false;
+            history_start_end_option.setVisibility(View.GONE);
+            is_start_set = false;
+            is_end_set = false;
             history_selected_date.setText("All Transactions");
+            history_filter_button.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_filter));
             setUpHistoryList();
         }
     }
@@ -539,12 +588,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void openCart() {
         Intent intent = new Intent(MainActivity.this, CartActivity.class);
         startActivity(intent);
-    }
-
-    private void openSettings() {
-        //This has no functionality or system yet just a debugging and testing button
-        refreshItems();
-        Toast.makeText(getApplicationContext(), "Settings clicked", Toast.LENGTH_SHORT).show();
     }
 
     private void eyeOpen() {
@@ -757,6 +800,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     subscription_type = snapshot.getValue(Integer.class);
                     Log.d(FUNCTION_TAG, "subscription_type: " + subscription_type);
 
+                    /*Check subscription type*/
                     switch (subscription_type) {
                         case Subscription.FREE:
                         case Subscription.DEBUG_FREE:
@@ -766,6 +810,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         case Subscription.PREMIUM1:
                         case Subscription.PREMIUM2:
                         case Subscription.DEBUG_PREMIUM:
+                            premium_icon.setVisibility(View.VISIBLE);
                             lock_marked = false;
                             deinitializeAds();
                             setUpExpiryTracker();
@@ -1094,6 +1139,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterEmployeeFirebase.startListening();
     }
 
+    ValueEventListener history_listener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            if (!snapshot.exists()) {
+                return;
+            }
+
+            history_current_total.setText(String.valueOf(snapshot.getChildrenCount()));
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
+
     private void setUpHistoryList() {
         rvHistory.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         history_query = firebaseDatabaseHelper.getBusinessTransactionHistoryRef(cUser.getBusiness_code());
@@ -1104,6 +1165,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listAdapterHistoryFirebase = new ListAdapterHistoryFirebase(options4, this, cUser);
         rvHistory.setAdapter(listAdapterHistoryFirebase);
         listAdapterHistoryFirebase.startListening();
+
+        if (history_filtered_query != null) {
+            history_filtered_query.removeEventListener(history_listener);
+        }
+        history_query.addValueEventListener(history_listener);
     }
 
     ItemTouchHelper.Callback call_back = new ItemTouchHelper.Callback() {
@@ -1226,12 +1292,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
 
         amBtnGeneratePunchInCode.setOnClickListener(view -> {
+            vibrate(VIB_DURATION);
             business_code_ref.child("punch in code").setValue(randomHelper.generateRandom5NumberCharString());
         });
     }
@@ -1430,7 +1495,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
 
                 btnEnterPunchInCode.setOnClickListener(view -> {
-                    hideKeyboard(view);
+                    GeneralHelper.hideKeyboard(view);
                     punch_in_code = etPunchInCode.getText().toString();
                     business_code_ref.child("punch in code").get().addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
@@ -1886,15 +1951,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rvItems.setAdapter(listAdapterItemFirebase);
     }
 
-    private void transactionDateFilter(long[] date) {
-        FirebaseRecyclerOptions<MyTransaction> options =
-                new FirebaseRecyclerOptions.Builder<MyTransaction>()
-                        .setQuery(history_ref.orderByChild("transaction_date").startAt(date[0]).endAt(date[1]), MyTransaction.class)
-                        .build();
+    private void transactionDateFilter() {
+        if (is_start_set && is_end_set) {
+            history_filtered_query = history_ref.orderByChild("transaction_date").startAt(selected_date_range[0]).endAt(selected_date_range[1]);
+            FirebaseRecyclerOptions<MyTransaction> options =
+                    new FirebaseRecyclerOptions.Builder<MyTransaction>()
+                            .setQuery(history_filtered_query, MyTransaction.class)
+                            .build();
 
-        listAdapterHistoryFirebase = new ListAdapterHistoryFirebase(options, this, cUser);
-        listAdapterHistoryFirebase.startListening();
-        rvHistory.setAdapter(listAdapterHistoryFirebase);
+            listAdapterHistoryFirebase = new ListAdapterHistoryFirebase(options, this, cUser);
+            listAdapterHistoryFirebase.startListening();
+            rvHistory.setAdapter(listAdapterHistoryFirebase);
+
+            if (history_query != null) {
+                history_query.removeEventListener(history_listener);
+            }
+            history_filtered_query.addValueEventListener(history_listener);
+        }
     }
 
     @Override
@@ -2072,7 +2145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         close_btn.setOnClickListener(view -> {
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
 
         /*Cost Field*/
@@ -2179,7 +2252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
     }
 
@@ -2353,7 +2426,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_close.setOnClickListener(view -> {
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
 
         //Edit button
@@ -2402,7 +2475,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
 
         //Delete button
@@ -2410,7 +2483,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             items_ref.child(current_item_name).removeValue();
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
 
         //Add to cart button
@@ -2442,7 +2515,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 items_ref.child(current_item_name).setValue(new Item(current_item_name,  current_item_price, current_item_cost_price, current_item_quantity - selected_item_quantity, current_item_category));
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
-                hideKeyboard(view);
+                GeneralHelper.hideKeyboard(view);
             }
         });
 
@@ -2494,7 +2567,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 openReceipt(ref.getKey());
                 popupWindow.dismiss();
                 itemSearchBar.clearFocus();
-                hideKeyboard(view);
+                GeneralHelper.hideKeyboard(view);
             } else {
                 Toast.makeText(MainActivity.this, "Please choose quantity", Toast.LENGTH_SHORT).show();
             }
@@ -2577,7 +2650,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         set_btn.setOnClickListener(view -> {
             items_ref.child(item.getName()).child("restock_quantity").setValue(Integer.parseInt(restock_quantity_et.getText().toString()));
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
             popupWindow.dismiss();
         });
     }
@@ -2619,7 +2692,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             popupWindow.dismiss();
             restockingSearchBar.clearFocus();
-            hideKeyboard(view);
+            GeneralHelper.hideKeyboard(view);
         });
     }
 
@@ -2808,11 +2881,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         ref.removeValue();
-    }
-
-    public void hideKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @Override
