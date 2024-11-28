@@ -29,12 +29,17 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginRegisterActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
     private static final String DB = "https://sarithmetics-f53d1-default-rtdb.asia-southeast1.firebasedatabase.app/";
+    private static final String BUILD_KEY = "m£43a4QPD+Zm";
+
     TextView tvRegister, tvLogin;
     LinearLayout loginLayout, registerLayout;
     Button registerBtn, loginBtn;
@@ -170,11 +175,32 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }*/
 
     private void checkSession() {
-        if(sessionManager.getLogin()){
-            sessionManager.setMainStatus(0);
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            finish();
-        }
+        database.getReference("build_key").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
+                    return;
+                }
+
+                String current_build_key = snapshot.getValue(String.class);
+
+                if (BUILD_KEY.equals(current_build_key)) {
+                    if(sessionManager.getLogin()){
+                        sessionManager.setMainStatus(0);
+                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        finish();
+                    }
+                } else {
+                    startActivity(new Intent(getApplicationContext(), DemoEndActivity.class));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void loginUser() {

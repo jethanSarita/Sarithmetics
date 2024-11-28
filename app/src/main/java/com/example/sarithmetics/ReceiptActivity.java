@@ -355,7 +355,7 @@ public class ReceiptActivity extends AppCompatActivity {
         desc = popupView.findViewById(R.id.transaction_max_description);
         upgrade_option = popupView.findViewById(R.id.transaction_max_upgrade_option);
 
-        if (subscription_type == Subscription.PREMIUM1) {
+        if (subscription_type == Subscription.PREMIUM1 || !(cUser.getUser_type() == 1)) {
             desc.setText("You've reached the transaction limit. Delete the oldest to add this one.");
             upgrade_option.setVisibility(View.GONE);
         }
