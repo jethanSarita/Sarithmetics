@@ -153,7 +153,7 @@ public class ListAdapterRestockFirebase extends FirebaseRecyclerAdapter<Item, Li
 
         public void bindData(Item item) {
             item_name.setText(item.getName());
-            item_quantity.setText("Stock: " + item.getQuantity());
+            item_quantity.setText("" + item.getQuantity());
             item_selling_price.setText("₱" + item.getPrice());
             item_total_cost.setText("₱" + (item.getCost_price() * item.getRestock_quantity()));
             restock_number.setText(String.valueOf(item.getRestock_quantity()));

@@ -2186,7 +2186,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().isEmpty()) {
-                    double markup = Integer.parseInt(s.toString());
+                    double markup = Double.parseDouble(s.toString());
                     String price_string = cost_price_field.getText().toString().trim();
                     if (!price_string.isEmpty()) {
                         double price = Double.parseDouble(price_string);
@@ -2301,6 +2301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         String current_item_name = item.getName();
+        double current_item_cost = item.getCost_price();
         double current_item_price = item.getPrice();
         double current_item_cost_price = item.getCost_price();
         int current_item_quantity = item.getQuantity();
@@ -2328,13 +2329,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*edit*/
         LinearLayout epp_ll_edit;
         Button button_edit, button_delete;
-        EditText edit_item_name, edit_item_price;
+        EditText edit_item_name, edit_item_price, edit_item_cost, edit_item_markup;
         TextView edit_display_item_quantity;
         Spinner category_spinner;
         List<String> categories;
 
         epp_ll_edit = popupView.findViewById(R.id.epp_ll_edit);
         edit_item_name = popupView.findViewById(R.id.productNameEdit);
+        edit_item_cost = popupView.findViewById(R.id.productCostPriceEdit);
+        edit_item_markup = popupView.findViewById(R.id.productMarkupEdit);
         edit_item_price = popupView.findViewById(R.id.productPriceEdit);
         edit_display_item_quantity = popupView.findViewById(R.id.productQuantityEdit);
         button_edit = popupView.findViewById(R.id.btnEditPopupEdit);
@@ -2357,21 +2360,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvAreYouSure = popupView.findViewById(R.id.tvAreYouSure);
         button_close = popupView.findViewById(R.id.epp_close_button);
 
-        //Set number picker
+        /*Set number picker*/
         editPopupNumberPicker.setMinValue(0);
         editPopupNumberPicker.setMaxValue(item.getQuantity());
 
-        //Set edit text fields
+        /*Set edit text fields*/
         edit_item_name.setText(current_item_name);
+        edit_item_cost.setText(String.valueOf(current_item_cost));
         edit_item_price.setText(String.valueOf(current_item_price));
         edit_display_item_quantity.setText(String.valueOf(current_item_quantity));
 
-        //Set text view fields
+        /*Set text view fields*/
         epp_tv_item_name.setText(current_item_name);
+        //Add for cost price here
         epp_tv_item_price.setText(String.valueOf(current_item_price));
         epp_tv_item_quantity.setText(String.valueOf(current_item_quantity));
 
-        //Spinner
+        /*Spinner*/
         category_ref.addListenerForSingleValueEvent(new ValueEventListener() {
             ArrayAdapter<String> adapter;
             int position = 0;
@@ -2405,31 +2410,85 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        //Check user type
+        /*Check user type*/
         if (cUser.getUser_type() == 0) {
-            //Standard employee
+            /*Standard employee*/
 
-            //Remove edit permissions
+            /*Remove edit permissions*/
             epp_ll_info.setVisibility(View.VISIBLE);
-            //Change title (Can hard code this to the editpopup.xml, might need to do later)
+            /*Change title (Can hard code this to the editpopup.xml, might need to do later)*/
             epp_title.setText("Item Information");
         } else {
-            //Not standard employee
+            /*Not standard employee*/
 
-            //Grant edit permissions
+            /*Grant edit permissions*/
             epp_ll_edit.setVisibility(View.VISIBLE);
-            ////Change title (Can hard code this to the editpopup.xml, might need to do later)
+            /*Change title (Can hard code this to the editpopup.xml, might need to do later)*/
             epp_title.setText("Edit Item");
         }
 
-        //Close button
+        /*Close button*/
         button_close.setOnClickListener(view -> {
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             GeneralHelper.hideKeyboard(view);
         });
 
-        //Edit button
+        edit_item_cost.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    double price = Double.parseDouble(s.toString());
+                    String markup_string = edit_item_markup.getText().toString().trim();
+                    if (!markup_string.isEmpty()) {
+                        double markup = Double.parseDouble(markup_string);
+                        double total = price + (price * (markup / 100));
+                        edit_item_price.setText(Double.toString(total));
+                    }
+                } else {
+                    edit_item_price.setText("" + current_item_price);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        edit_item_markup.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    double markup = Double.parseDouble(s.toString());
+                    String price_string = edit_item_cost.getText().toString().trim();
+                    if (!price_string.isEmpty()) {
+                        double price = Double.parseDouble(price_string);
+                        double total = price + (price * (markup / 100));
+                        edit_item_price.setText(Double.toString(total));
+                    }
+                } else {
+                    edit_item_price.setText("" + current_item_price);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /*Edit button*/
         button_edit.setOnClickListener(view -> {
 
             //Set input variables
@@ -2478,7 +2537,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GeneralHelper.hideKeyboard(view);
         });
 
-        //Delete button
+        /*Delete button*/
         button_delete.setOnClickListener(view -> {
             items_ref.child(current_item_name).removeValue();
             popupWindow.dismiss();
@@ -2486,7 +2545,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GeneralHelper.hideKeyboard(view);
         });
 
-        //Add to cart button
+        /*Add to cart button*/
         button_add_to_cart.setOnClickListener(view -> {
             int selected_item_quantity = editPopupNumberPicker.getValue();
 
@@ -2519,7 +2578,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        //Quick buy button
+        /*Quick buy button*/
         button_quick_buy.setOnClickListener(view -> {
             int selected_product_quantity = editPopupNumberPicker.getValue();
 
@@ -2536,6 +2595,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        /*Yes nutton*/
         button_yes.setOnClickListener(view -> {
 
             double customer_change;
@@ -2573,6 +2633,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        /*No button*/
         button_no.setOnClickListener(view ->{
             button_add_to_cart.setVisibility(View.VISIBLE);
             button_quick_buy.setVisibility(View.VISIBLE);
