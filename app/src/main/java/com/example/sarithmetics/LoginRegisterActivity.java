@@ -206,8 +206,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        String email = etLoginEmail.getText().toString();
-        String password = etLoginPassword.getText().toString();
+        String email = etLoginEmail.getText().toString().trim();
+        String password = etLoginPassword.getText().toString().trim();
         if (isEmpty(email) || isEmpty(password)){
             Toast.makeText(LoginRegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
         } else {
@@ -217,11 +217,11 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-        String first_name = etRegisterFirstName.getText().toString();
-        String last_name = etRegisterLastName.getText().toString();
-        String email = etEmail.getText().toString();
-        String password = etRegisterPassword.getText().toString();
-        String confirm_password = etRegisterConfirmPassword.getText().toString();
+        String first_name = etRegisterFirstName.getText().toString().trim();
+        String last_name = etRegisterLastName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String password = etRegisterPassword.getText().toString().trim();
+        String confirm_password = etRegisterConfirmPassword.getText().toString().trim();
         int user_type = getUserType();
 
         if (isEmpty(first_name) || isEmpty(last_name) || isEmpty(email) || isEmpty(password) || isEmpty(confirm_password) || user_type == -1) {
