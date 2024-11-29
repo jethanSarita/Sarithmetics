@@ -179,7 +179,6 @@ public class LoginRegisterActivity extends AppCompatActivity {
         database.getReference("build_key").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                systemLoading.dismissDialog();
                 if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
                     return;
                 }
