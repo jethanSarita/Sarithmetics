@@ -890,9 +890,7 @@
             <RelativeLayout
                 android:id="@+id/layout_restock_rl"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="match_parent">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fabUpdate"
@@ -992,7 +990,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <LinearLayout
                             android:layout_width="match_parent"
