@@ -195,6 +195,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
                     startActivity(new Intent(getApplicationContext(), DemoEndActivity.class));
                     finish();
                 }
+
+                systemLoading.dismissDialog();
             }
 
             @Override
