@@ -458,8 +458,7 @@
                 android:id="@+id/layout_items_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/items_add_button_fab"
@@ -892,7 +891,8 @@
                 android:id="@+id/layout_restock_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fabUpdate"
@@ -909,7 +909,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
                     <Space
                         android:layout_width="match_parent"
@@ -955,13 +957,11 @@
                             android:background="@color/colorTextSecondary" />
                     </RelativeLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp" />
-
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:paddingLeft="30dp"
                         android:paddingRight="30dp">
 
@@ -972,11 +972,83 @@
                             android:background="@drawable/bg_search"
                             app:iconifiedByDefault="false"
                             app:queryHint="Search" />
+
                     </RelativeLayout>
 
-                    <Space
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="10dp" />
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="5dp"
+                            android:background="@color/colorTextSecondary" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/varela_round"
+                                android:text="Quantity: "
+                                android:textAlignment="center"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:id="@+id/restock_current_total_quantity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/varela_round"
+                                android:gravity="center"
+                                android:text="0"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textSize="20sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/varela_round"
+                                android:text="Cost: "
+                                android:textAlignment="center"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:id="@+id/restock_current_total_cost"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/varela_round"
+                                android:gravity="center"
+                                android:text="0"
+                                android:textColor="@color/colorTextPrimary"
+                                android:textSize="20sp" />
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
 
                     <RelativeLayout
                         android:layout_width="match_parent"

@@ -392,6 +392,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         category_plus_btn.setOnClickListener(view -> {
             categoryAddOpenPopup();
         });
+
+        toolbar.setNavigationOnClickListener(view -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+            GeneralHelper.hideKeyboard(view);
+        });
     }
 
     private void vibrate(int duration) {
