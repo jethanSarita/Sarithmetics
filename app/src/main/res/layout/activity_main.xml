@@ -458,7 +458,8 @@
                 android:id="@+id/layout_items_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/items_add_button_fab"
@@ -1043,8 +1044,7 @@
                 android:id="@+id/layout_history_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1223,7 +1223,7 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/varela_round"
                             android:gravity="center"
-                            android:text="[]"
+                            android:text="0"
                             android:textColor="@color/colorTextPrimary"
                             android:textSize="20sp" />
 

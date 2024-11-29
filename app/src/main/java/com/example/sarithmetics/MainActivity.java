@@ -823,19 +823,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setUpLists();
                     setUpTrackers();
                 } else {
+                    if (!(cUser.getBusiness_code().equals("null"))) {
+                        subscription_ref.child("type").setValue(0).addOnCompleteListener(task ->
+                        {
+                            Log.d(FUNCTION_TAG, "Added new data:\n" +
+                                    "subscription/type/0");
+                            subscription_type = 0;
+                            Log.d(FUNCTION_TAG, "" + subscription_type);
 
-                    subscription_ref.child("type").setValue(0).addOnCompleteListener(task ->
-                    {
-                        Log.d(FUNCTION_TAG, "Added new data:\n" +
-                                "subscription/type/0");
-                        subscription_type = 0;
-                        Log.d(FUNCTION_TAG, "" + subscription_type);
+                            lock_marked = true;
 
-                        lock_marked = true;
-
-                        setUpLists();
-                        setUpTrackers();
-                    });
+                            setUpLists();
+                            setUpTrackers();
+                        });
+                    }
                 }
             }
 
@@ -1306,8 +1307,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         home_layout = findViewById(R.id.layout_home_employee_rl);
         //Set username text view
         profileFnLNameEmployee.setText(sessionManager.getUsername());
-        //Remove access to insights
+
+        /*Access removal*/
+        /*Insight*/
         nav_insights.setVisible(false);
+        /*Add buttons*/
+        category_plus_btn.setVisibility(View.GONE);
+        add_button.setVisibility(View.GONE);
+
         //Check employee subtype
         if (cUser.getUser_type() != 2) {
             nav_restock.setVisible(false);
@@ -1402,6 +1409,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.VISIBLE);
                                 rvItems.setVisibility(View.GONE);
+                                rvCategory.setVisibility(View.GONE);
 
                                 //Restocking View
                                 findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.VISIBLE);
@@ -1422,6 +1430,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 //Items View
                                 findViewById(R.id.items_not_punched_in_tv).setVisibility(View.GONE);
                                 rvItems.setVisibility(View.VISIBLE);
+                                rvCategory.setVisibility(View.VISIBLE);
 
                                 //Restocking View
                                 findViewById(R.id.maTvNotPunchedInRestocking).setVisibility(View.GONE);
