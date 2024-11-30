@@ -4,6 +4,7 @@ import static android.text.TextUtils.isEmpty;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -69,8 +70,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
@@ -488,8 +491,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         MyTransaction transaction;
 
-        /*double customer_change;
-        double customer_payment;*/
         double subtotal;
         int item_count;
         Object transaction_date;
@@ -510,53 +511,108 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         for (int i = 0; i < listAdapterRestockFirebase.getItemCount(); i++) {
 
             Item item = listAdapterRestockFirebase.getItem(i);
-            int new_stock_quantity ;
-            int new_restock_quantity;
 
             /*Check if current item is being restocked*/
-            if (item.getRestock_quantity() != 0) {
+            if (item.getRestock_quantity() == 0) {
+                continue;
+            }
 
-                if (item.getCost_price() != 0) {
-                    restocks_count++;
+            restocks_count++;
 
-                    new_stock_quantity = item.getRestock_quantity() + item.getQuantity();
-                    new_restock_quantity = 0;
+            items.add(new Item(item.getName(), item.getCost_price(), item.getRestock_quantity()));
 
-                    items.add(new Item(item.getName(), item.getCost_price(), item.getRestock_quantity()));
+            subtotal += item.getCost_price() * item.getRestock_quantity();
+            item_count += item.getRestock_quantity();
 
-                    subtotal += item.getCost_price() * item.getRestock_quantity();
-                    item_count += item.getRestock_quantity();
-
-                    item.setQuantity(new_stock_quantity);
-                    item.setRestock_quantity(new_restock_quantity);
-
-                    /*Update item's stock*/
-                    items_ref.child(item.getName()).setValue(item).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Log.i(FUNCTION_TAG, item.getName() + " has been restocked");
-                        } else {
-                            Log.i(FUNCTION_TAG, item.getName() + " has had an error:\n" + task);
-                        }
-                    });
-                } else {
-                    item_without_cost_price = true;
-                    Log.d(FUNCTION_TAG, item.getName() + "'s cost_price is empty");
-                }
-            } else {
-                Log.d(FUNCTION_TAG, item.getName() + "'s restock_quantity is empty");
+            /*Check if item has cost price*/
+            if (item.getCost_price() == 0) {
+                item_without_cost_price = true;
             }
         }
 
-        if (restocks_count > 0) {
-            transaction = new MyTransaction(0.0, 0.0, subtotal, item_count, false, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
-
-            ref.setValue(transaction);
-
-            openReceipt(key);
-        } else if (item_without_cost_price) {
-            Toast.makeText(getApplicationContext(), "Selected items have no set cost price", Toast.LENGTH_SHORT).show();
-        } else {
+        if (restocks_count == 0) {
             Toast.makeText(getApplicationContext(), "Please select items to restock", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        transaction = new MyTransaction(0.0, 0.0, subtotal, item_count, false, transaction_date, items, cUser.getFirst_name() + " " + cUser.getLast_name());
+
+        if (item_without_cost_price) {
+            restockApprovalOpenPopup(transaction, key, ref);
+        } else if (restocks_count > 0) {
+            ref.setValue(transaction);
+            openReceipt(key);
+            processRestock(transaction.getItems());
+        }
+    }
+
+    private void restockApprovalOpenPopup(MyTransaction transaction, String key, DatabaseReference ref) {
+        String FUNCTION_TAG = "restockApprovalOpenPopup";
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_restock_approval, null);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
+
+        Button yes, no;
+
+        yes = popupView.findViewById(R.id.rap_btn_yes);
+        no = popupView.findViewById(R.id.rap_btn_no);
+
+        yes.setOnClickListener(view -> {
+            Log.e(FUNCTION_TAG, "yes");
+            ref.setValue(transaction);
+            openReceipt(key);
+            processRestock(transaction.getItems());
+            popupWindow.dismiss();
+        });
+
+        no.setOnClickListener(view -> {
+            Log.e(FUNCTION_TAG, "no");
+            popupWindow.dismiss();
+        });
+    }
+
+    private void processRestock(@NonNull List<Item> items) {
+        String FUNCTION_TAG = "processRestock";
+
+        for (Item item : items) {
+            Log.e(FUNCTION_TAG, "Current Item Restock Quantity: " + item.getQuantity());
+            items_ref.child(item.getName()).runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    if (currentData.getValue(Item.class) == null) {
+                        Log.e(FUNCTION_TAG, "Error");
+                        return Transaction.success(currentData);
+                    }
+                    Item current_value = currentData.getValue(Item.class);
+                    if (current_value.getQuantity() == 0) {
+                        current_value.setQuantity(item.getQuantity());
+                    } else {
+                        current_value.setQuantity(current_value.getQuantity() + item.getQuantity());
+                    }
+                    current_value.setRestock_quantity(0);
+                    currentData.setValue(current_value);
+                    return Transaction.success(currentData);
+                }
+
+                @Override
+                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                    if (error != null) {
+                        Log.e(FUNCTION_TAG, "Transaction failed: " + error.getMessage());
+                    } else if (committed) {
+                        Log.d(FUNCTION_TAG, "Transaction succeeded. New value: " + currentData.getValue());
+                    }
+                }
+            });
         }
     }
 
