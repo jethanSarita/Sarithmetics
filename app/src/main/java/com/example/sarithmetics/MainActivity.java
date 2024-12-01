@@ -2565,12 +2565,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String input_item_name, input_item_price, input_item_category;
 
             //Set Item class
-            Item new_item = new Item();
-
-            /*//set object variables
-            String obj_item_name;
-            double obj_item_price;
-            String obj_item_category;*/
+            Item new_item = new Item(item);
 
             //store editText data
             input_item_name = edit_item_name.getText().toString().trim();
@@ -2580,14 +2575,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //check values
             if (!isEmpty(input_item_name)) {
                 new_item.setName(input_item_name);
-            } else {
-                new_item.setName(current_item_name);
             }
 
             if (!isEmpty(input_item_price)) {
                 new_item.setPrice(Double.parseDouble(input_item_price));
-            } else {
-                new_item.setPrice(current_item_price);
             }
 
             if (!input_item_category.equals("Select Category")) {
@@ -2596,11 +2587,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new_item.setCategory(null);
             }
 
-            new_item.setCost_price(current_item_cost_price);
+            if (!(current_item_name.equals(new_item.getName()))) {
+                items_ref.child(item.getName()).removeValue();
+            }
 
-            new_item.setQuantity(current_item_quantity);
-
-            items_ref.child(item.getName()).setValue(new_item);
+            items_ref.child(new_item.getName()).setValue(new_item);
 
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
@@ -2716,7 +2707,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void itemLockOpenPopup(Item item) {
-        String FUNCTION_TAG = "itemEditOpenPopup";
+        String FUNCTION_TAG = "itemLockOpenPopup";
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_item_locked, null);

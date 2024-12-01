@@ -10,6 +10,17 @@ public class Item {
     private String category;
     private boolean sub_marked;
 
+    public Item(Item item) {
+        this.name = item.getName();
+        this.price = item.getPrice();
+        this.cost_price = item.getCost_price();
+        this.quantity = item.getQuantity();
+        this.restock_quantity = item.getRestock_quantity();
+        this.in_cart_quantity = item.getIn_cart_quantity();
+        this.category = item.getCategory();
+        this.sub_marked = item.isSub_marked();
+    }
+
     public Item(String name, double price, int quantity) {
         this.name = name;
         this.price = price;
