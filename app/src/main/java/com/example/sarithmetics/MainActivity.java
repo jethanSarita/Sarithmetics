@@ -2562,7 +2562,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_edit.setOnClickListener(view -> {
 
             //Set input variables
-            String input_item_name, input_item_price, input_item_category;
+            String input_item_name, input_item_price, input_item_category, input_item_cost_price;
 
             //Set Item class
             Item new_item = new Item(item);
@@ -2571,6 +2571,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             input_item_name = edit_item_name.getText().toString().trim();
             input_item_price = edit_item_price.getText().toString().trim();
             input_item_category = category_spinner.getSelectedItem().toString().trim();
+            input_item_cost_price = edit_item_cost.getText().toString().trim();
 
             //check values
             if (!isEmpty(input_item_name)) {
@@ -2585,6 +2586,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new_item.setCategory(input_item_category);
             } else {
                 new_item.setCategory(null);
+            }
+
+            if(!isEmpty(input_item_cost_price)) {
+                new_item.setCost_price(Double.parseDouble(input_item_cost_price));
             }
 
             if (!(current_item_name.equals(new_item.getName()))) {
