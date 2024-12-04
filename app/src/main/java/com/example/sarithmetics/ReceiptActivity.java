@@ -464,7 +464,7 @@ public class ReceiptActivity extends AppCompatActivity {
     }
 
     private void handleBack() {
-        if (!currently_maxed) {
+        if (currently_maxed) {
             Toast.makeText(ReceiptActivity.this, "Deleted oldest transaction to make room for new one", Toast.LENGTH_SHORT).show();
         }
         deleteOldestTransaction();
