@@ -2685,9 +2685,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MyTransaction transaction;
             DatabaseReference ref;
 
-            customer_change = item.getPrice();
-            customer_payment = item.getPrice();
+            customer_change = 0;
             subtotal = item.getPrice() * editPopupNumberPicker.getValue();
+            customer_payment = subtotal;
             item_count = editPopupNumberPicker.getValue();
             transaction_date = ServerValue.TIMESTAMP;
             items = new ArrayList<>();
