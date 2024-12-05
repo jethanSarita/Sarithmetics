@@ -645,7 +645,8 @@
                 android:id="@+id/layout_insight_rl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -704,16 +705,18 @@
 
                                     <Spinner
                                         android:id="@+id/insight_item_perf_spinner"
-                                        android:layout_width="wrap_content"
+                                        android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:minHeight="48dp"
+                                        android:layout_weight="1"
                                         android:spinnerMode="dialog" />
 
                                     <Spinner
                                         android:id="@+id/insight_context_perf_spinner"
-                                        android:layout_width="wrap_content"
+                                        android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:minHeight="48dp"
+                                        android:layout_weight="1"
                                         android:spinnerMode="dialog" />
 
                                 </LinearLayout>
@@ -891,8 +894,7 @@
                 android:id="@+id/layout_restock_rl"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="gone">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fabUpdate"

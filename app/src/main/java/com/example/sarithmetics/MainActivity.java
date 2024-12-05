@@ -1623,12 +1623,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         total_rev = 0;
         top_list_item = new ArrayList<>();
 
+        /*Check item selection is not default*/
         if (!(insight_selected_item.equals("Choose Item") || insight_selected_context.equals("Choose Context"))) {
             getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     for (DataSnapshot current_snapshot : snapshot.getChildren()) {
                         MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+
+                        if (current_transaction == null || !current_transaction.isIs_out()) {
+                            continue;
+                        }
+
                         List<Item> items = current_transaction.getItems();
                         if (items != null) {
                             for (Item current_item : items) {
@@ -1655,12 +1661,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             item_revenue_tv.setText("Pending Choice");
         }
 
+        /*If context has been selected*/
         if (!(insight_selected_context.equals("Choose Context"))) {
             getInsightReference(insight_selected_context).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     for (DataSnapshot current_snapshot : snapshot.getChildren()) {
                         MyTransaction current_transaction = current_snapshot.getValue(MyTransaction.class);
+
+                        if (current_transaction == null || !current_transaction.isIs_out()) {
+                            continue;
+                        }
+
                         List<Item> items = current_transaction.getItems();
                         if (items != null) {
                             top_list_item.addAll(items);
@@ -2673,9 +2685,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MyTransaction transaction;
             DatabaseReference ref;
 
-            customer_change = item.getPrice();
-            customer_payment = item.getPrice();
+            customer_change = 0;
             subtotal = item.getPrice() * editPopupNumberPicker.getValue();
+            customer_payment = subtotal;
             item_count = editPopupNumberPicker.getValue();
             transaction_date = ServerValue.TIMESTAMP;
             items = new ArrayList<>();
