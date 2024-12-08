@@ -158,7 +158,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
-            systemLoading.startLoadingDialog();
+            //systemLoading.startLoadingDialog();
             checkSession();
         }
     }
@@ -176,6 +176,11 @@ public class LoginRegisterActivity extends AppCompatActivity {
     }*/
 
     private void checkSession() {
+        if(sessionManager.getLogin()){
+            sessionManager.setMainStatus(0);
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        }
+
         database.getReference("build_key").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -185,18 +190,13 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
                 String current_build_key = snapshot.getValue(String.class);
 
-                if (BUILD_KEY.equals(current_build_key)) {
-                    if(sessionManager.getLogin()){
-                        sessionManager.setMainStatus(0);
-                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        finish();
-                    }
-                } else {
-                    startActivity(new Intent(getApplicationContext(), DemoEndActivity.class));
-                    finish();
+                if (!(BUILD_KEY.equals(current_build_key))) {
+                    Intent intent = new Intent(getApplicationContext(), DemoEndActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                 }
 
-                systemLoading.dismissDialog();
+                finish();
             }
 
             @Override
