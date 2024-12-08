@@ -50,6 +50,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sarithmetics.databinding.PopupItemAddBinding;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -2174,31 +2175,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void itemAddOpenPopup() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.popup_item_add, null);
+        /*LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_item_add, null);*/
+
+        PopupItemAddBinding binding = PopupItemAddBinding.inflate(LayoutInflater.from(this));
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
         boolean focusable = true;
-        PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), width, height, focusable);
         popupWindow.setElevation(10);
         popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         popupWindow.setAnimationStyle(R.style.PopupAnimation);
         drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
 
         List<String> categories;
-        Button add_btn;
+        /*Button add_btn;
         ImageButton close_btn;
         EditText name_field, price_field, cost_price_field, markup_field;
-        Spinner category_spinner;
+        Spinner category_spinner;*/
 
-        name_field = popupView.findViewById(R.id.popup_item_add_name);
+        /*name_field = popupView.findViewById(R.id.popup_item_add_name);
         price_field = popupView.findViewById(R.id.popup_item_add_price);
         cost_price_field = popupView.findViewById(R.id.popup_item_add_cost_price);
         add_btn = popupView.findViewById(R.id.btnPopupAdd);
         close_btn = popupView.findViewById(R.id.btnPopupClose);
         category_spinner = popupView.findViewById(R.id.popup_item_category_spinner);
-        markup_field = popupView.findViewById(R.id.popup_item_price_mark_up);
+        markup_field = popupView.findViewById(R.id.popup_item_price_mark_up);*/
         categories = new ArrayList<>();
         categories.add("Select Category");
 
@@ -2214,7 +2218,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
                 adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, categories);
-                category_spinner.setAdapter(adapter);
+                binding.popupItemCategorySpinner.setAdapter(adapter);
             }
 
             @Override
@@ -2224,14 +2228,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         /*Close Button*/
-        close_btn.setOnClickListener(view -> {
+        binding.btnPopupClose.setOnClickListener(view -> {
             popupWindow.dismiss();
             itemSearchBar.clearFocus();
             GeneralHelper.hideKeyboard(view);
         });
 
         /*Cost Field*/
-        cost_price_field.addTextChangedListener(new TextWatcher() {
+        binding.popupItemAddCostPrice.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -2241,14 +2245,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().isEmpty()) {
                     double price = Double.parseDouble(s.toString());
-                    String markup_string = markup_field.getText().toString().trim();
+                    String markup_string = binding.popupItemPriceMarkUp.getText().toString().trim();
                     if (!markup_string.isEmpty()) {
                         double markup = Double.parseDouble(markup_string);
                         double total = price + (price * (markup / 100));
-                        price_field.setText(Double.toString(total));
+                        binding.popupItemAddPrice.setText(Double.toString(total));
                     }
                 } else {
-                    price_field.setText("");
+                    binding.popupItemAddPrice.setText("");
                 }
             }
 
@@ -2259,7 +2263,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         /*Markup Field*/
-        markup_field.addTextChangedListener(new TextWatcher() {
+        binding.popupItemPriceMarkUp.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -2269,14 +2273,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().isEmpty()) {
                     double markup = Double.parseDouble(s.toString());
-                    String price_string = cost_price_field.getText().toString().trim();
+                    String price_string = binding.popupItemAddCostPrice.getText().toString().trim();
                     if (!price_string.isEmpty()) {
                         double price = Double.parseDouble(price_string);
                         double total = price + (price * (markup / 100));
-                        price_field.setText(Double.toString(total));
+                        binding.popupItemAddPrice.setText(Double.toString(total));
                     }
                 } else {
-                    price_field.setText("");
+                    binding.popupItemAddPrice.setText("");
                 }
             }
 
@@ -2287,13 +2291,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         /*Add Button*/
-        add_btn.setOnClickListener(view -> {
+        binding.btnPopupAdd.setOnClickListener(view -> {
             //Store field data in temp variables
             String name, price, cost_price, category;
-            name =  name_field.getText().toString().trim();
-            price = price_field.getText().toString().trim();
-            cost_price = cost_price_field.getText().toString().trim();
-            category = category_spinner.getSelectedItem().toString();
+            name =  binding.popupItemAddName.getText().toString().trim();
+            price = binding.popupItemAddPrice.getText().toString().trim();
+            cost_price = binding.popupItemAddCostPrice.getText().toString().trim();
+            category = binding.popupItemCategorySpinner.getSelectedItem().toString();
 
             boolean is_sub_marked = false;
 
