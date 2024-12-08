@@ -178,7 +178,7 @@ public class LoginRegisterActivity extends AppCompatActivity {
     private void checkSession() {
         if(sessionManager.getLogin()){
             sessionManager.setMainStatus(0);
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startActivity(new Intent(getApplicationContext(), MainActivity2.class));
         }
 
         database.getReference("build_key").addListenerForSingleValueEvent(new ValueEventListener() {

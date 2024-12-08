@@ -1,51 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:tools="http://schemas.android.com/tools"
+<menu
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_home"
-            android:title="Home"
-            android:icon="@drawable/icon_home_2"/>
-        <item
-            android:id="@+id/nav_items"
-            android:title="Items"
-            android:icon="@drawable/icon_items"/>
-        <item
-            android:id="@+id/nav_logout"
-            android:title="Logout"
-            android:icon="@drawable/icon_analytics" />
-
-    </group>
-
-    <item android:title="Feedback">
-
-            <menu>
-
-                <group android:checkableBehavior="single">
-
-                    <item
-                        android:id="@+id/nav_share"
-                        android:title="Share"
-                        android:icon="@drawable/icon_share"
-                        />
-                    <item
-                        android:id="@+id/nav_rate"
-                        android:title="Rate us"
-                        android:icon="@drawable/icon_rate"
-                        />
-
-                </group>
-
-            </menu>
-
-        </item>
-
-    <group android:id="@+id/nav_exit_group">
-
-        <item
-            android:id="@+id/nav_exit"
-            android:icon="@drawable/icon_exit"
-            android:title="Exit" />
-
-    </group>
+    <item
+        android:id="@+id/nav_home2"
+        android:title="Home"
+        android:icon="@drawable/icon_home_2"/>
+    <item
+        android:id="@+id/nav_items2"
+        android:title="Items"
+        android:icon="@drawable/icon_items"/>
+    <item
+        android:id="@+id/nav_restock2"
+        android:icon="@drawable/icon_restock"
+        android:title="Restock" />
+    <item
+        android:id="@+id/nav_history2"
+        android:icon="@drawable/icon_history"
+        android:title="History" />
+    <item
+        android:id="@+id/nav_insights2"
+        android:icon="@drawable/icon_insights"
+        android:title="Insights" />
 </menu>
