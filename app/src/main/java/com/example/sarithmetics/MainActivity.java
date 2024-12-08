@@ -20,6 +20,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sarithmetics.databinding.PopupItemAddBinding;
+import com.example.sarithmetics.databinding.PopupItemMaxBinding;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -198,6 +200,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     long item_count_unmarked = 0;
     long transaction_count = 0;
     long category_count = 0;
+
+    String current_checkout_link;
 
     private static JSONObject getBaseRequest() throws JSONException {
         return new JSONObject()
@@ -382,7 +386,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         add_button.setOnClickListener(view -> {
-            itemAddOpenPopup();
+            if (at_max_items) {
+                itemMaxOpenPopup();
+            } else {
+                itemAddOpenPopup();
+            }
         });
 
         restock_button.setOnClickListener(view -> {
@@ -733,6 +741,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //Dismiss loading popup
             systemLoading.dismissDialog();
+
+            validateCheckoutLink();
         });
     }
 
@@ -2340,6 +2350,126 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             itemSearchBar.clearFocus();
             GeneralHelper.hideKeyboard(view);
         });
+    }
+
+    private void itemMaxOpenPopup() {
+        String FUNC_TAG = "itemMaxOpenPopup";
+
+        PopupItemMaxBinding binding = PopupItemMaxBinding.inflate(LayoutInflater.from(this));
+
+        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
+
+        binding.btnUpgrade.setOnClickListener(view -> {
+            /*Check if there is existing link*/
+            if (current_checkout_link != null) {
+                /*Parse link*/
+                Uri uri = Uri.parse(current_checkout_link);
+
+                /*Redirect to link*/
+                redirectToLink(uri);
+
+                return;
+            }
+
+            Request request = Subscription.createCheckOutRequest(Subscription.PREMIUM1_PRICE);
+
+            OkHttpClient client = new OkHttpClient();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.e(FUNC_TAG, e.toString());
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    String result = "Empty";
+
+                    if (response.body() != null) {
+                        result = response.body().string();
+                    }
+
+                    if (result.equals("Empty")) {
+                        return;
+                    }
+
+                    Log.i(FUNC_TAG, result);
+                    String id = Subscription.parseCheckOutID(result);
+                    String url = Subscription.parseCheckOutUrl(result);
+                    Uri uri = Uri.parse(url);
+                    Log.i(FUNC_TAG, "LINK: " + url);
+
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("current_checkout_id")
+                            .setValue(id);
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("checkout_expiration")
+                            .setValue(Subscription.getUnixOneMinuteExpiry());
+
+                    redirectToLink(uri);
+                }
+            });
+        });
+    }
+
+    private void validateCheckoutLink() {
+        /*Check if existing checkout link exists*/
+        firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                .child("current_checkout_id")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    final String FUNC_TAG = "getExistingCheckoutLink";
+
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
+                            return;
+                        }
+
+                        Request request = Subscription.createCheckOutGetRequest(snapshot.getValue(String.class));
+
+                        OkHttpClient client = new OkHttpClient();
+
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                Log.e(FUNC_TAG, e.toString());
+                            }
+
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                String result = "Empty";
+
+                                if (response.body() != null) {
+                                    result = response.body().string();
+                                }
+
+                                if (result.equals("Empty")) {
+                                    return;
+                                }
+
+                                current_checkout_link = Subscription.parseCheckOutUrl(result);
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void redirectToLink(Uri uri) {
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        finish();
     }
 
     private boolean is_item_max() {
