@@ -25,6 +25,17 @@
 
     </group>
 
+    <item android:title="Services">
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/nav_premium"
+                    android:icon="@drawable/icon_premium"
+                    android:title="Premium"/>
+            </group>
+        </menu>
+    </item>
+
     <item android:title="Feedback">
 
             <menu>

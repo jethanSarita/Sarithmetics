@@ -29,6 +29,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -124,6 +125,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance(DB);
 
+        checkBuild();
+
         /*Loading System*/
         systemLoading = new SystemLoading(LoginRegisterActivity.this);
 
@@ -163,6 +166,30 @@ public class LoginRegisterActivity extends AppCompatActivity {
         }
     }
 
+    private void checkBuild() {
+        database.getReference("build_key").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
+                    return;
+                }
+
+                String current_build_key = snapshot.getValue(String.class);
+
+                if (!(BUILD_KEY.equals(current_build_key))) {
+                    Intent intent = new Intent(getApplicationContext(), DemoEndActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     /*private boolean checkInternet() {
         if (checkConnection()) {
             Toast.makeText(getApplicationContext(), "Connected to internet", Toast.LENGTH_SHORT).show();
@@ -179,31 +206,8 @@ public class LoginRegisterActivity extends AppCompatActivity {
         if(sessionManager.getLogin()){
             sessionManager.setMainStatus(0);
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         }
-
-        database.getReference("build_key").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists() || snapshot.getValue(String.class) == null) {
-                    return;
-                }
-
-                String current_build_key = snapshot.getValue(String.class);
-
-                if (!(BUILD_KEY.equals(current_build_key))) {
-                    Intent intent = new Intent(getApplicationContext(), DemoEndActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-
-                finish();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     private void loginUser() {

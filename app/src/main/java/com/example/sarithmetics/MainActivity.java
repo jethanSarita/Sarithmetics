@@ -53,6 +53,7 @@ import android.widget.Toast;
 
 import com.example.sarithmetics.databinding.PopupItemAddBinding;
 import com.example.sarithmetics.databinding.PopupItemMaxBinding;
+import com.example.sarithmetics.databinding.PopupPremiumBinding;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -2111,11 +2112,80 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else if(item.getItemId() == R.id.nav_exit) {
             finishAffinity();
+        } else if (item.getItemId() == R.id.nav_premium) {
+            premiumOpenPopup();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    private void premiumOpenPopup() {
+        String FUNC_TAG = "premiumOpenPopup";
+
+        PopupPremiumBinding binding = PopupPremiumBinding.inflate(LayoutInflater.from(this));
+
+        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setElevation(10);
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+
+        drawerLayout.post(() -> popupWindow.showAtLocation(drawerLayout, Gravity.CENTER, 0, 0));
+
+        binding.btnUpgrade.setOnClickListener(view -> {
+            /*Check if there is existing link*/
+            if (current_checkout_link != null) {
+                /*Parse link*/
+                Uri uri = Uri.parse(current_checkout_link);
+
+                /*Redirect to link*/
+                redirectToLink(uri);
+
+                return;
+            }
+
+            Request request = Subscription.createCheckOutRequest(Subscription.PREMIUM1_PRICE);
+
+            OkHttpClient client = new OkHttpClient();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.e(FUNC_TAG, e.toString());
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    String result = "Empty";
+
+                    if (response.body() != null) {
+                        result = response.body().string();
+                    }
+
+                    if (result.equals("Empty")) {
+                        return;
+                    }
+
+                    Log.i(FUNC_TAG, result);
+                    String id = Subscription.parseCheckOutID(result);
+                    String url = Subscription.parseCheckOutUrl(result);
+                    Uri uri = Uri.parse(url);
+                    Log.i(FUNC_TAG, "LINK: " + url);
+
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("current_checkout_id")
+                            .setValue(id);
+                    firebaseDatabaseHelper.getSubscriptionRef(cUser.getBusiness_code())
+                            .child("checkout_expiration")
+                            .setValue(Subscription.getUnixOneMinuteExpiry());
+
+                    redirectToLink(uri);
+                }
+            });
+        });
     }
 
     private void logout() {
