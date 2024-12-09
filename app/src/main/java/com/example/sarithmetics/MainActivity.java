@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //ScrollView maSvItems;
     RandomHelper randomHelper;
-    MenuItem nav_insights, nav_restock;
+    MenuItem nav_insights, nav_restock, nav_services;
     ImageButton category_plus_btn, history_filter_button;
 
     //Database
@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*navigation*/
         nav_insights = navigationView.getMenu().findItem(R.id.nav_insights);
         nav_restock = navigationView.getMenu().findItem(R.id.nav_restock);
+        nav_services = navigationView.getMenu().findItem(R.id.nav_services);
 
         /*home page layout*/
         profileFnLNameEmployee = findViewById(R.id.home_employee_name_tv);
@@ -887,6 +888,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             lock_marked = false;
                             deinitializeAds();
                             setUpExpiryTracker();
+                            nav_services.setVisible(false);
                             break;
                         default:
                             Log.wtf(FUNCTION_TAG, "Subscription type out of bounds");
@@ -1387,6 +1389,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*Add buttons*/
         category_plus_btn.setVisibility(View.GONE);
         add_button.setVisibility(View.GONE);
+
+        nav_services.setVisible(false);
 
         //Check employee subtype
         if (cUser.getUser_type() != 2) {
@@ -2126,9 +2130,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         PopupPremiumBinding binding = PopupPremiumBinding.inflate(LayoutInflater.from(this));
 
-        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
 
-        popupWindow.setOutsideTouchable(false);
         popupWindow.setElevation(10);
         popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         popupWindow.setAnimationStyle(R.style.PopupAnimation);
@@ -2427,9 +2430,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         PopupItemMaxBinding binding = PopupItemMaxBinding.inflate(LayoutInflater.from(this));
 
-        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        PopupWindow popupWindow = new PopupWindow(binding.getRoot(), ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
 
-        popupWindow.setOutsideTouchable(false);
         popupWindow.setElevation(10);
         popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         popupWindow.setAnimationStyle(R.style.PopupAnimation);

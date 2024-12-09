@@ -25,7 +25,8 @@
 
     </group>
 
-    <item android:title="Services">
+    <item android:title="Services"
+        android:id="@+id/nav_services">
         <menu>
             <group>
                 <item
